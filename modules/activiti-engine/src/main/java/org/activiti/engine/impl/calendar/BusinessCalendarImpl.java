@@ -6,9 +6,7 @@ import org.joda.time.format.ISODateTimeFormat;
 
 import java.util.Date;
 
-/**
- * This class implements business calendar based on internal clock
- */
+/** This class implements business calendar based on internal clock */
 public abstract class BusinessCalendarImpl implements BusinessCalendar {
 
   protected ClockReader clockReader;
@@ -18,20 +16,24 @@ public abstract class BusinessCalendarImpl implements BusinessCalendar {
   }
 
   @Override
-  public Date resolveDuedate(String duedateDescription){
-    return resolveDuedate(duedateDescription,-1);
+  public Date resolveDuedate(String duedateDescription) {
+    return resolveDuedate(duedateDescription, -1);
   }
 
   public abstract Date resolveDuedate(String duedateDescription, int maxIterations);
 
   @Override
-  public Boolean validateDuedate(String duedateDescription, int maxIterations, Date endDate, Date newTimer) {
+  public Boolean validateDuedate(
+      String duedateDescription, int maxIterations, Date endDate, Date newTimer) {
     return endDate == null || endDate.after(newTimer) || endDate.equals(newTimer);
   }
 
   @Override
   public Date resolveEndDate(String endDateString) {
-      return ISODateTimeFormat.dateTimeParser().withZone(DateTimeZone.forTimeZone(clockReader.getCurrentTimeZone())).parseDateTime(endDateString).toCalendar(null).getTime();
+    return ISODateTimeFormat.dateTimeParser()
+        .withZone(DateTimeZone.forTimeZone(clockReader.getCurrentTimeZone()))
+        .parseDateTime(endDateString)
+        .toCalendar(null)
+        .getTime();
   }
-
 }

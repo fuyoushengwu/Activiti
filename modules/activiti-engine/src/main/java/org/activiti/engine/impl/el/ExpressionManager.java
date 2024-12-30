@@ -1,9 +1,9 @@
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -31,20 +31,14 @@ import org.activiti.engine.impl.javax.el.ValueExpression;
 import org.activiti.engine.impl.juel.ExpressionFactoryImpl;
 import org.activiti.engine.impl.persistence.entity.VariableScopeImpl;
 
-
 /**
- * <p>
  * Central manager for all expressions.
- * </p>
- * <p>
- * Process parsers will use this to build expression objects that are stored in
- * the process definitions.
- * </p>
- * <p>
- * Then also this class is used as an entry point for runtime evaluation of the
- * expressions.
- * </p>
- * 
+ *
+ * <p>Process parsers will use this to build expression objects that are stored in the process
+ * definitions.
+ *
+ * <p>Then also this class is used as an entry point for runtime evaluation of the expressions.
+ *
  * @author Tom Baeyens
  * @author Dave Syer
  * @author Frederik Heremans
@@ -55,28 +49,29 @@ public class ExpressionManager {
   // Default implementation (does nothing)
   protected ELContext parsingElContext = new ParsingElContext();
   protected Map<Object, Object> beans;
-  
-  
+
   public ExpressionManager() {
-	    this(null);
+    this(null);
   }
-  
+
   public ExpressionManager(boolean initFactory) {
-	    this(null, false);
+    this(null, false);
   }
-  
+
   public ExpressionManager(Map<Object, Object> beans) {
-	  this(beans, true);
+    this(beans, true);
   }
-  
+
   public ExpressionManager(Map<Object, Object> beans, boolean initFactory) {
-    // Use the ExpressionFactoryImpl in activiti build in version of juel, with parametrised method expressions enabled
+    // Use the ExpressionFactoryImpl in activiti build in version of juel, with parametrised method
+    // expressions enabled
     expressionFactory = new ExpressionFactoryImpl();
     this.beans = beans;
   }
 
   public Expression createExpression(String expression) {
-    ValueExpression valueExpression = expressionFactory.createValueExpression(parsingElContext, expression.trim(), Object.class);
+    ValueExpression valueExpression =
+        expressionFactory.createValueExpression(parsingElContext, expression.trim(), Object.class);
     return new JuelExpression(valueExpression, expression);
   }
 
@@ -90,11 +85,11 @@ public class ExpressionManager {
       VariableScopeImpl variableScopeImpl = (VariableScopeImpl) variableScope;
       elContext = variableScopeImpl.getCachedElContext();
     }
-    
-    if (elContext==null) {
+
+    if (elContext == null) {
       elContext = createElContext(variableScope);
       if (variableScope instanceof VariableScopeImpl) {
-        ((VariableScopeImpl)variableScope).setCachedElContext(elContext);
+        ((VariableScopeImpl) variableScope).setCachedElContext(elContext);
       }
     }
 
@@ -116,28 +111,29 @@ public class ExpressionManager {
     if (variableScope != null) {
       elResolver.add(new VariableScopeElResolver(variableScope));
     }
-    
-    if(beans != null) {
+
+    if (beans != null) {
       // ACT-1102: Also expose all beans in configuration when using standalone activiti, not
       // in spring-context
       elResolver.add(new ReadOnlyMapELResolver(beans));
     }
-    
+
     elResolver.add(new ArrayELResolver());
     elResolver.add(new ListELResolver());
     elResolver.add(new MapELResolver());
     elResolver.add(new JsonNodeELResolver());
-    elResolver.add(new DynamicBeanPropertyELResolver(ItemInstance.class, "getFieldValue", "setFieldValue")); //TODO: needs verification
+    elResolver.add(
+        new DynamicBeanPropertyELResolver(
+            ItemInstance.class, "getFieldValue", "setFieldValue")); // TODO: needs verification
     elResolver.add(new BeanELResolver());
     return elResolver;
   }
 
-	public Map<Object, Object> getBeans() {
-		return beans;
-	}
+  public Map<Object, Object> getBeans() {
+    return beans;
+  }
 
-	public void setBeans(Map<Object, Object> beans) {
-		this.beans = beans;
-	}
-  
+  public void setBeans(Map<Object, Object> beans) {
+    this.beans = beans;
+  }
 }

@@ -1,9 +1,9 @@
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -42,13 +42,12 @@ import org.activiti.engine.impl.persistence.entity.TaskEntityManager;
 import org.activiti.engine.impl.persistence.entity.UserIdentityManager;
 import org.activiti.engine.impl.persistence.entity.VariableInstanceEntityManager;
 
-
 /**
  * @author Tom Baeyens
  * @author Joram Barrez
  */
 public abstract class AbstractManager implements Session {
-  
+
   public void insert(PersistentObject persistentObject) {
     getDbSqlSession().insert(persistentObject);
   }
@@ -72,19 +71,19 @@ public abstract class AbstractManager implements Session {
   protected ResourceEntityManager getResourceManager() {
     return getSession(ResourceEntityManager.class);
   }
-  
+
   protected ByteArrayEntityManager getByteArrayManager() {
     return getSession(ByteArrayEntityManager.class);
   }
-  
+
   protected ProcessDefinitionEntityManager getProcessDefinitionManager() {
     return getSession(ProcessDefinitionEntityManager.class);
   }
-  
+
   protected ProcessDefinitionInfoEntityManager getProcessDefinitionInfoManager() {
     return getSession(ProcessDefinitionInfoEntityManager.class);
   }
-  
+
   protected ModelEntityManager getModelManager() {
     return getSession(ModelEntityManager.class);
   }
@@ -100,9 +99,9 @@ public abstract class AbstractManager implements Session {
   protected IdentityLinkEntityManager getIdentityLinkManager() {
     return getSession(IdentityLinkEntityManager.class);
   }
-  
+
   protected EventSubscriptionEntityManager getEventSubscriptionManager() {
-  	return (getSession(EventSubscriptionEntityManager.class));
+    return (getSession(EventSubscriptionEntityManager.class));
   }
 
   protected VariableInstanceEntityManager getVariableInstanceManager() {
@@ -120,50 +119,48 @@ public abstract class AbstractManager implements Session {
   protected HistoricActivityInstanceEntityManager getHistoricActivityInstanceManager() {
     return getSession(HistoricActivityInstanceEntityManager.class);
   }
-  
+
   protected HistoricVariableInstanceEntityManager getHistoricVariableInstanceManager() {
     return getSession(HistoricVariableInstanceEntityManager.class);
   }
-  
+
   protected HistoricTaskInstanceEntityManager getHistoricTaskInstanceManager() {
     return getSession(HistoricTaskInstanceEntityManager.class);
   }
-  
+
   protected HistoricIdentityLinkEntityManager getHistoricIdentityLinkEntityManager() {
     return getSession(HistoricIdentityLinkEntityManager.class);
   }
-  
+
   protected UserIdentityManager getUserIdentityManager() {
     return getSession(UserIdentityManager.class);
   }
-  
+
   protected GroupIdentityManager getGroupIdentityManager() {
     return getSession(GroupIdentityManager.class);
   }
-  
+
   protected IdentityInfoEntityManager getIdentityInfoManager() {
     return getSession(IdentityInfoEntityManager.class);
   }
-  
+
   protected MembershipIdentityManager getMembershipIdentityManager() {
     return getSession(MembershipIdentityManager.class);
   }
-  
+
   protected AttachmentEntityManager getAttachmentManager() {
     return getSession(AttachmentEntityManager.class);
   }
-  
+
   protected HistoryManager getHistoryManager() {
     return getSession(HistoryManager.class);
   }
-  
+
   protected ProcessEngineConfigurationImpl getProcessEngineConfiguration() {
-  	return Context.getProcessEngineConfiguration();
-  }
-  
-  public void close() {
+    return Context.getProcessEngineConfiguration();
   }
 
-  public void flush() {
-  }
+  public void close() {}
+
+  public void flush() {}
 }

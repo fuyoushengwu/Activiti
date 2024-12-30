@@ -1,0 +1,43 @@
+@startuml
+!include org.activiti.engine.impl.bpmn.webservice.puml
+hide @unlinked
+package "org.activiti.engine.impl.webservice" {
+interface SyncWebServiceClient {
+    + send(String methodName,Object[] arguments,ConcurrentMap<QName,URL> overridenEndpointAddress):Object[]
+}
+interface SyncWebServiceClientFactory {
+    + create(String wsdl):SyncWebServiceClient
+}
+SyncWebServiceClientFactory ..> SyncWebServiceClient
+
+class WSOperation implements org.activiti.engine.impl.bpmn.webservice.OperationImplementation {
+    # id:String
+    # name:String
+    # service:WSService
+    + WSOperation(String id,String operationName,WSService service)
+    + getId():String
+    + getName():String
+    + sendFor(MessageInstance message,Operation operation,ConcurrentMap<QName,URL> overridenEndpointAddress):MessageInstance
+    - getArguments(MessageInstance message):Object[]
+    - safeSend(Object[] arguments,ConcurrentMap<QName,URL> overridenEndpointAddress):Object[]
+    - createResponseMessage(Object[] results,Operation operation):MessageInstance
+    + getService():WSService
+}
+class WSService implements org.activiti.engine.impl.bpmn.webservice.BpmnInterfaceImplementation {
+    # name:String
+    # location:String
+    # operations:Map<String,WSOperation>
+    # wsdlLocation:String
+    # client:SyncWebServiceClient
+    + WSService(String name,String location,String wsdlLocation)
+    + WSService(String name,String location,SyncWebServiceClient client)
+    + addOperation(WSOperation operation):void
+    + getClient():SyncWebServiceClient
+    + getName():String
+    + getLocation():String
+}
+WSService *--> WSOperation
+WSService *--> SyncWebServiceClient
+}
+/' package finished '/
+@enduml

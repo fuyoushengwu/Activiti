@@ -1,0 +1,266 @@
+@startuml
+/' !include org.activiti.engine.impl.pvm.delegate.puml '/
+hide @unlinked
+
+package "org.activiti.engine.impl.pvm.runtime" {
+abstract class AbstractEventAtomicOperation implements AtomicOperation {
+    + isAsync(InterpretableExecution execution):boolean
+    + execute(InterpretableExecution execution):void
+    # {abstract} getScope(InterpretableExecution execution):org.activiti.engine.impl.pvm.process.ScopeImpl
+    # {abstract} getEventName():String
+    # {abstract} eventNotificationsCompleted(InterpretableExecution execution):void
+}
+
+interface AtomicOperation {
+    + execute(InterpretableExecution execution):void
+    + isAsync(InterpretableExecution execution):boolean
+}
+class AtomicOperationActivityEnd extends AbstractEventAtomicOperation {
+    # getScope(InterpretableExecution execution):org.activiti.engine.impl.pvm.process.ScopeImpl
+    # getEventName():String
+    # eventNotificationsCompleted(InterpretableExecution execution):void
+}
+class AtomicOperationActivityExecute implements AtomicOperation {
+    + execute(InterpretableExecution execution):void
+    + isAsync(InterpretableExecution execution):boolean
+}
+class AtomicOperationActivityStart extends AbstractEventAtomicOperation {
+    # getScope(InterpretableExecution execution):org.activiti.engine.impl.pvm.process.ScopeImpl
+    # getEventName():String
+    # eventNotificationsCompleted(InterpretableExecution execution):void
+}
+class AtomicOperationDeleteCascade implements AtomicOperation {
+    + execute(InterpretableExecution execution):void
+    + isAsync(InterpretableExecution execution):boolean
+    # findFirstLeaf(InterpretableExecution execution):InterpretableExecution
+}
+class AtomicOperationDeleteCascadeFireActivityEnd extends AbstractEventAtomicOperation {
+    # getScope(InterpretableExecution execution):org.activiti.engine.impl.pvm.process.ScopeImpl
+    # getEventName():String
+    # eventNotificationsCompleted(InterpretableExecution execution):void
+}
+class AtomicOperationProcessEnd extends AbstractEventAtomicOperation {
+    # getScope(InterpretableExecution execution):org.activiti.engine.impl.pvm.process.ScopeImpl
+    # getEventName():String
+    # eventNotificationsCompleted(InterpretableExecution execution):void
+}
+
+class AtomicOperationProcessStart extends AbstractEventAtomicOperation {
+    # getScope(InterpretableExecution execution):org.activiti.engine.impl.pvm.process.ScopeImpl
+    # getEventName():String
+    # eventNotificationsCompleted(InterpretableExecution execution):void
+}
+class AtomicOperationProcessStartInitial extends AbstractEventAtomicOperation {
+    # getScope(InterpretableExecution execution):org.activiti.engine.impl.pvm.process.ScopeImpl
+    # getEventName():String
+    # eventNotificationsCompleted(InterpretableExecution execution):void
+}
+class AtomicOperationTransitionCreateScope implements AtomicOperation {
+    + execute(InterpretableExecution execution):void
+    + isAsync(InterpretableExecution execution):boolean
+}
+class AtomicOperationTransitionDestroyScope implements AtomicOperation {
+    + isAsync(InterpretableExecution execution):boolean
+    + execute(InterpretableExecution execution):void
+    + transitionLeavesNextOuterScope(org.activiti.engine.impl.pvm.process.ScopeImpl nextScopeElement,org.activiti.engine.impl.pvm.process.ActivityImpl destination):boolean
+}
+class AtomicOperationTransitionNotifyListenerEnd extends AbstractEventAtomicOperation {
+    # getScope(InterpretableExecution execution):org.activiti.engine.impl.pvm.process.ScopeImpl
+    # getEventName():String
+    # eventNotificationsCompleted(InterpretableExecution execution):void
+}
+class AtomicOperationTransitionNotifyListenerStart extends AbstractEventAtomicOperation {
+    # getScope(InterpretableExecution execution):org.activiti.engine.impl.pvm.process.ScopeImpl
+    # getEventName():String
+    # eventNotificationsCompleted(InterpretableExecution execution):void
+}
+
+class AtomicOperationTransitionNotifyListenerTake implements AtomicOperation{
+    + isAsync(InterpretableExecution execution):boolean
+    + execute(InterpretableExecution execution):void
+    + {static} findNextScope(org.activiti.engine.impl.pvm.process.ScopeImpl outerScopeElement,org.activiti.engine.impl.pvm.process.ActivityImpl destination):org.activiti.engine.impl.pvm.process.ActivityImpl
+}
+
+class ExecutionImpl implements org.activiti.engine.impl.pvm.delegate.ActivityExecution,org.activiti.engine.impl.pvm.delegate.ExecutionListenerExecution,org.activiti.engine.impl.pvm.PvmExecution,InterpretableExecution {
+    # processDefinition:org.activiti.engine.impl.pvm.process.ProcessDefinitionImpl
+    # activity:org.activiti.engine.impl.pvm.process.ActivityImpl
+    # transition:org.activiti.engine.impl.pvm.process.TransitionImpl
+    # processInstance:ExecutionImpl
+    # parent:ExecutionImpl
+    # executions:List<ExecutionImpl>
+    # superExecution:ExecutionImpl
+    # subProcessInstance:ExecutionImpl
+    # startingExecution:StartingExecution
+    == state/type of execution ==
+    # isActive:boolean
+    # isScope:boolean
+    # isConcurrent:boolean
+    # isEnded:boolean
+    # isEventScope:boolean
+    # variables:Map<String,Object>
+    == events ==
+    # eventName:String
+    # eventSource:org.activiti.engine.impl.pvm.PvmProcessElement
+    # executionListenerIndex:int
+    == cascade deletion ==
+    # deleteRoot:boolean
+    # deleteReason:String
+    == replaced by ==
+    # replacedBy:ExecutionImpl
+    == atomic operations ==
+    # nextOperation:AtomicOperation
+    # isOperating:boolean
+    == constructor ==
+    + ExecutionImpl()
+    + ExecutionImpl(org.activiti.engine.impl.pvm.process.ActivityImpl initial)
+    == constructor ==
+    + createExecution():ExecutionImpl
+    + newExecution():ExecutionImpl
+    + createSubProcessInstance(org.activiti.engine.impl.pvm.PvmProcessDefinition processDefinition):org.activiti.engine.impl.pvm.PvmProcessInstance
+    + initialize():void
+    + destroy():void
+    + remove():void
+    + destroyScope(String reason):void
+    + getParent():ExecutionImpl
+    + setParent(InterpretableExecution parent):void
+    + getParentId():String
+    + getSuperExecutionId():String
+    # ensureParentInitialized():void
+    + getExecutions():List<ExecutionImpl>
+    + getSuperExecution():ExecutionImpl
+    + setSuperExecution(ExecutionImpl superExecution):void
+    # ensureSuperExecutionInitialized():void
+    + getSubProcessInstance():ExecutionImpl
+    + setSubProcessInstance(InterpretableExecution superExecution):void
+    # ensureSubProcessInstanceInitialized():void
+    + deleteCascade(String deleteReason):void
+    + end():void
+    + findExecution(String activityId):ExecutionImpl
+    + findActiveActivityIds():List<String>
+    # collectActiveActivityIds(List<String> activeActivityIds):void
+    # ensureExecutionsInitialized():void
+    + getProcessDefinition():org.activiti.engine.impl.pvm.process.ProcessDefinitionImpl
+    + getProcessDefinitionId():String
+    # ensureProcessDefinitionInitialized():void
+    + getProcessInstance():ExecutionImpl
+    + getProcessInstanceId():String
+    + getBusinessKey():string
+    + getProcessBusinessKey():String
+    + setProcessInstance(InterpretableExecution processInstance):void
+    # ensureProcessInstanceInitialized():void
+    + getActivity():org.activiti.engine.impl.pvm.process.ActivityImpl
+    + setActivity(org.activiti.engine.impl.pvm.process.ActivityImpl activity):void
+    + ensureActivityInitialized():void
+    + isCope():boolean
+    + start():void
+    + signal(String signalName,Object signalData):void
+    + take(org.activiti.engine.impl.pvm.PvmTransition transition,boolean fireActivityCompletedEvent):void
+    + take(org.activiti.engine.impl.pvm.PvmTransition transition):void
+    + executeActivity(org.activiti.engine.impl.pvm.PvmActivity activity):void
+    + findInactiveConcurrentExecutions(org.activiti.engine.impl.pvm.PvmActivity activity):List<org.activiti.engine.impl.pvm.delegate.ActivityExecution>
+    + takeAll(List<org.activiti.engine.impl.pvm.PvmTransition> transitions,List<org.activiti.engine.impl.pvm.delegate.ActivityExecution> recyclableExecutions):void
+    + performOperation(AtomicOperation executionOperation):void
+    + isActive(String activityId):boolean
+    + getVariable(String variableName):Object
+    + getVariable(String variableName,boolean fetchAllVariables):Object
+    + getVariables():Map<String,Object>
+    + getVariables(Collection<String> variableNames):Map<String,Object>
+    + getVariables(Collection<String> variableNames,boolean fetchAllVariables):Map<String,Object>
+    # collectVariables(Map<String,Object> collectedVariables):void
+    + setVariables(Map<String,? extends Object> variables):void
+    + setVariable(String variableName,Object value):void
+    + setVariable(String variableName,Object value,boolean fetchAllVariables):void
+    + setVariableLocally(String variableName,Object value):void
+    + setVariableLocal(String variableName,Object value,boolean fetchAllVariables):void
+    + hasVariable(String variableName):boolean
+    # ensureVariablesInitialized():void
+    + getEngineServices():org.activiti.engine.EngineServices
+    + isProcessInstanceType():boolean
+    + inactivate():boolean
+    + getId():String
+    + getTransition():org.activiti.engine.impl.pvm.process.TransitionImpl
+    + setTransition(org.activiti.engine.impl.pvm.process.TransitionImpl):void
+    + getExecutionListenerIndex():Integer
+    + setExecutionListenerIndex(Integer executionListenerIndex):void
+    + isConcurrent():boolean
+    + setConcurrent(boolean isConcurrent):void
+    + isActive():boolean
+    + setActive(boolean isActive):void
+    + isEnded():boolean
+    + setEnded(boolean ended):void
+    + setProcessDefinition(org.activiti.engine.impl.pvm.process.ProcessDefinitionImpl processDefinition):void
+    + getEventName():String
+    + setEventName(String eventName):void
+    + getEventSource():org.activiti.engine.impl.pvm.PvmProcessElement
+    + setEventSource(org.activiti.engine.impl.pvm.PvmProcessElement):void
+    + getDeleteReason():String
+    + setDeleteReason(String deleteReason):void
+    + getReplacedBy():ExecutionImpl
+    + setReplacedBy(ExecutionImpl replacedBy):void
+    + setExecutions(List<ExecutionImpl> executions):void
+    + isDeleteRoot():boolean
+    + getCurrentActivityId():String
+    + getCurrentActivityName():String
+    + getVariableInstances():Map<String,org.activiti.engine.impl.persistence.entity.VariableInstance>
+    + getVariableInstances(Collection<String> variableNames):Map<String,org.activiti.engine.impl.persistence.entity.VariableInstance>
+    + getVariableInstances(Collection<String> variableNames,boolean fetchAllVariables):Map<String,org.activiti.engine.impl.persistence.entity.VariableInstance>
+    + getVariableInstancesLocal():Map<String,org.activiti.engine.impl.persistence.entity.VariableInstance>
+    + getVariableInstancesLocal(Collection<String> variableNames):Map<String,org.activiti.engine.impl.persistence.entity.VariableInstance>
+    + getVariableInstancesLocal(Collection<String> variableNames,boolean fetchAllVariables):Map<String,org.activiti.engine.impl.persistence.entity.VariableInstance>
+    + getVariableInstance(String variableName):org.activiti.engine.impl.persistence.entity.VariableInstance
+    + getVariableInstance(String variableName,boolean fetchAllVariables):org.activiti.engine.impl.persistence.entity.VariableInstance
+    + createVariableLocal(String variableName,Object value):void
+    + createVariablesLocal(Map<String,? extends Object> variables):void
+    + getVariableLocal(String variableName):Object
+    + getVariableInstanceLocal(String variableName):org.activiti.engine.impl.persistence.entity.VariableInstance
+    + getVariableLocal(String variableName,boolean fetchAllVariables):Object
+}
+interface InterpretableExecution extends org.activiti.engine.impl.pvm.delegate.ActivityExecution,org.activiti.engine.impl.pvm.delegate.ExecutionListenerExecution,org.activiti.engine.impl.pvm.PvmProcessInstance {
+    + take(PvmTransition transition):void
+    + take(PvmTransition transition,boolean fireActivityCompletedEvent):void
+    + setEventName(String eventName):void
+    + setEventSource(PvmProcessElement element):void
+    + getExecutionListenerIndex():int
+    + setExecutionListenerIndex(int executionListenerIndex):void
+    + getProcessDefinition():org.activiti.engine.impl.pvm.process.ProcessDefinitionImpl
+    + setActivity(org.activiti.engine.impl.pvm.process.ActivityImpl activity):void
+    + performOperation(org.activiti.engine.impl.pvm.runtime.AtomicOperation operation):void
+    + isScope():boolean
+    + destroy():void
+    + remove():void
+    + getReplacedBy():InterpretableExecution
+    + setReplacedBy(InterpretableExecution replacedBy):void
+    + getSubProcessInstance():InterpretableExecution
+    + setSubProcessInstance(InterpretableExecution subProcessInstance):void
+    + getSuperExecution():InterpretableExecution
+    + deleteCascade(String deleteReason):void
+    + isDeleteRoot():boolean
+    + getTransition():TransitionImpl
+    + setTransition(TransitionImpl):void
+    + initialize():void
+    + setParent(InterpretableExecution parent):void
+    + setProcessDefinition(org.activiti.engine.impl.pvm.process.ProcessDefinitionImpl processDefinition):void
+    + setProcessInstance(InterpretableExecution processInstance):void
+    + isEventScope():boolean
+    + setEventScope(boolean isEventScope):void
+    + getStartingExecution():StartingExecution
+    + disposeStartingExecution():void
+    + shouldExecuteListeners():boolean
+}
+class OutgoingExecution {
+    # outingExecution:InterpretableExecution
+    # outgoingTransition:org.activiti.engine.impl.pvm.PvmTransition
+    # isNew:boolean
+    + OutgoingExecution(InterpretableExecution outgoingTransition,org.activiti.engine.impl.pvm.PvmTransition outgoingTransition,boolean isNew)
+    + take():void
+    + take(boolean fireActivityCompletedEvent):void
+}
+class StartingExecution {
+    # selectedInitial:org.activiti.engine.impl.pvm.process.ActivityImpl
+    + StartingExecution(org.activiti.engine.impl.pvm.process.ActivityImpl selectedInitial)
+    + getInitial():org.activiti.engine.impl.pvm.process.ActivityImpl
+}
+/' package finished '/
+}
+
+@enduml

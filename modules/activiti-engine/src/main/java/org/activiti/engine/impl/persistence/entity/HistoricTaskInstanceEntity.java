@@ -116,7 +116,7 @@ public class HistoricTaskInstanceEntity extends HistoricScopeInstanceEntity impl
     this.executionId = executionId;
   }
   public String getName() {
-    if (localizedName != null && localizedName.length() > 0) {
+    if (localizedName != null && !localizedName.isEmpty()) {
       return localizedName;
     } else {
       return name;
@@ -129,7 +129,7 @@ public class HistoricTaskInstanceEntity extends HistoricScopeInstanceEntity impl
     this.localizedName = name;
   }
   public String getDescription() {
-    if (localizedDescription != null && localizedDescription.length() > 0) {
+    if (localizedDescription != null && !localizedDescription.isEmpty()) {
       return localizedDescription;
     } else {
       return description;

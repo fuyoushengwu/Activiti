@@ -288,14 +288,14 @@ public class ArrayELResolver extends ELResolver {
 			index = ((Number) property).intValue();
 		} else if (property instanceof String) {
 			try {
-				index = Integer.valueOf((String) property);
+				index = Integer.parseInt((String) property);
 			} catch (NumberFormatException e) {
 				throw new IllegalArgumentException("Cannot parse array index: " + property);
 			}
 		} else if (property instanceof Character) {
-			index = ((Character) property).charValue();
+			index = (Character) property;
 		} else if (property instanceof Boolean) {
-			index = ((Boolean) property).booleanValue() ? 1 : 0;
+			index = (Boolean) property ? 1 : 0;
 		} else {
 			throw new IllegalArgumentException("Cannot coerce property to array index: " + property);
 		}

@@ -1,9 +1,9 @@
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -57,7 +57,7 @@ import org.xml.sax.SAXException;
 
 /**
  * A WSDL importer
- * 
+ *
  * @author Esteban Robles Luna
  */
 public class WSDLImporter implements XMLImporter {
@@ -66,12 +66,13 @@ public class WSDLImporter implements XMLImporter {
 
   protected Map<String, WSOperation> wsOperations = new HashMap<String, WSOperation>();
 
-  protected Map<String, StructureDefinition> structures = new HashMap<String, StructureDefinition>();
+  protected Map<String, StructureDefinition> structures =
+      new HashMap<String, StructureDefinition>();
 
   protected String wsdlLocation;
-  
+
   protected String namespace;
-  
+
   public WSDLImporter() {
     this.namespace = "";
   }
@@ -98,27 +99,22 @@ public class WSDLImporter implements XMLImporter {
     }
   }
 
-  /**
-   * Parse the WSDL definition using WSDL4J.
-   */
+  /** Parse the WSDL definition using WSDL4J. */
   private Definition parseWSDLDefinition() throws WSDLException {
     WSDLFactory wsdlFactory = WSDLFactory.newInstance();
     WSDLReader reader = wsdlFactory.newWSDLReader();
     reader.setFeature("javax.wsdl.verbose", false);
     reader.setFeature("javax.wsdl.importDocuments", true);
-    Definition definition = reader.readWSDL(this.wsdlLocation);
-    return definition;
+    return reader.readWSDL(this.wsdlLocation);
   }
 
-  /**
-   * Imports services and operations from the WSDL definition
-   */
+  /** Imports services and operations from the WSDL definition */
   private void importServicesAndOperations(Definition definition) {
     for (Object serviceObject : definition.getServices().values()) {
       Service service = (Service) serviceObject;
       WSService wsService = this.importService(service);
       this.wsServices.put(this.namespace + wsService.getName(), wsService);
-      
+
       Port port = (Port) service.getPorts().values().iterator().next();
       for (Object bindOperationObject : port.getBinding().getBindingOperations()) {
         BindingOperation bindOperation = (BindingOperation) bindOperationObject;
@@ -129,15 +125,13 @@ public class WSDLImporter implements XMLImporter {
       }
     }
   }
-  
-  /**
-   * Imports the service from the WSDL service definition
-   */
+
+  /** Imports the service from the WSDL service definition */
   private WSService importService(Service service) {
     String name = service.getQName().getLocalPart();
     Port port = (Port) service.getPorts().values().iterator().next();
     String location = "";
-    
+
     List extensionElements = port.getExtensibilityElements();
     for (Object extension : extensionElements) {
       if (extension instanceof SOAPAddress) {
@@ -146,18 +140,18 @@ public class WSDLImporter implements XMLImporter {
       }
     }
 
-    WSService wsService = new WSService(this.namespace + name, location, this.wsdlLocation);
-    return wsService;
+      return new WSService(this.namespace + name, location, this.wsdlLocation);
   }
 
   private WSOperation processOperation(Operation wsOperation, WSService service) {
-    WSOperation operation = new WSOperation(this.namespace + wsOperation.getName(), wsOperation.getName(), service);
+    WSOperation operation =
+        new WSOperation(this.namespace + wsOperation.getName(), wsOperation.getName(), service);
     return operation;
   }
 
   /**
-   * Import the Types from the WSDL definition using the same strategy that
-   * Cxf uses taking advantage of JAXB
+   * Import the Types from the WSDL definition using the same strategy that Cxf uses taking
+   * advantage of JAXB
    */
   private void importTypes(Types types) {
     SchemaCompiler compiler = XJC.createSchemaCompiler();
@@ -167,11 +161,10 @@ public class WSDLImporter implements XMLImporter {
     Element rootTypes = this.getRootTypes();
     this.createDefaultStructures(rootTypes);
 
-    
     S2JJAXBModel intermediateModel = this.compileModel(types, compiler, rootTypes);
     Collection<? extends Mapping> mappings = intermediateModel.getMappings();
 
-    for (Mapping mapping : mappings){
+    for (Mapping mapping : mappings) {
       this.importStructure(mapping);
     }
   }
@@ -179,8 +172,9 @@ public class WSDLImporter implements XMLImporter {
   private void importStructure(Mapping mapping) {
     QName qname = mapping.getElement();
     JDefinedClass theClass = (JDefinedClass) mapping.getType().getTypeClass();
-    SimpleStructureDefinition structure = (SimpleStructureDefinition) this.structures.get(this.namespace + qname.getLocalPart());
-    
+    SimpleStructureDefinition structure =
+        (SimpleStructureDefinition) this.structures.get(this.namespace + qname.getLocalPart());
+
     Map<String, JFieldVar> fields = theClass.fields();
     int index = 0;
     for (Entry<String, JFieldVar> entry : fields.entrySet()) {
@@ -198,7 +192,8 @@ public class WSDLImporter implements XMLImporter {
   }
 
   private void createDefaultStructures(Element rootTypes) {
-    NodeList complexTypes = rootTypes.getElementsByTagNameNS("http://www.w3.org/2001/XMLSchema", "complexType");
+    NodeList complexTypes =
+        rootTypes.getElementsByTagNameNS("http://www.w3.org/2001/XMLSchema", "complexType");
     for (int i = 0; i < complexTypes.getLength(); i++) {
       Element element = (Element) complexTypes.item(i);
       String structureName = this.namespace + element.getAttribute("name");
@@ -213,7 +208,8 @@ public class WSDLImporter implements XMLImporter {
       Document doc = docBuilder.parse(this.wsdlLocation);
       Element root = (Element) doc.getFirstChild();
       Element typesElement = (Element) root.getElementsByTagName("wsdl:types").item(0);
-      return (Element) typesElement.getElementsByTagNameNS("http://www.w3.org/2001/XMLSchema", "schema").item(0);
+      return (Element)
+          typesElement.getElementsByTagNameNS("http://www.w3.org/2001/XMLSchema", "schema").item(0);
     } catch (SAXException e) {
       throw new ActivitiException(e.getMessage(), e);
     } catch (IOException e) {

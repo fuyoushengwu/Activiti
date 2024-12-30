@@ -1,9 +1,9 @@
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,7 +14,6 @@
 package org.activiti.engine.impl.scripting;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -23,7 +22,7 @@ import javax.script.ScriptEngineFactory;
 
 /**
  * Factory to create {@link JuelScriptEngine}s.
- * 
+ *
  * @author Frederik Heremans
  */
 public class JuelScriptEngineFactory implements ScriptEngineFactory {
@@ -33,7 +32,7 @@ public class JuelScriptEngineFactory implements ScriptEngineFactory {
   private static List<String> mimeTypes;
 
   static {
-    names = Collections.unmodifiableList(Arrays.asList("juel"));
+    names = Collections.singletonList("juel");
     extensions = names;
     mimeTypes = Collections.unmodifiableList(new ArrayList<String>(0));
   }
@@ -74,20 +73,20 @@ public class JuelScriptEngineFactory implements ScriptEngineFactory {
     // We will use out:print function to output statements
     StringBuilder stringBuffer = new StringBuilder();
     stringBuffer.append("out:print(\"");
-    
+
     int length = toDisplay.length();
     for (int i = 0; i < length; i++) {
       char c = toDisplay.charAt(i);
       switch (c) {
-      case '"':
-        stringBuffer.append("\\\"");
-        break;
-      case '\\':
-        stringBuffer.append("\\\\");
-        break;
-      default:
-        stringBuffer.append(c);
-        break;
+        case '"':
+          stringBuffer.append("\\\"");
+          break;
+        case '\\':
+          stringBuffer.append("\\\\");
+          break;
+        default:
+          stringBuffer.append(c);
+          break;
       }
     }
     stringBuffer.append("\")");
@@ -115,12 +114,10 @@ public class JuelScriptEngineFactory implements ScriptEngineFactory {
   public String getProgram(String... statements) {
     // Each statement is wrapped in '${}' to comply with EL
     StringBuilder buf = new StringBuilder();
-    if (statements.length != 0) {
-      for (int i = 0; i < statements.length; i++) {
-        buf.append("${");
-        buf.append(statements[i]);
-        buf.append("} ");
-      }
+    for (String statement : statements) {
+      buf.append("${");
+      buf.append(statement);
+      buf.append("} ");
     }
     return buf.toString();
   }
@@ -128,5 +125,4 @@ public class JuelScriptEngineFactory implements ScriptEngineFactory {
   public ScriptEngine getScriptEngine() {
     return new JuelScriptEngine(this);
   }
-
 }

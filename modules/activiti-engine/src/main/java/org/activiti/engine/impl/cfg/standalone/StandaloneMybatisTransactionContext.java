@@ -1,9 +1,9 @@
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,87 +30,92 @@ import org.apache.ibatis.session.SqlSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * @author Tom Baeyens
  * @author Joram Barrez
  */
 public class StandaloneMybatisTransactionContext implements TransactionContext {
-  
-  private static Logger log = LoggerFactory.getLogger(StandaloneMybatisTransactionContext.class);
+
+  private static final Logger log = LoggerFactory.getLogger(StandaloneMybatisTransactionContext.class);
 
   protected CommandContext commandContext;
-  protected Map<TransactionState,List<TransactionListener>> stateTransactionListeners = null;
-  
+  protected Map<TransactionState, List<TransactionListener>> stateTransactionListeners = null;
+
   public StandaloneMybatisTransactionContext(CommandContext commandContext) {
     this.commandContext = commandContext;
   }
 
-  public void addTransactionListener(TransactionState transactionState, TransactionListener transactionListener) {
-    if (stateTransactionListeners==null) {
+  public void addTransactionListener(
+      TransactionState transactionState, TransactionListener transactionListener) {
+    if (stateTransactionListeners == null) {
       stateTransactionListeners = new HashMap<TransactionState, List<TransactionListener>>();
     }
-    List<TransactionListener> transactionListeners = stateTransactionListeners.get(transactionState);
-    if (transactionListeners==null) {
+    List<TransactionListener> transactionListeners =
+        stateTransactionListeners.get(transactionState);
+    if (transactionListeners == null) {
       transactionListeners = new ArrayList<TransactionListener>();
       stateTransactionListeners.put(transactionState, transactionListeners);
     }
     transactionListeners.add(transactionListener);
   }
-  
+
   public void commit() {
-    
+
     log.debug("firing event committing...");
     fireTransactionEvent(TransactionState.COMMITTING, false);
-    
+
     log.debug("committing the ibatis sql session...");
     getDbSqlSession().commit();
     log.debug("firing event committed...");
     fireTransactionEvent(TransactionState.COMMITTED, true);
-    
   }
 
   /**
    * Fires the event for the provided {@link TransactionState}.
-   * 
+   *
    * @param transactionState The {@link TransactionState} for which the listeners will be called.
-   * @param executeInNewContext If true, the listeners will be called in a new command context.
-   *                            This is needed for example when firing the {@link TransactionState#COMMITTED}
-   *                            event: the transaction is already committed and executing logic in the same
-   *                            context could lead to strange behaviour (for example doing a {@link SqlSession#update(String)}
-   *                            would actually roll back the update (as the MyBatis context is already committed
-   *                            and the internal flags have not been correctly set).
+   * @param executeInNewContext If true, the listeners will be called in a new command context. This
+   *     is needed for example when firing the {@link TransactionState#COMMITTED} event: the
+   *     transaction is already committed and executing logic in the same context could lead to
+   *     strange behaviour (for example doing a {@link SqlSession#update(String)} would actually
+   *     roll back the update (as the MyBatis context is already committed and the internal flags
+   *     have not been correctly set).
    */
-  protected void fireTransactionEvent(TransactionState transactionState, boolean executeInNewContext) {
-    if (stateTransactionListeners==null) {
+  protected void fireTransactionEvent(
+      TransactionState transactionState, boolean executeInNewContext) {
+    if (stateTransactionListeners == null) {
       return;
     }
-    final List<TransactionListener> transactionListeners = stateTransactionListeners.get(transactionState);
-    if (transactionListeners==null) {
+    final List<TransactionListener> transactionListeners =
+        stateTransactionListeners.get(transactionState);
+    if (transactionListeners == null) {
       return;
     }
-    
+
     if (executeInNewContext) {
-      CommandExecutor commandExecutor = commandContext.getProcessEngineConfiguration().getCommandExecutor(); 
-      CommandConfig commandConfig = new CommandConfig(false, TransactionPropagation.REQUIRES_NEW); 
-      commandExecutor.execute(commandConfig, new Command<Void>() {
-        public Void execute(CommandContext commandContext) {
-          executeTransactionListeners(transactionListeners, commandContext);
-          return null;
-        }
-      });
+      CommandExecutor commandExecutor =
+          commandContext.getProcessEngineConfiguration().getCommandExecutor();
+      CommandConfig commandConfig = new CommandConfig(false, TransactionPropagation.REQUIRES_NEW);
+      commandExecutor.execute(
+          commandConfig,
+          new Command<Void>() {
+            public Void execute(CommandContext commandContext) {
+              executeTransactionListeners(transactionListeners, commandContext);
+              return null;
+            }
+          });
     } else {
       executeTransactionListeners(transactionListeners, commandContext);
     }
-    
   }
 
-  protected void executeTransactionListeners(List<TransactionListener> transactionListeners, CommandContext commandContext) {
+  protected void executeTransactionListeners(
+      List<TransactionListener> transactionListeners, CommandContext commandContext) {
     for (TransactionListener transactionListener : transactionListeners) {
       transactionListener.execute(commandContext);
     }
   }
-  
+
   protected DbSqlSession getDbSqlSession() {
     return commandContext.getSession(DbSqlSession.class);
   }
@@ -120,17 +125,17 @@ public class StandaloneMybatisTransactionContext implements TransactionContext {
       try {
         log.debug("firing event rolling back...");
         fireTransactionEvent(TransactionState.ROLLINGBACK, false);
-        
+
       } catch (Throwable exception) {
-        log.info("Exception during transaction: {}",exception.getMessage());
+        log.info("Exception during transaction: {}", exception.getMessage());
         commandContext.exception(exception);
       } finally {
         log.debug("rolling back ibatis sql session...");
         getDbSqlSession().rollback();
       }
-      
+
     } catch (Throwable exception) {
-      log.info("Exception during transaction: {}",exception.getMessage());
+      log.info("Exception during transaction: {}", exception.getMessage());
       commandContext.exception(exception);
 
     } finally {

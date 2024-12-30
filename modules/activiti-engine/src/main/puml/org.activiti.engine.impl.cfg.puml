@@ -1,0 +1,242 @@
+@startuml
+
+hide @unlinked
+
+package "org.activiti.engine.impl.cfg" {
+class BeansConfigurationHelper {
+    + {static} parseProcessEngineConfiguration(Resource springResource,String beanName):org.activiti.engine.ProcessEngineConfiguration
+    + {static} parseProcessEngineConfigurationFromInputStream(InputStream inputStream,String beanName):org.activiti.engine.ProcessEngineConfiguration
+    + {static} parseProcessEngineConfigurationFromResource(String resource,String beanName):org.activiti.engine.ProcessEngineConfiguration
+}
+
+interface BpmnParseFactory {
+    + createBpmnParse(org.activiti.engine.impl.bpmn.parser.BpmnParser):org.activiti.engine.impl.bpmn.parser.BpmnParse
+}
+class CommandExecutorImpl implements org.activiti.engine.impl.interceptor.CommandExecutor {
+    - defaultConfig:org.activiti.engine.impl.interceptor.CommandConfig
+    - first:org.activiti.engine.impl.interceptor.CommandInterceptor
+    + CommandExecutorImpl(CommandConfig,CommandInterceptor)
+    + getFirst():org.activiti.engine.impl.interceptor.CommandInterceptor
+    + getDefaultConfig():org.activiti.engine.impl.interceptor.CommandConfig
+    + execute(org.activiti.engine.impl.interceptor.Command<T>):T
+    + execute(CommandConfig config,Command<T> command):T
+}
+class DefaultBpmnParseFactory implements BpmnParseFactory {
+    + createBpmnParse(org.activiti.engine.impl.bpmn.parser.BpmnParser):org.activiti.engine.impl.bpmn.parser.BpmnParse
+}
+
+enum DelegateExpressionFieldInjectionMode {
+    COMPATIBILITY
+    MIXED
+    DISABLED
+}
+interface IdGenerator {
+    + generateId():String
+}
+class JpaHelper {
+    + {static} createEntityManagerFactory(String jpaPersistenceUnitName):javax.persistence.EntityManagerFactory
+}
+class JtaProcessEngineConfiguration extends ProcessEngineConfigurationImpl {
+    # transactionManager:TransactionManager
+    + JtaProcessEngineConfiguration()
+    # createTransactionInterceptor():org.activiti.engine.impl.interceptor.CommandInterceptor
+    # initTransactionContextFactory():void
+}
+JtaProcessEngineConfiguration *--> org.activiti.engine.impl.interceptor.JtaTransactionInterceptor
+JtaProcessEngineConfiguration *--> org.activiti.engine.impl.cfg.jta.JtaTransactionContextFactory
+
+abstract class ProcessEngineConfigurationImpl extends ProcessEngineConfiguration {
+    == SERVICES ==
+    # repositoryService:org.activiti.engine.RepositoryService
+    # runtimeService:org.activiti.engine.RuntimeService
+    # historyService:org.activiti.engine.HistoryService
+    # identityService:org.activiti.engine.IdentityService
+    # taskService:org.activiti.engine.TaskService
+    # formService:org.activiti.engine.FormService
+    # managementService:org.activiti.engine.ManagementService
+    # dynamicBpmnService:org.activiti.engine.DynamicBpmnService
+    == COMMAND EXECUTORS ==
+    # defaultCommandConfig:org.activiti.engine.impl.interceptor.CommandConfig
+    # schemaCommandConfig:org.activiti.engine.impl.interceptor.CommandConfig
+    # commandInvoker:org.activiti.engine.impl.interceptor.CommandInterceptor
+    # customPreCommandInterceptors:List<org.activiti.engine.impl.interceptor.CommandInterceptor>
+    # customPostCommandInterceptors:List<org.activiti.engine.impl.interceptor.CommandInterceptor>
+    # commandInterceptors:List<org.activiti.engine.impl.interceptor.CommandInterceptor>
+    # commandExecutor:org.activiti.engine.impl.interceptor.CommandExecutor
+    == SESSION FACTORIES ==
+    # customSessionFactories:List<org.activiti.engine.impl.interceptor.SessionFactory>
+    # dbSqlSessionFactory:org.activiti.engine.impl.db.DbSqlSessionFactory
+    # sessionFactories:Map<Class<?>,org.activiti.engine.impl.interceptor.SessionFactory>
+    == Configurators ==
+    # enableConfiguratorServiceLoader:boolean
+    # configurators:List<org.activiti.engine.cfg.ProcessEngineConfigurator>
+    # allConfigurators:List<org.activiti.engine.cfg.ProcessEngineConfigurator>
+    == DEPLOYERS ==
+    # bpmnDeployer:org.activiti.engine.impl.bpmn.deployer.BpmnDeployer
+    # bpmnParser:org.activiti.engine.impl.bpmn.parser.BpmnParser
+    # customPreDeployers:List<org.activiti.engine.impl.persistence.deploy.Deployer>
+    # customPostDeployers:List<org.activiti.engine.impl.persistence.deploy.Deployer>
+    # deployers:List<org.activiti.engine.impl.persistence.deploy.Deployer>
+    # deploymentManager:org.activiti.engine.impl.persistence.deploy.DeploymentManager
+    # processDefinitionCacheLimit:int
+    # processDefinitionCache:org.activiti.engine.impl.persistence.deploy.DeploymentCache<ProcessDefinitionEntity>
+    # bpmnModelCacheLimit:int
+    # bpmnModelCache:org.activiti.engine.impl.persistence.deploy.DeploymentCache<BpmnModel>
+    # processDefinitionInfoCacheLimit:int
+    # processDefinitionInfoCache:org.activiti.engine.impl.persistence.deploy.ProcessDefinitionInfoCache
+    # knowledgeBaseCacheLimit:int
+    # knowledgeBaseCache:org.activiti.engine.impl.persistence.deploy.DeploymentCache<Object>
+    == JOB EXECUTOR ==
+    # customJobHandlers:List<org.activiti.engine.impl.jobexecutor.JobHandler>
+    # jobHandlers:Map<String,org.activiti.engine.impl.jobexecutor.JobHandler>
+    == ASYNC EXECUTOR ==
+    # asyncExecutorCorePoolSize:int
+    # asyncExecutorMaxPoolSize:int
+    # asyncExecutorThreadKeepAliveTime:long
+    # asyncExecutorThreadPoolQueueSize:int
+    # asyncExecutorThreadPoolQueue:BlockingQueue<Runnable>
+    # asyncExecutorSecondsToWaitOnShutdown:long
+    # asyncExecutorMaxTimerJobsPerAcquisition:int
+    # asyncExecutorMaxAsyncJobsDuePerAcquisition:int
+    # asyncExecutorDefaultTimerJobAcquireWaitTime:int
+    # asyncExecutorDefaultAsyncJobAcquireWaitTime:int
+    # asyncExecutorDefaultQueueSizeFullWaitTime:int
+    # asyncExecutorLockOwner:String
+    # asyncExecutorTimerLockTimeInMillis:int
+    # asyncExecutorAsyncJobLockTimeInMillis:int
+    # asyncExecutorLockRetryWaitTimeInMillis:int
+    # asyncExecutorExecuteAsyncRunnableFactory:org.activiti.engine.impl.asyncexecutor.ExecuteAsyncRunnableFactory
+    == MYBATIS SQL SESSION FACTORY ==
+    # sqlSessionFactory:org.apache.ibatis.session.SqlSessionFactory
+    # transactionFactory:org.apache.ibatis.transaction.TransactionFactory
+    # customMybatisMappers:Set<Class<?>
+    # customMybatisXMLMappers:Set<Class<?>>
+    == ID GENERATOR ==
+    # idGenerator:IdGenerator
+    # idGeneratorDataSource:DataSource
+    # idGeneratorDataSourceJndiName:String
+    == BPMN PARSER ==
+    # preBpmnParseHandlers:List<org.activiti.engine.parse.BpmnParseHandler>
+    # postBpmnParseHandlers:List<org.activiti.engine.parse.BpmnParseHandler>
+    # customDefaultBpmnParseHandlers:List<org.activiti.engine.parse.BpmnParseHandler>
+    # activityBehaviorFactory:org.activiti.engine.impl.bpmn.parser.factory.ActivityBehaviorFactory
+    # listenerFactory:org.activiti.engine.impl.bpmn.parser.factory.ListenerFactory
+    # bpmnParseFactory:org.activiti.engine.impl.cfg.BpmnParseFactory
+    == PROCESS VALIDATION ==
+    # processValidator:org.activiti.validation.ProcessValidator
+    == OTHER ==
+    # customFormEngines:List<org.activiti.engine.impl.form.FormEngine>
+    # formEngines:Map<String, org.activiti.engine.impl.form.FormEngine>
+
+    # customFormTypes:List<org.activiti.engine.form.AbstractFormType>
+    # formTypes:org.activiti.engine.impl.form.FormTypes
+
+    # customPreVariableTypes:List<org.activiti.engine.impl.variable.VariableType>
+    # customPostVariableTypes:List<org.activiti.engine.impl.variable.VariableType>
+    # variableTypes:org.activiti.engine.impl.variable.VariableTypes
+
+    # expressionManager:org.activiti.engine.impl.el.ExpressionManager
+    # customScriptingEngineClasses:List<String>
+    # scriptingEngines:org.activiti.engine.impl.scripting.ScriptingEngines
+    # resolverFactories:List<org.activiti.engine.impl.scripting.ResolverFactory>
+
+    # businessCalendarManager:org.activiti.engine.impl.calendar.BusinessCalendarManager
+
+    # executionQueryLimit:int
+    # taskQueryLimit:int
+    # historicTaskQueryLimit:int
+    # historicProcessInstancesQueryLimit:int
+
+    # wsSyncFactoryClassName:String
+    # wsOverridenEndpointAddresses:String
+
+    # commandContextFactory:org.activiti.engine.impl.interceptor.CommandContextFactory
+    # transactionContextFactory:TransactionContextFactory
+
+    # beans:Map<Object,Object>
+
+    # delegateInterceptor:org.activiti.engine.impl.interceptor.DelegateInterceptor
+
+    # customRejectedJobsHandler:org.activiti.engine.impl.jobexecutor.RejectedJobsHandler
+
+    # eventHandlers:Map<String,org.activiti.engine.impl.event.EventHandler<
+    # customEventHandlers:List<org.activiti.engine.impl.event.EventHandler>
+
+    # failedJobCommandFactory:org.activiti.engine.impl.jobexecutor.FailedJobCommandFactory
+
+    # enableSafeBpmnXml:boolean
+
+    # batchSizeProcessInstances:int
+    # batchSizeTasks:int
+
+    # isBulkInsertEnabled:boolean
+
+    # maxNrOfStatementsInBulkInsert:int
+    # enableEventDispatcher:boolean
+    # eventDispatcher:org.activiti.engine.delegate.event.ActivitiEventDispatcher
+    # eventListeners:List<org.activiti.engine.delegate.event.ActivitiEventListener>
+    # typedEventListeners:Map<String, List<org.activiti.engine.delegate.event.ActivitiEventListener>>
+    == Event logging to database ==
+    # enableDatabaseEventLogging
+
+    # delegateExpressionFieldInjectionMode:org.activiti.engine.impl.cfg.DelegateExpressionFieldInjectionMode
+
+    # maxLengthStringVariableType:int
+
+    # objectMapper:com.fasterxml.jackson.databind.ObjectMapper
+
+    # {abstract} createTransactionInterceptor():org.activiti.engine.impl.interceptor.CommandInterceptor
+}
+interface ServiceInvoker {
+    + invoke(String serviceType,Map<String,Object> params,ExecutionEntity execution,TaskEntity taskEntity):void
+}
+class SpringBeanFactoryProxyMap implements Map<Object,Object> {
+    # beanFactory:org.springframework.beans.factory.BeanFactory
+    + SpringBeanFactoryProxyMap(org.springframework.beans.factory.BeanFactory)
+    + get(Object):Object
+    + containsKey(Object):boolean
+    + keySet():Set<Object>
+    + clear():void
+    + containsValue(Object):boolean
+    + entrySet():Set<Map.Entry<Object,Object>>
+    + isEmpty():boolean
+    + put(Object,Object)
+    + putAll(Map<? extends Object,? extends Object>):void
+    + remove(Object):Object
+    + size():int
+    + values():Collection<Object>
+}
+
+class StandaloneInMemProcessEngineConfiguration extends StandaloneProcessEngineConfiguration {
+    + StandaloneInMemProcessEngineConfiguration()
+}
+class StandaloneProcessEngineConfiguration extends ProcessEngineConfigurationImpl {
+    # createTransactionInterceptor():org.activiti.engine.impl.interceptor.CommandInterceptor
+}
+interface TransactionContext {
+    + commit()
+    + rollback()
+    + addTransactionListener(TransactionState state,TransactionListener listener)
+}
+interface TransactionContextFactory {
+    + openTransactionContext(CommandContext context):TransactionContext
+}
+interface TransactionListener {
+    + execute(CommandContext context):void
+}
+enum TransactionPropagation {
+    REQUIRED
+    REQUIRED_NEW
+    NOT_SUPPORTED
+}
+enum TransactionState {
+    COMMITTED
+    ROLLED_BACK
+    COMMITTING
+    ROLLINGBACK
+}
+}
+/' package finished '/
+
+
+@enduml

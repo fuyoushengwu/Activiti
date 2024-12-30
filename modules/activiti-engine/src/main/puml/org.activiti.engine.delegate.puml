@@ -1,0 +1,163 @@
+@startuml
+/' !include org.activiti.engine.impl.persistence.entity.puml '/
+hide @unlinked
+package "org.activiti.engine.delegate" {
+interface BusinessRuleTaskDelegate extends org.activiti.engine.impl.pvm.delegate.ActivityBehavior {
+    + addRuleVariableInputIdExpression(Expression inputId):void
+    + addRuleIdExpression(Expression inputId):void
+    + setExclude(boolean exclude):void
+    + setResultVariable(String resultVariableName):void
+}
+Expression <.. BusinessRuleTaskDelegate
+
+interface DelegateExecution extends VariableScope {
+    + getId(): String
+    + getProcessInstanceId(): String
+    + getEventName(): String
+    + getBusinessKey(): String
+    + getProcessBusinessKey(): String
+    + getProcessDefinitionId(): String
+    + getParentId(): String
+    + getSuperExecutionId(): String
+    + getCurrentActivityId(): String
+    + getCurrentActivityName(): String
+    + getTenantId(): String
+    + getEngineServices(): org.activiti.engine.EngineServices
+}
+org.activiti.engine.EngineServices <.. DelegateExecution
+
+class DelegateHelper {
+    + {static} getBpmnModel(DelegateExecution):org.activiti.bpmn.model.BpmnModel
+    + {static} getFlowElement(DelegateExecution):org.activiti.bpmn.model.FlowElement
+    + {static} getExtensionElements(DelegateExecution):Map<String,List<org.activiti.bpmn.model.ExtensionElement>>
+    + {static} getFields(DelegateExecution):List<org.activiti.bpmn.model.FieldExtension>
+    + {static} getField(DelegateExecution execution,String fieldName):org.activiti.bpmn.model.FieldExtension
+    + {static} createExpressionForField(org.activiti.bpmn.model.FieldExtension):Expression
+    + {static} getFieldExpression(DelegateExecution execution,String fieldName):Expression
+}
+
+interface DelegateTask extends VariableScope {
+    + getId():String
+    + getName():String
+    + setName(String)
+    + getDescription():String
+    + setDescription(String description)
+    + getPriority():int
+    + setPriority(int)
+    + getProcessInstanceId():String
+    + getExecutionId():String
+    + getProcessDefinitionId():String
+    + getCreateTime():Date
+    + getTaskDefinitionKey():String
+    + isSuspended():boolean
+    + getTenantId():String
+    + getFormKey():String
+    + setFormKey(String formKey)
+    + getExecution():DelegateExecution
+    + getEventName():String
+    + getDelegationState():DelegationState
+    + addCandidateUser(String userId)
+    + addCandidateUsers(Collection<String> candidateUsers)
+    + addCandidateGroup(String groupId)
+    + addCandidateGroups(Collection<String> candidateGroups)
+    + getOwner():String
+    + setOwner(String)
+    + getAssignee()
+    + setAssignee*(String)
+    + getDueDate():Date
+    + setDueDate(Date)
+    + getCategory():String
+    + setCategory(String)
+    + addUserIdentityLink(String userId,String identityLinkType)
+    + addGroupIdentityLink(String groupId,String identityLinkType)
+    + deleteCandidateUser(String userId)
+    + deleteCandidateGroup(String groupId)
+    + deleteUserIdentityLink(String userId,String identityLinkType)
+    + deleteGroupIdentityLink(String groupId,String identityLinkType)
+    + getCandidates():Set<IdentityLink)
+}
+interface ExecutionListener {
+    ~ EVENTNAME_STAR:String
+    ~ EVENTNAME_END:String
+    ~ EVENTNAME_TAKE:String
+
+    + notify(DelegateExecution execute)
+}
+ExecutionListener ..> DelegateExecution
+
+interface Expression {
+    + getValue(VariableScope scope):Object
+    + setValue(Object value,VariableScope scope)
+    + getExpressionText():String
+}
+Expression ..> VariableScope
+
+interface JavaDelegate {
+    + execute(DelegateExecution execute)
+}
+JavaDelegate ..> DelegateExecution
+
+interface TaskListener {
+    ~ EVENTNAME_CREATE:String
+    ~ EVENTNAME_ASSIGNMENT:String
+    ~ EVENTNAME_COMPLETE:String
+    ~ EVENTNAME_DELETE:String
+    ~ EVENTNAME_ALL_EVENTS:String
+
+    + notify(DelegateTask task)
+}
+TaskListener ..> DelegateTask
+
+interface VariableScope {
+    + getVariables():Map<String,Object>
+    + getVariableInstances():Map<String,VariableInstance>
+    + getVariables(Collection<String>):Map<String,Object>
+    + getVariableInstances(Collection<String>):Map<String,VariableInstance>
+    + getVariables((Collection<String>,boolean):Map<String,Object>
+    + getVariableInstances(Collection<String>,boolean):Map<String,VariableInstance>
+
+    + getVariablesLocal():Map<String,Object>
+    + getVariableInstancesLocal():Map<String,VariableInstance>
+    + getVariablesLocal(Collection<String>):Map<String,Object>
+    + getVariableInstancesLocal(Collection<String>):Map<(String,VariableInstance>
+    + getVariablesLocal(Collection<String>,boolean):Map<String,Object>
+    + getVariableInstancesLocal(Collection<String>,boolean):Map<String,VariableInstance>
+
+    + getVariable(String):Object
+    + getVariableInstance(String):VariableInstance
+    + getVariable(String,boolean):Object
+    + getVariableInstance(String,boolean):VariableInstance
+    + getVariableLocal(String):Object
+    + getVariableInstanceLocal(String):VariableInstance
+    + getVariableLocal(String,boolean):Object
+    + getVariableInstanceLocal(String,boolean):VariableInstance
+
+    + getVariable(String,Class<T> variableClass):T
+    + getVariableLocal(String,Class<T> variableClass):T
+    + getVariableNames():Set<String>
+    + getVariableNamesLocal():Set<String>
+
+    + setVariable(String,Object)
+    + setVariable(String,Object,boolean)
+    + setVariableLocal(String,Object)
+    + setVariableLocal(String,Object,boolean)
+    + setVariables(Map<String,? extends Object>)
+    + setVariablesLocal(Map<String,? extends Object>)
+
+    + hasVariables():boolean
+    + hasVariablesLocal():boolean
+    + hasVariable(String):boolean
+    + hasVariableLocal(String):boolean
+    + createVariableLocal(String,Object)
+    + removeVariable(String)
+    + removeVariableLocal(String)
+    + removeVariables(Collection<String>)
+    + removeVariablesLocal(Collection<String>)
+    + removeVariables()
+    + removeVariablesLocal()
+}
+VariableScope o-->VariableInstance:use
+
+}
+
+@enduml

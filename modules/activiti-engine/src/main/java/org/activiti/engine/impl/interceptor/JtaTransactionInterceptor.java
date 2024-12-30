@@ -71,7 +71,8 @@ public class JtaTransactionInterceptor extends AbstractCommandInterceptor {
         throw err;
       } catch (Exception ex) {
         doRollback(isNew, ex);
-        throw new UndeclaredThrowableException(ex, "TransactionCallback threw undeclared checked exception");
+        throw new UndeclaredThrowableException(
+            ex, "TransactionCallback threw undeclared checked exception");
       }
       if (isNew) {
         doCommit();
@@ -158,7 +159,8 @@ public class JtaTransactionInterceptor extends AbstractCommandInterceptor {
       throw e;
     } finally {
       if (rollbackEx != null && originalException != null) {
-        LOGGER.error("Error when rolling back transaction, orginal exception was:", originalException);
+        LOGGER.error(
+            "Error when rolling back transaction, orginal exception was:", originalException);
       }
     }
   }
@@ -167,8 +169,7 @@ public class JtaTransactionInterceptor extends AbstractCommandInterceptor {
 
     private static final long serialVersionUID = 1L;
 
-    private TransactionException() {
-    }
+    private TransactionException() {}
 
     private TransactionException(String s) {
       super(s);

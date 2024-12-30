@@ -40,7 +40,7 @@ public class ActivityInstanceEndHandler implements ExecutionListener {
         if (transition != null) {
             ActivityBehavior activityBehavior = transition.getSource().getActivityBehavior();
         
-            return (!(execution.getActivity().getId().equals(execution.getTransition().getSource().getId())) &&
+            return (!(execution.getActivity().getId().equals(transition.getSource().getId())) &&
                     activityBehavior instanceof BoundaryEventActivityBehavior &&
                     !(((BoundaryEventActivityBehavior) activityBehavior).isInterrupting()));
         }

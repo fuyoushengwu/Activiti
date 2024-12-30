@@ -1,0 +1,115 @@
+@startuml
+hide @unlinked
+package "org.activiti.engine.impl.history" {
+
+class DefaultHistoryManager extends org.activiti.engine.impl.persistence.AbstractManager implements HistoryManager {
+      - historyLevel:HistoryLevel
+      + DefaultHistoryManager()
+      + isHistoryLevelAtLeast(HistoryLevel level): boolean
+      + isHistoryEnabled(): boolean
+      + recordProcessInstanceEnd(String processInstanceId, String deleteReason, String activityId)
+      + recordProcessInstanceStart(ExecutionEntity processInstance)
+      + recordProcessInstanceNameChange(String processInstanceId, String newName)
+      + recordSubProcessInstanceStart(ExecutionEntity parentExecution, ExecutionEntity subProcessInstance)
+      + recordActivityStart(ExecutionEntity executionEntity)
+      + recordActivityEnd(ExecutionEntity executionEntity)
+      + recordStartEventEnded(ExecutionEntity execution, String activityId)
+      + findActivityInstance(ExecutionEntity execution): HistoricActivityInstanceEntity
+      + recordExecutionReplacedBy(ExecutionEntity execution, InterpretableExecution replacedBy)
+      + recordProcessDefinitionChange(String processInstanceId, String processDefinitionId)
+      + recordTaskCreated(TaskEntity task, ExecutionEntity execution)
+      + recordTaskAssignment(TaskEntity task)
+      + recordTaskClaim(String taskId)
+      + recordTaskId(TaskEntity task)
+      + recordTaskEnd(String taskId, String deleteReason)
+      + recordTaskAssigneeChange(String taskId, String assignee)
+      + recordTaskOwnerChange(String taskId, String owner)
+      + recordTaskNameChange(String taskId, String taskName)
+      + recordTaskDescriptionChange(String taskId, String description)
+      + recordTaskDueDateChange(String taskId, Date dueDate)
+      + recordTaskPriorityChange(String taskId, int priority)
+      + recordTaskCategoryChange(String taskId, String category)
+      + recordTaskFormKeyChange(String taskId, String formKey)
+      + recordTaskParentTaskIdChange(String taskId, String parentTaskId)
+      + recordTaskExecutionIdChange(String taskId, String executionId)
+      + recordTaskDefinitionKeyChange(TaskEntity task, String taskDefinitionKey)
+      + recordTaskProcessDefinitionChange(String taskId, String processDefinitionId)
+      + recordVariableCreate(VariableInstanceEntity variable)
+      + recordHistoricDetailVariableCreate(VariableInstanceEntity variable, ExecutionEntity sourceActivityExecution, boolean useActivityId)
+      + recordVariableUpdate(VariableInstanceEntity variable)
+      + recordVariableRemoved(VariableInstanceEntity variable)
+      + createIdentityLinkComment(String taskId, String userId, String groupId, String type, boolean create)
+      + createIdentityLinkComment(String taskId, String userId, String groupId, String type, boolean create, boolean forceNullUserId)
+      + createProcessInstanceIdentityLinkComment(String processInstanceId, String userId, String groupId, String type, boolean create)
+      + createProcessInstanceIdentityLinkComment(String processInstanceId, String userId, String groupId, String type, boolean create, boolean forceNullUserId)
+      + createAttachmentComment(String taskId, String processInstanceId, String attachmentName, boolean create)
+      + reportFormPropertiesSubmitted(ExecutionEntity processInstance, Map<String, String> properties, String taskId)
+      + recordIdentityLinkCreated(IdentityLinkEntity identityLink)
+      + deleteHistoricIdentityLink(String id)
+      + updateProcessBusinessKeyInHistory(ExecutionEntity processInstance)
+}
+
+enum HistoryLevel {
+    NONE("none"),
+    ACTIVITY("activity"),
+    AUDIT("audit"),
+    FULL("full");
+
+    - key:String
+    - HistoryLevel(String key)
+    + getKey():String
+    + isAtLeast(HistoryLevel level):boolean
+
+    + {static} getHistoryLevelForKey(String key):HistoryLevel
+}
+
+interface HistoryManager extends org.activiti.engine.impl.interceptor.Session {
+      + isHistoryLevelAtLeast(HistoryLevel level): boolean
+      + isHistoryEnabled(): boolean
+      + recordProcessInstanceEnd(String processInstanceId, String deleteReason, String activityId)
+      + recordProcessInstanceStart(ExecutionEntity processInstance)
+      + recordProcessInstanceNameChange(String processInstanceId, String newName)
+      + recordSubProcessInstanceStart(ExecutionEntity parentExecution, ExecutionEntity subProcessInstance)
+      + recordActivityStart(ExecutionEntity executionEntity)
+      + recordActivityEnd(ExecutionEntity executionEntity)
+      + recordStartEventEnded(ExecutionEntity execution, String activityId)
+      + findActivityInstance(ExecutionEntity execution): HistoricActivityInstanceEntity
+      + recordExecutionReplacedBy(ExecutionEntity execution, InterpretableExecution replacedBy)
+      + recordProcessDefinitionChange(String processInstanceId, String processDefinitionId)
+      + recordTaskCreated(TaskEntity task, ExecutionEntity execution)
+      + recordTaskAssignment(TaskEntity task)
+      + recordTaskClaim(String taskId)
+      + recordTaskId(TaskEntity task)
+      + recordTaskEnd(String taskId, String deleteReason)
+      + recordTaskAssigneeChange(String taskId, String assignee)
+      + recordTaskOwnerChange(String taskId, String owner)
+      + recordTaskNameChange(String taskId, String taskName)
+      + recordTaskDescriptionChange(String taskId, String description)
+      + recordTaskDueDateChange(String taskId, Date dueDate)
+      + recordTaskPriorityChange(String taskId, int priority)
+      + recordTaskCategoryChange(String taskId, String category)
+      + recordTaskFormKeyChange(String taskId, String formKey)
+      + recordTaskParentTaskIdChange(String taskId, String parentTaskId)
+      + recordTaskExecutionIdChange(String taskId, String executionId)
+      + recordTaskDefinitionKeyChange(TaskEntity task, String taskDefinitionKey)
+      + recordTaskProcessDefinitionChange(String taskId, String processDefinitionId)
+      + recordVariableCreate(VariableInstanceEntity variable)
+      + recordHistoricDetailVariableCreate(VariableInstanceEntity variable, ExecutionEntity sourceActivityExecution, boolean useActivityId)
+      + recordVariableUpdate(VariableInstanceEntity variable)
+      + recordVariableRemoved(VariableInstanceEntity variable)
+      + createIdentityLinkComment(String taskId, String userId, String groupId, String type, boolean create)
+      + createIdentityLinkComment(String taskId, String userId, String groupId, String type, boolean create, boolean forceNullUserId)
+      + createProcessInstanceIdentityLinkComment(String processInstanceId, String userId, String groupId, String type, boolean create)
+      + createProcessInstanceIdentityLinkComment(String processInstanceId, String userId, String groupId, String type, boolean create, boolean forceNullUserId)
+      + createAttachmentComment(String taskId, String processInstanceId, String attachmentName, boolean create)
+      + reportFormPropertiesSubmitted(ExecutionEntity processInstance, Map<String, String> properties, String taskId)
+      + recordIdentityLinkCreated(IdentityLinkEntity identityLink)
+      + deleteHistoricIdentityLink(String id)
+      + updateProcessBusinessKeyInHistory(ExecutionEntity processInstance)
+    }
+HistoryManager ..> HistoryLevel
+}
+
+/' package finished  '/
+
+@enduml

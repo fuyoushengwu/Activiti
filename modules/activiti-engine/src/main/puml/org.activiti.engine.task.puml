@@ -1,0 +1,236 @@
+@startuml
+!include org.activiti.engine.history.puml
+!include org.activiti.engine.query.puml
+hide @unlinked
+package "org.activiti.engine.task" {
+
+interface Attachment {
+    + getId():String
+    + getName():String
+    + setName(String name):void
+    + getDescription():String
+    + setDescription(String description):void
+    + getType():String
+    + getTaskId():String
+    + getProcessInstanceId():String
+    + getUrl():String
+    + getUserId():String
+    + getTime():Date
+    + setTime(Date time):void
+}
+
+interface Comment extends org.activiti.engine.history.HistoricData {
+    + getId():String
+    + getUserId():String
+    + getTime():Date
+    + getTaskId():String
+    + getProcessInstanceId():String
+    + getType():String
+    + getFullMessage():String
+}
+
+enum DelegationState {
+    PENDING,
+    RESOLVED
+}
+
+interface Event {
+    ~ ACTION_ADD_USER_LINK:String
+    ~ ACTION_DELETE_USER_LINK:String
+    ~ ACTION_ADD_GROUP_LINK:String
+    ~ ACTION_DELETE_GROUP_LINK:String
+    ~ ACTION_ADD_COMMENT:String
+    ~ ACTION_ADD_ATTACHMENT:String
+    ~ ACTION_DELETE_ATTACHMENT:String
+
+    + getId():String
+    + getAction():String
+    + getMessageParts():List<String>
+    + getMessage():String
+    + getUserId():String
+    + getTime():Date
+    + getTaskId():String
+    + getProcessInstanceId():String
+}
+
+interface IdentityLink {
+    + getType():String
+    + getUserId():String
+    + getGroupId():String
+    + getTaskId():String
+    + getProcessDefinitionId():String
+    + getProcessInstanceId():String
+}
+
+class IdentityLinkType {
+    + {static} ASSIGNEE:String
+    + {static} CANDIDATE:String
+    + {static} OWNER:String
+    + {static} STARTER:String
+    + {static} PARTICIPANT:String
+}
+
+interface NativeTaskQuery extends org.activiti.engine.query.NativeQuery<NativeTaskQuery,Task> {
+}
+
+interface Task extends TaskInfo {
+    ~ DEFAULT_PRIORITY:int
+    + setName(String name):void
+    + setLocalizedName(String name):void
+    + setDescription(String description):void
+    + setLocalizedDescription(String description):void
+    + setPriority(int priority):void
+    + setOwner(String owner):void
+    + setAssignee(String assignee):void
+    + getDelegationState():DelegationState
+    + setDelegationState(DelegationState delegationState):void
+    + setDueDate(Date dueDate):void
+    + setCategory(String category):void
+    + delegate(String userId)
+    + setParentTaskId(String parentTaskId)
+    + setTenantId(String)
+    + setFormKey(String formKey)
+    + isSuspended():boolean
+}
+
+interface TaskInfo {
+    + getId():String
+    + getName():String
+    + getDescription():String
+    + getPriority():String
+    + getOwner():String
+    + getAssignee():String
+    + getProcessInstanceId():String
+    + getExecutionId():String
+    + getProcessDefinitionId():String
+    + getCreateTime():Date
+    + getTaskDefinitionKey():String
+    + getDueDate():Date
+    + getCategory():String
+    + getParentTaskId():String
+    + getTenantId():String
+    + getFormKey():String
+    + getTaskLocalVariables():Map<String,Object>
+    + getProcessVariables():Map<String,Object>
+}
+interface TaskInfoQuery<T extends TaskInfoQuery<?,?>,V extends TaskInfo> extends org.activiti.engine.query.Query<T,V> {
+        + T taskId(String taskId)
+        + T taskName(String name)
+        + T taskNameIn(List<String> nameList)
+        + T taskNameInIgnoreCase(List<String> nameList)
+        + T taskNameLike(String nameLike)
+        + T taskNameLikeIgnoreCase(String nameLike)
+        + T taskDescription(String description)
+        + T taskDescriptionLike(String descriptionLike)
+        + T taskDescriptionLikeIgnoreCase(String descriptionLike)
+        + T taskPriority(Integer priority)
+        + T taskMinPriority(Integer minPriority)
+        + T taskMaxPriority(Integer maxPriority)
+        + T taskAssignee(String assignee)
+        + T taskAssigneeLike(String assigneeLike)
+        + T taskAssigneeLikeIgnoreCase(String assigneeLikeIgnoreCase)
+        + T taskOwnerLike(String ownerLike)
+        + T taskOwnerLikeIgnoreCase(String ownerLikeIgnoreCase)
+        + T taskCandidateUser(String candidateUser)
+        + T taskInvolvedUser(String involvedUser)
+        + T taskInvolvedGroupsIn(List<String> involvedGroups)
+        + T taskCandidateGroup(String candidateGroup)
+        + T taskCandidateGroupIn(List<String> candidateGroups)
+        + T taskTenantId(String tenantId)
+        + T taskTenantIdLike(String tenantIdLike)
+        + T taskWithoutTenantId()
+        + T processInstanceId(String processInstanceId)
+        + T processInstanceIdIn(List<String> processInstanceIds)
+        + T processInstanceBusinessKey(String processInstanceBusinessKey)
+        + T processInstanceBusinessKeyLike(String processInstanceBusinessKeyLike)
+        + T processInstanceBusinessKeyLikeIgnoreCase(String processInstanceBusinessKeyLikeIgnoreCase)
+        + T executionId(String executionId)
+        + T taskCreatedOn(Date createTime)
+        + T taskCreatedBefore(Date before)
+        + T taskCreatedAfter(Date after)
+        + T taskCategory(String category)
+        + T taskDefinitionKey(String key)
+        + T taskDefinitionKeyLike(String keyLike)
+        + T taskDueDate(Date dueDate)
+        + T taskDueBefore(Date dueDate)
+        + T taskDueAfter(Date dueDate)
+        + T withoutTaskDueDate()
+        + T processDefinitionKey(String processDefinitionKey)
+        + T processDefinitionKeyLike(String processDefinitionKeyLike)
+        + T processDefinitionKeyLikeIgnoreCase(String processDefinitionKeyLikeIgnoreCase)
+        + T processDefinitionKeyIn(List<String> processDefinitionKeys)
+        + T processDefinitionId(String processDefinitionId)
+        + T processDefinitionName(String processDefinitionName)
+        + T processDefinitionNameLike(String processDefinitionNameLike)
+        + T processCategoryIn(List<String> processCategoryInList)
+        + T processCategoryNotIn(List<String> processCategoryNotInList)
+        + T deploymentId(String deploymentId)
+        + T deploymentIdIn(List<String> deploymentIds)
+        + T taskVariableValueEquals(String variableName, Object variableValue)
+        + T taskVariableValueEquals(Object variableValue)
+        + T taskVariableValueEqualsIgnoreCase(String name, String value)
+        + T taskVariableValueNotEquals(String variableName, Object variableValue)
+        + T taskVariableValueNotEqualsIgnoreCase(String name, String value)
+        + T taskVariableValueGreaterThan(String name, Object value)
+        + T taskVariableValueGreaterThanOrEqual(String name, Object value)
+        + T taskVariableValueLessThan(String name, Object value)
+        + T taskVariableValueLessThanOrEqual(String name, Object value)
+        + T taskVariableValueLike(String name, String value)
+        + T taskVariableValueLikeIgnoreCase(String name, String value)
+        + T processVariableValueEquals(String variableName, Object variableValue)
+        + T processVariableValueEquals(Object variableValue)
+        + T processVariableValueEqualsIgnoreCase(String name, String value)
+        + T processVariableValueNotEquals(String variableName, Object variableValue)
+        + T processVariableValueNotEqualsIgnoreCase(String name, String value)
+        + T processVariableValueGreaterThan(String name, Object value)
+        + T processVariableValueGreaterThanOrEqual(String name, Object value)
+        + T processVariableValueLessThan(String name, Object value)
+        + T processVariableValueLessThanOrEqual(String name, Object value)
+        + T processVariableValueLike(String name, String value)
+        + T processVariableValueLikeIgnoreCase(String name, String value)
+        + T includeTaskLocalVariables()
+        + T includeProcessVariables()
+        + T limitTaskVariables(Integer taskVariablesLimit)
+        + T locale(String locale)
+        + T withLocalizationFallback()
+        + T or()
+        + T endOr()
+        + T orderByTaskId()
+        + T orderByTaskName()
+        + T orderByTaskDescription()
+        + T orderByTaskPriority()
+        + T orderByTaskAssignee()
+        + T orderByTaskCreateTime()
+        + T orderByProcessInstanceId()
+        + T orderByExecutionId()
+        + T orderByProcessDefinitionId()
+        + T orderByTaskDueDate()
+        + T orderByTaskOwner()
+        + T orderByTaskDefinitionKey()
+        + T orderByTenantId()
+        + T orderByDueDateNullsFirst()
+        + T orderByDueDateNullsLast()
+}
+
+class TaskInfoQueryWrapper {
+    # taskInfoQuery:TaskInfoQuery<? extends TaskInfoQuery<?,?>,? extends TaskInfo>
+    + TaskInfoQueryWrapper(TaskInfoQuery<? extends TaskInfoQuery<?,?>,? extends TaskInfo>)
+    + getTaskInfoQuery():TaskInfoQuery<? extends TaskInfoQuery<?,?>,? extends TaskInfo>
+    + setTaskInfoQuery(TaskInfoQuery<? extends TaskInfoQuery<?,?>,? extends TaskInfo>)
+}
+TaskInfoQueryWrapper ..> TaskInfoQuery
+
+interface TaskQuery extends TaskInfoQuery<TaskQuery,Task> {
+    + taskUnassigned():TaskQuery
+    + taskDelegationState(DelegationState):TaskQuery
+    + taskCandidateOrAssigned(String userIdForCandidateAndAssignee):TaskQuery
+    + excludeSubtasks():TaskQuery
+    + suspend():TaskQuery
+    + active():TaskQuery
+    + orderByDueDate():TaskQuery
+}
+
+}
+
+/' package finished'/
+@enduml

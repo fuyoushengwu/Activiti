@@ -1,0 +1,467 @@
+@startuml
+class ExtensionAttribute {
+    # name:String
+    # value:String
+    # namespace:String
+    # namespacePrefix:String
+}
+
+interface HasExtensionAttributes {
+    + getAttributes():Map<String, List<ExtensionAttribute>>
+    + void setAttributes(Map<String, List<ExtensionAttribute>>)
+    + getAttributeValue(String, String):String
+    + addAttribute(ExtensionAttribute):void
+}
+HasExtensionAttributes ... ExtensionAttribute
+
+
+abstract class BaseElement implements HasExtensionAttributes{
+    # id:String
+    # xmlRowNumber:int
+    # xmlColNumber:int
+    # extensionElements:Map<String, List<ExtensionElement>>
+    # attributes:Map<String, List<ExtensionAttribute>>
+}
+
+class DataAssociation extends BaseElement {
+    # sourceRef:String
+    # targetRef:String
+    # transformation:String
+    # assignments:List<Assignment>
+}
+class DataSpec extends BaseElement {
+    # name:String
+    # itemSubjectRef:String
+    # isCollection:boolean
+}
+
+class Assignment extends BaseElement {
+    # from:String
+    # to:String
+}
+class IOSpecification extends BaseElement {
+    # dataInputs:List<DataSpec>
+    # dataOutputs:List<DataSpec>
+    # dataInputRefs:List<String>
+    # dataOutputRefs:List<String>
+}
+
+class FieldExtension extends BaseElement {
+    # fieldName:String
+    # stringValue:String
+    # expression:String
+}
+
+class ActivitiListener extends BaseElement {
+    # eventType:String
+    # implementationType:String
+    # implementation:String
+    # fieldExtends:List<FieldExtension>
+}
+
+interface HasExecutionListeners {
+    + getExecutionListeners():List<ActivitiListener>
+    + setExecutionListeners(List<ActivitiListener>)
+}
+
+class ExtensionElement extends BaseElement{
+    # name:String
+    # namespacePrefix:String
+    # namespace:String
+    # elementText:String
+    # childElements:Map<String, List<ExtensionElement>>
+}
+
+abstract class EventDefinition extends BaseElement{
+
+}
+
+class TimerEventDefinition extends EventDefinition {
+    # timeDate:String
+    # timeDuration:String
+    # timeCycle:String
+    # endDate:String
+    # calendarName:String
+}
+
+class CancelEventDefinition extends EventDefinition {
+}
+class CompensateEventDefinition extends EventDefinition {
+    # activityRef:String
+    # waitForCompletion:boolean
+}
+class ErrorEventDefinition extends EventDefinition {
+    # errorCode:String
+}
+class MessageEventDefinition extends EventDefinition {
+    # messageRef:String
+}
+class SignalEventDefinition extends EventDefinition {
+    # signalRef:String
+    # async:boolean
+}
+
+class TerminateEventDefinition extends EventDefinition {
+    # terminateAll:boolean
+}
+
+
+class Resource extends BaseElement {
+    # name:String
+}
+abstract class Artifact extends BaseElement {}
+enum AssociationDirection {
+    + NONE
+    + ONE
+    + BOTH
+}
+
+class Association extends Artifact {
+    # associationDirection:AssociationDirection
+    # sourceRef:String
+    # targetRef:String
+}
+
+class TextAnnotation extends Artifact {
+    # text:String
+    # textFormat:String
+}
+
+class Import extends BaseElement {
+    # importType:String
+    # location:String
+    # namespace:String
+}
+
+class DataStore extends BaseElement {
+    # name:String
+    # dataState:String
+    # itemSubjectRef:String
+}
+
+class Pool extends BaseElement {
+    # name:String
+    # processRef:String
+    # executable:boolean
+}
+
+class IOParameter extends BaseElement {
+    # source:String
+    # sourceExpression:String
+    # target:String
+    # targetExpression:String
+}
+
+class ItemDefinition extends BaseElement {
+    # structureRef:String
+    # itemKind:String
+}
+
+class Message extends BaseElement {
+    # name:String
+    # itemRef:String
+}
+
+class MessageFlow extends BaseElement {
+    # name:String
+    # sourceRef:String
+    # targetRef:String
+    # messageRef:String
+}
+
+
+
+class Operation extends BaseElement {
+    # name:String
+    # implementationRef:String
+    # inMessageRef:String
+    # outMessageRef:String
+    # errorMessageRef:List<String>
+}
+
+
+class Interface extends BaseElement {
+    # name:String
+    # implementationRef:String
+    # operations:List<Operation>
+}
+
+
+class DataGridField extends BaseElement {
+    # name:String
+    # value:String
+}
+
+class DataGridRow {
+    # index:int
+    # fields:List<DataGridField>
+}
+
+interface ComplexDataType {
+}
+class DataGrid implements ComplexDataType {
+    # rows:List<DataGridRow>
+}
+class CustomProperty extends BaseElement {
+    # name:String
+    # simpleValue:String
+    # complexValue:ComplexDataType
+}
+
+class FormValue extends BaseElement {
+    # name:String
+}
+class FormProperty extends BaseElement {
+    #  name:String
+    # expression:String
+    # variable:String
+    # type:String
+    # defaultExpression:String
+    # datePattern:String
+    # readable:boolean
+    # writeable:boolean
+    # required:boolean
+    # formValues:List<FormValue>
+}
+
+class MultiInstanceLoopCharacteristics extends BaseElement {
+    # inputDataItem:String
+    # loopCardinality:String
+    # completionCondition:String
+    # elementVariable:String
+    # sequential:String
+}
+
+abstract class FlowElement extends BaseElement implements HasExecutionListeners {
+    # name:String
+    # documentation:String
+    # executionListeners:List<ActivitiListener>
+}
+
+class SequenceFlow extends FlowElement {
+    conditionExpression:String
+    sourceRef:String
+    targetRef:String
+    skipExpression:String
+}
+
+abstract class FlowNode extends FlowElement {
+    # asynchronous:boolean
+    # notExclusive:boolean
+    # incomingFlows:List<SequenceFlow>
+    # outgoingFlows:List<SequenceFlow>
+}
+
+abstract class DataObject extends FlowElement {
+    # itemSubjectRef:ItemDefinition
+}
+
+abstract class ValuedDataObject extends DataObject {
+    # value:Object
+}
+
+class BooleanDataObject extends ValuedDataObject {
+}
+class StringDataObject extends ValuedDataObject {
+}
+class LongDataObject extends ValuedDataObject {
+}
+class IntegerDataObject extends ValuedDataObject {
+}
+class DoubleDataObject extends ValuedDataObject {
+}
+class DateDataObject extends ValuedDataObject {
+}
+
+abstract Gateway extends FlowNode {
+    # defaultFlow:String
+}
+class ParallelGateway extends Gateway {}
+class ComplexGateway extends Gateway {}
+class EventGateway extends Gateway {}
+class InclusiveGateway extends Gateway {}
+class ExclusiveGateway extends Gateway {}
+
+abstract class Event extends FlowNode {
+    # eventDefinitions:List<EventDefinition>
+}
+class StartEvent extends Event {
+    # initiator:String
+    # formKey:String
+    # formProperties:List<FormProperty>
+}
+class EndEvent extends Event {
+}
+class BoundaryEvent extends Event {
+    # attachedToRef:Activity
+    # attachedToRefId:String
+    # cancelActivity:boolean
+}
+class IntermediateCatchEvent extends Event {
+}
+class ThrowEvent extends Event {
+}
+
+abstract class Activity extends FlowNode {
+    # defaultFlow:String
+    # forCompensation:String
+    # loopCharacteristics:MultiInstanceLoopCharacteristics
+    # ioSpecification:IOSpecification
+    # dataInputAssociations:List<DataAssociation>
+    # dataOutputAssociations:LIst<DataAssociation>
+    # boundaryEvents:List<BoundaryEvent>
+    # failedJobRetryTimeCycleValue:String
+    # mapExceptions:List<MapExceptionEntry>
+}
+
+
+class CallActivity extends Activity {
+    # calledElement:String
+    # inheritVariables:boolean
+    # inParameters:List<IOParameter>
+    # outParameters:List<IOParameter>
+    # businessKey:String
+    # inheritBusinessKey:String
+}
+
+abstract class Task extends Activity {}
+abstract class TaskWithFieldExtensions extends Task {
+    # fieldExtensions:List<FieldExtension>
+}
+class ScriptTask extends Task {
+    # scriptFormat:String
+    # script:String
+    # resultVariable:String
+    # autoStoreVariables:boolean
+}
+class ReceiveTask extends Task {}
+class ManualTask extends Task {}
+class UserTask extends Task {
+    # assignee:String
+    # owner:String
+    # priority:String
+    # formKey:String
+    # businessCalendarName:String
+    # category:String
+    # extensionId:String
+    # candidateUsers:List<String>
+    # candidateGroups:List<String>
+    # formProperties:List<FormProperty>
+    # taskListeners:List<ActivitiListener>
+    # skipExpression:String
+    # customUserIdentityLinks:Map<String,List<String>>
+    # customGroupIdentityLinks:Map<String,List<String>>
+    # customProperties:List<CustomProperty>
+}
+class SendTask extends TaskWithFieldExtensions {
+    # type:String
+    # implementationType:String
+    # operationRef:String
+}
+
+class ServiceTask extends TaskWithFieldExtensions {
+    # implementationType:String
+    # implementation:String
+    # resultVariableName:String
+    # type:String
+    # operationRef:String
+    # extensionId:String
+    # customProperties:List<CustomProperties>
+    # skipExpression:String
+}
+
+class BusinessRuleTask extends Task {
+    # resultVariableName:String
+    # exclude:boolean
+    # ruleNames:List<String>
+    # inputVariables:List<String>
+    # className:String
+}
+
+class GraphicInfo {
+    # x:double
+    # y:double
+    # height:double
+    # width:double
+    # element:BaseElement
+    # expand:Boolean
+    # xmlRowNumber:int
+    # xmlColumnNumber:int
+}
+interface FlowElementsContainer {
+    == FlowElement ==
+    + getFlowElement(String):FlowElement
+    + getFlowElements():Collection<FlowElement>
+    + addFlowElement(FlowElement):void
+    + removeFlowElement(FlowElement):void
+    == Artifact ==
+    + getArtifact(String):Artifact
+    + getArtifacts():Collection<Artifact>
+    + addArtifact(Artifact):void
+    + removeArtifact(Artifact):void
+}
+class Lane extends BaseElement {
+    # name:String
+    # parentProcess:Process
+    # flowReferences:List<String>
+}
+class EventListener extends BaseElement {
+    # events:String
+    # implementationType:String
+    # implementation:String
+    # entityType:String
+
+}
+class Process extends BaseElement implements FlowElementsContainer,HasExecutionListeners {
+    # name:String
+    # executable:boolean
+    # documentation:String
+    # ioSpecification:IOSpecification
+    # executionListeners:List<ActivitiListener>
+    # lanes:List<Lane>
+    # flowElementList:List<FlowElement>
+    # dataObjects:List<ValuedDataObject>
+    # artifactList:List<Artifact>
+    # candidateStarterUsers:List<String>
+    # candidateStarterGroups:List<String>
+    # eventListeners:List<EventListener>
+}
+
+class SubProcess extends Activity implements FlowElementsContainer {
+    # flowElementList:List<FlowElement>
+    # artifactList:List<Artifact>
+    # dataObjects:List<ValuedDataObject>
+}
+class EventSubProcess extends SubProcess {}
+class Transaction extends SubProcess {}
+
+class Signal extends BaseElement {
+    # name:String
+    # scope:String
+}
+
+class BpmnModel {
+    # definitionsAttributes:Map<String,List<ExtensionAttribute>>
+    # processes:List<Process>
+    # locationMap:Map<String,GraphicInfo>
+    # labelLocationMap:Map<String,GraphicInfo>
+    # flowLocationMap:Map<String,List<GraphicInfo>>
+    # signals:List<Signal>
+    #  messageFlowMap:Map<String,MessageFlow>
+    # messageMap:Map<String,Message>
+    # errorMap:Map<String,String>
+    # itemDefinitionMap:Map<String,ItemDefinition>
+    # dataStoreMap:Map<String,DataStore>
+    # pools:List<Pool>
+    # imports:List<Import>
+    # interfaces:List<Interface>
+    # globalArtifacts:List<Artifact>
+    # resources:List<Resource>
+    # namespaceMap:Map<String,String>
+    # targetNamespace:String
+    # userTaskFormTypes:List<String>
+    # startEventFormTypes:List<String>
+    # nextFlowIdCounter:int
+}
+
+@enduml

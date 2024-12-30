@@ -36,7 +36,7 @@ public class DelegateExpressionUtil {
     // execution can change: eg. delegateExpression='${mySpringBeanFactory.randomSpringBean()}'
     Object delegate = expression.getValue(variableScope);
     
-    if (fieldDeclarations != null && fieldDeclarations.size() > 0) {
+    if (fieldDeclarations != null && !fieldDeclarations.isEmpty()) {
       
       DelegateExpressionFieldInjectionMode injectionMode = Context.getProcessEngineConfiguration().getDelegateExpressionFieldInjectionMode();
       if (injectionMode.equals(DelegateExpressionFieldInjectionMode.COMPATIBILITY)) {

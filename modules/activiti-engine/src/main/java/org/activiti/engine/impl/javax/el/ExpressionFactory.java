@@ -68,6 +68,7 @@ import org.activiti.engine.impl.util.ReflectUtil;
  * </ul>
  */
 public abstract class ExpressionFactory {
+
 	/**
 	 * Creates a new instance of a ExpressionFactory. This method uses the following ordered lookup
 	 * procedure to determine the ExpressionFactory implementation class to load:
@@ -91,6 +92,7 @@ public abstract class ExpressionFactory {
 	public static ExpressionFactory newInstance() {
 		return newInstance(null);
 	}
+
 
 	/**
 	 * Create a new instance of a ExpressionFactory, with optional properties. This method uses the
@@ -141,7 +143,7 @@ public abstract class ExpressionFactory {
 			}
 		}
 
-		if (className == null || className.trim().length() == 0) {
+		if (className == null || className.trim().isEmpty()) {
 			try {
 				String home = System.getProperty("java.home");
 				if (home != null) {
@@ -171,7 +173,7 @@ public abstract class ExpressionFactory {
 			}
 		}
 
-		if (className == null || className.trim().length() == 0) {
+		if (className == null || className.trim().isEmpty()) {
 			try {
 				className = System.getProperty(ExpressionFactory.class.getName());
 			} catch (Exception se) {
@@ -179,7 +181,7 @@ public abstract class ExpressionFactory {
 			}
 		}
 
-		if (className == null || className.trim().length() == 0) {
+		if (className == null || className.trim().isEmpty()) {
 			className = "org.activiti.engine.impl.juel.ExpressionFactoryImpl";
 		}
 

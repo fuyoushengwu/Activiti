@@ -1,0 +1,163 @@
+@startuml
+hide @unlinked
+package "org.activiti.engine.impl.scripting" {
+class BeansResolverFactory implements ResolverFactory,Resolver {
+    + createResolver(org.activiti.engine.delegate.VariableScope variableScope):Resolver
+    + containsKey(Object key):boolean
+    + get(Object key):Object
+}
+
+class JuelScriptEngine extends javax.script.AbstractScriptEngine implements javax.script.Compilable {
+    # scriptEngineFactory:javax.script.ScriptEngineFactory
+    # expressionFactory:org.activiti.engine.impl.javax.el.ExpressionFactory
+
+    == constructor ==
+    + JuelScriptEngine(javax.script.ScriptEngineFactory scriptEngineFactory)
+    + JuelScriptEngine()
+
+    == method ==
+    + compile(String script):javax.script.CompiledScript
+    + compile(java.io.Reader reader):javax.script.CompiledScript
+    + eval(String script,javax.script.ScriptContext scriptContext):Object
+    + eval(java.io.Reader reader,javax.script.ScriptContext scriptContext):Object
+    + getFactory():javax.script.ScriptEngineFactory
+    + createBindings():javax.script.Bindings
+    # evaluateExpression(org.activiti.engine.impl.javax.el.ValueExpression expr,javax.script.ScriptContext ctx):Object
+    # createElResolver():org.activiti.engine.impl.javax.el.ELResolver
+    # parse(String script,javax.script.ScriptContext ctx):org.activiti.engine.impl.javax.el.ValueExpression
+    # createElContext(javax.script.ScriptContext ctx):org.activiti.engine.impl.javax.el.ELContext
+}
+JuelScriptEngine *--> javax.script.ScriptEngineFactory
+JuelScriptEngine *--> org.activiti.engine.impl.javax.el.ExpressionFactory
+JuelScriptEngine ..> javax.script.SimpleBindings
+
+class JuelScriptEngine$JuelCompiledScript extends javax.script.CompiledScript {
+    - valueExpression:org.activiti.engine.impl.javax.el.ValueExpression
+    + JuelCompiledScript(ValueExpression valueExpression)
+    + getEngine():javax.script.ScriptEngine
+    + eval(javax.script.ScriptContext ctx):Object
+}
+class JuelScriptEngine$ScriptContextVariableMapper extends org.activiti.engine.impl.javax.el.VariableMapper {
+    # scriptContext:javax.script.ScriptContext
+    + JuelScriptEngine$ScriptContextVariableMapper(ScriptContext ctx)
+    + resolveVariable(String variableName):org.activiti.engine.impl.javax.el.ValueExpression
+    + setVariable(String name,ValueExpression value):org.activiti.engine.impl.javax.el.ValueExpression
+}
+class JuelScriptEngine$ScriptContextFunctionMapper extends org.activiti.engine.impl.javax.el.FunctionMapper {
+    - scriptContext:javax.script.ScriptContext
+    + JuelScriptEngine$ScriptContextFunctionMapper(ScriptContext ctx)
+    + getFullFunctionName(String prefix,String localName):String
+    + resolveFunction(String prefix,String localName):java.lang.reflect.Method
+}
+
+class JuelScriptEngineFactory implements javax.script.ScriptEngineFactory {
+    - {static} names:List<String>
+    - {static} extensions:List<String>
+    - {static} mimeTypes:List<String>
+    + getEngineName():String
+    + getEngineVersion():String
+    + getExtensions():List<String>
+    + getLanguageName():String
+    + getLanguageVersion():String
+    + getMethodCallSyntax(String obj,String method,String... arguments):String
+    + getMimeTypes():List<String>
+    + getNames():List<String>
+    + getOutputStatement(String toDisplay):String
+    + getParameter(String key):String
+    + getProgram(String... statements):String
+    + getScriptEngine():javax.script.ScriptEngine
+}
+JuelScriptEngineFactory ..> JuelScriptEngine
+
+interface Resolver {
+    + containsKey(Object key):boolean
+    + get(Object key):Object
+}
+
+interface ResolverFactory {
+    + createResolver(org.activiti.engine.delegate.VariableScope variableScope):Resolver
+}
+ResolverFactory ..> Resolver
+
+class ScriptBindings implements javax.script.Bindings {
+    # {static} UNSTORED_KEYS:Set<String>
+    # scriptResolvers:List<Resolver>
+    # variableScope:VariableScope
+    # defaultBindings:javax.script.Bindings
+    # storeScriptVariables:boolean
+    + ScriptBindings(List<Resolver> scriptResolvers,VariableScope variableScope)
+    + ScriptBindings(List<Resolver> scriptResolvers,VariableScope variableScope,boolean storeScriptVariables)
+    + containsKey(Object key):boolean
+    + get(Object key):Object
+    + put(String name,Object value):Object
+    + entrySet():Set<Map.Entry<String,Object>>
+    + keySet():Set<String>
+    + size():int
+    + values():Collection<Object>
+    + putAll(Map<? extends String,? extends Object> toMerge):void
+    + remove(Object key):Object
+    + clear():void
+    + containsValue(Object value):boolean
+    + isEmpty():boolean
+    + addUnstoredKey(String unstoredKey):void
+}
+
+class ScriptBindingsFactory {
+    # resolverFactories:List<ResolverFactory>
+    + ScriptBindingsFactory(List<ResolverFactory> resolverFactories)
+    + createBindings(VariableScope variableScope):javax.script.Bindings
+    + createBindings(VariableScope variableScope,boolean storeScriptVariables)
+    # createResolvers(VariableScope variableScope):List<Resolver>
+    + getResolverFactories():List<ResolverFactory>
+    + setResolverFactories(List<ResolverFactory> resolverFactories):void
+}
+ScriptBindingsFactory ..> ScriptBindings
+
+class ScriptCondition implements org.activiti.engine.impl.Condition {
+    - expression:String
+    - language:String
+    + ScriptCondition(String expression,String language)
+    + evaluate(String sequenceFlowId,DelegateExecution execution):boolean
+    # getActiveValue(String originalValue,String propertyName,ObjectNode elementProperties):String
+}
+ScriptCondition ..> ScriptingEngines
+
+class ScriptingEngines {
+    + {static} DEFAULT_SCRIPTING_LANGUAGE:String
+    + {static} GROOVY_SCRIPTING_LANGUAGE:String
+    - {final} scriptEngineManager:javax.script.ScriptEngineManager
+    # scriptBindingsFactory:ScriptBindingsFactory
+    # cacheScriptingEngines:boolean
+    # cachedEngines:Map<String,javax.script.ScriptEngine>
+    + ScriptingEngines(ScriptBindingsFactory scriptBindingsFactory)
+    + ScriptingEngines(javax.script.ScriptEngineManager scriptEngineManager)
+    + addScriptEngineFactory(javax.script.ScriptEngineFactory scriptEngineFactory):void
+    + setScriptEngineFactories(List<ScriptEngineFactory> scriptEngineFactories):void
+    + evaluate(String script,String language,VariableScope variableScope):Object
+    + evaluate(String script,String language,VariableScope variableScope,boolean storeScriptVariables):Object
+    + evaluate(String script,String language,javax.script.Bindings bindings):Object
+    + setCacheScriptingEngines(boolean cacheScriptingEngines):void
+    + isCacheScriptingEngines():boolean
+    + getEngineByName(String name): javax.script.ScriptEngine
+    + createBindings(VariableScope variableScope):javax.script.Bindings
+    + createBindings(VariableScope variableScope,boolean storeScriptVariables):javax.script.Bindings
+    + getScriptBindingsFactory():ScriptBindingsFactory
+    + setScriptBindingsFactory(ScriptBindingsFactory scriptBindingsFactory):void
+}
+
+class VariableScopeResolver implements Resolver {
+    # variableScope:org.activiti.engine.delegate.VariableScope
+    # variableScopeKey:String
+    + VariableScopeResolver(org.activiti.engine.delegate.VariableScope variableScope)
+    + containsKey(Object key):boolean
+    + get(Object key):Object
+}
+class VariableScopeResolverFactory implements ResolverFactory {
+    + createResolver(org.activiti.engine.delegate.VariableScope scope):Resolver
+}
+VariableScopeResolverFactory ..> VariableScopeResolver
+
+}
+
+/' package finished '/
+@enduml

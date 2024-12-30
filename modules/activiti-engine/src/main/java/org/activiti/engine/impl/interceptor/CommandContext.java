@@ -1,9 +1,9 @@
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -69,23 +69,24 @@ import org.slf4j.LoggerFactory;
  */
 public class CommandContext {
 
-  private static Logger log = LoggerFactory.getLogger(CommandContext.class);
+  private static final Logger log = LoggerFactory.getLogger(CommandContext.class);
 
-  protected Command< ? > command;
+  protected Command<?> command;
   protected TransactionContext transactionContext;
-  protected Map<Class< ? >, SessionFactory> sessionFactories;
-  protected Map<Class< ? >, Session> sessions = new HashMap<Class< ? >, Session>();
+  protected Map<Class<?>, SessionFactory> sessionFactories;
+  protected Map<Class<?>, Session> sessions = new HashMap<Class<?>, Session>();
   protected Throwable exception = null;
   protected LinkedList<AtomicOperation> nextOperations = new LinkedList<AtomicOperation>();
   protected ProcessEngineConfigurationImpl processEngineConfiguration;
   protected FailedJobCommandFactory failedJobCommandFactory;
-	protected List<CommandContextCloseListener> closeListeners;
-  protected Map<String, Object> attributes; // General-purpose storing of anything during the lifetime of a command context
+  protected List<CommandContextCloseListener> closeListeners;
+  protected Map<String, Object>
+      attributes; // General-purpose storing of anything during the lifetime of a command context
 
-  
-  public void performOperation(AtomicOperation executionOperation, InterpretableExecution execution) {
+  public void performOperation(
+      AtomicOperation executionOperation, InterpretableExecution execution) {
     nextOperations.add(executionOperation);
-    if (nextOperations.size()==1) {
+    if (nextOperations.size() == 1) {
       try {
         Context.setExecutionContext(execution);
         while (!nextOperations.isEmpty()) {
@@ -94,9 +95,9 @@ public class CommandContext {
             log.trace("AtomicOperation: {} on {}", currentOperation, this);
           }
           if (execution.getReplacedBy() == null) {
-          	currentOperation.execute(execution);
+            currentOperation.execute(execution);
           } else {
-          	currentOperation.execute(execution.getReplacedBy());
+            currentOperation.execute(execution.getReplacedBy());
           }
         }
       } finally {
@@ -105,14 +106,14 @@ public class CommandContext {
     }
   }
 
-  public CommandContext(Command<?> command, ProcessEngineConfigurationImpl processEngineConfiguration) {
+  public CommandContext(
+      Command<?> command, ProcessEngineConfigurationImpl processEngineConfiguration) {
     this.command = command;
     this.processEngineConfiguration = processEngineConfiguration;
     this.failedJobCommandFactory = processEngineConfiguration.getFailedJobCommandFactory();
     sessionFactories = processEngineConfiguration.getSessionFactories();
-    this.transactionContext = processEngineConfiguration
-      .getTransactionContextFactory()
-      .openTransactionContext(this);
+    this.transactionContext =
+        processEngineConfiguration.getTransactionContextFactory().openTransactionContext(this);
   }
 
   public void close() {
@@ -123,16 +124,16 @@ public class CommandContext {
     try {
       try {
         try {
-        	
-        	if (exception == null && closeListeners != null) {
-	        	try {
-	        		for (CommandContextCloseListener listener : closeListeners) {
-	        			listener.closing(this);
-	        		}
-	        	} catch (Throwable exception) {
-	        		exception(exception);
-	        	}
-        	}
+
+          if (exception == null && closeListeners != null) {
+            try {
+              for (CommandContextCloseListener listener : closeListeners) {
+                listener.closing(this);
+              }
+            } catch (Throwable exception) {
+              exception(exception);
+            }
+          }
 
           if (exception == null) {
             flushSessions();
@@ -141,7 +142,7 @@ public class CommandContext {
         } catch (Throwable exception) {
           exception(exception);
         } finally {
-        	
+
           try {
             if (exception == null) {
               transactionContext.commit();
@@ -149,20 +150,22 @@ public class CommandContext {
           } catch (Throwable exception) {
             exception(exception);
           }
-          
-        	if (exception == null && closeListeners != null) {
-	        	try {
-	        		for (CommandContextCloseListener listener : closeListeners) {
-	        			listener.closed(this);
-	        		}
-	        	} catch (Throwable exception) {
-	        		exception(exception);
-	        	}
-        	}
+
+          if (exception == null && closeListeners != null) {
+            try {
+              for (CommandContextCloseListener listener : closeListeners) {
+                listener.closed(this);
+              }
+            } catch (Throwable exception) {
+              exception(exception);
+            }
+          }
 
           if (exception != null) {
-            if (exception instanceof JobNotFoundException || exception instanceof ActivitiTaskAlreadyClaimedException) {
-              // reduce log level, because this may have been caused because of job deletion due to cancelActiviti="true"
+            if (exception instanceof JobNotFoundException
+                || exception instanceof ActivitiTaskAlreadyClaimedException) {
+              // reduce log level, because this may have been caused because of job deletion due to
+              // cancelActiviti="true"
               log.info("Error while closing command context", exception);
             } else if (exception instanceof ActivitiOptimisticLockingException) {
               // reduce log level, as normally we're not interested in logging this exception
@@ -178,11 +181,10 @@ public class CommandContext {
         exception(exception);
       } finally {
         closeSessions();
-
       }
     } catch (Throwable exception) {
       exception(exception);
-    } 
+    }
 
     // rethrow the original exception if there was one
     if (exception != null) {
@@ -195,18 +197,18 @@ public class CommandContext {
       }
     }
   }
-  
+
   public void addCloseListener(CommandContextCloseListener commandContextCloseListener) {
-  	if (closeListeners == null) {
-  		closeListeners = new ArrayList<CommandContextCloseListener>(1);
-  	}
-  	closeListeners.add(commandContextCloseListener);
+    if (closeListeners == null) {
+      closeListeners = new ArrayList<CommandContextCloseListener>(1);
+    }
+    closeListeners.add(commandContextCloseListener);
   }
-  
+
   public List<CommandContextCloseListener> getCloseListeners() {
-  	return closeListeners;
+    return closeListeners;
   }
- 
+
   protected void flushSessions() {
     for (Session session : sessions.values()) {
       session.flush();
@@ -230,23 +232,25 @@ public class CommandContext {
       if (Context.isExecutionContextActive()) {
         LogMDC.putMDCExecution(Context.getExecutionContext().getExecution());
       }
-    	log.error("masked exception in command context. for root cause, see below as it will be rethrown later.", exception);    	
-    	LogMDC.clear();
+      log.error(
+          "masked exception in command context. for root cause, see below as it will be rethrown later.",
+          exception);
+      LogMDC.clear();
     }
   }
-  
+
   public void addAttribute(String key, Object value) {
-  	if (attributes == null) {
-  		attributes = new HashMap<String, Object>(1);
-  	}
-  	attributes.put(key, value);
+    if (attributes == null) {
+      attributes = new HashMap<String, Object>(1);
+    }
+    attributes.put(key, value);
   }
-  
+
   public Object getAttribute(String key) {
-  	if (attributes != null) {
-  		return attributes.get(key);
-  	}
-  	return null;
+    if (attributes != null) {
+      return attributes.get(key);
+    }
+    return null;
   }
 
   @SuppressWarnings({"unchecked"})
@@ -254,8 +258,8 @@ public class CommandContext {
     Session session = sessions.get(sessionClass);
     if (session == null) {
       SessionFactory sessionFactory = sessionFactories.get(sessionClass);
-      if (sessionFactory==null) {
-        throw new ActivitiException("no session factory configured for "+sessionClass.getName());
+      if (sessionFactory == null) {
+        throw new ActivitiException("no session factory configured for " + sessionClass.getName());
       }
       session = sessionFactory.openSession();
       sessions.put(sessionClass, session);
@@ -263,11 +267,11 @@ public class CommandContext {
 
     return (T) session;
   }
-  
+
   public DbSqlSession getDbSqlSession() {
     return getSession(DbSqlSession.class);
   }
-  
+
   public DeploymentEntityManager getDeploymentEntityManager() {
     return getSession(DeploymentEntityManager.class);
   }
@@ -275,19 +279,19 @@ public class CommandContext {
   public ResourceEntityManager getResourceEntityManager() {
     return getSession(ResourceEntityManager.class);
   }
-  
+
   public ByteArrayEntityManager getByteArrayEntityManager() {
     return getSession(ByteArrayEntityManager.class);
   }
-  
+
   public ProcessDefinitionEntityManager getProcessDefinitionEntityManager() {
     return getSession(ProcessDefinitionEntityManager.class);
   }
-  
+
   public ModelEntityManager getModelEntityManager() {
     return getSession(ModelEntityManager.class);
   }
-  
+
   public ProcessDefinitionInfoEntityManager getProcessDefinitionInfoEntityManager() {
     return getSession(ProcessDefinitionInfoEntityManager.class);
   }
@@ -315,7 +319,7 @@ public class CommandContext {
   public HistoricDetailEntityManager getHistoricDetailEntityManager() {
     return getSession(HistoricDetailEntityManager.class);
   }
-  
+
   public HistoricVariableInstanceEntityManager getHistoricVariableInstanceEntityManager() {
     return getSession(HistoricVariableInstanceEntityManager.class);
   }
@@ -323,19 +327,19 @@ public class CommandContext {
   public HistoricActivityInstanceEntityManager getHistoricActivityInstanceEntityManager() {
     return getSession(HistoricActivityInstanceEntityManager.class);
   }
-  
+
   public HistoricTaskInstanceEntityManager getHistoricTaskInstanceEntityManager() {
     return getSession(HistoricTaskInstanceEntityManager.class);
   }
-  
+
   public HistoricIdentityLinkEntityManager getHistoricIdentityLinkEntityManager() {
     return getSession(HistoricIdentityLinkEntityManager.class);
   }
-  
+
   public EventLogEntryEntityManager getEventLogEntryEntityManager() {
-  	return getSession(EventLogEntryEntityManager.class);
+    return getSession(EventLogEntryEntityManager.class);
   }
-  
+
   public JobEntityManager getJobEntityManager() {
     return getSession(JobEntityManager.class);
   }
@@ -355,7 +359,7 @@ public class CommandContext {
   public MembershipIdentityManager getMembershipIdentityManager() {
     return getSession(MembershipIdentityManager.class);
   }
-  
+
   public AttachmentEntityManager getAttachmentEntityManager() {
     return getSession(AttachmentEntityManager.class);
   }
@@ -367,44 +371,50 @@ public class CommandContext {
   public CommentEntityManager getCommentEntityManager() {
     return getSession(CommentEntityManager.class);
   }
-  
+
   public PropertyEntityManager getPropertyEntityManager() {
     return getSession(PropertyEntityManager.class);
   }
-  
+
   public EventSubscriptionEntityManager getEventSubscriptionEntityManager() {
     return getSession(EventSubscriptionEntityManager.class);
   }
-  
-  public Map<Class< ? >, SessionFactory> getSessionFactories() {
+
+  public Map<Class<?>, SessionFactory> getSessionFactories() {
     return sessionFactories;
   }
 
   public HistoryManager getHistoryManager() {
     return getSession(HistoryManager.class);
   }
-  
+
   // getters and setters //////////////////////////////////////////////////////
 
   public TransactionContext getTransactionContext() {
     return transactionContext;
   }
-  public Command< ? > getCommand() {
+
+  public Command<?> getCommand() {
     return command;
   }
-  public Map<Class< ? >, Session> getSessions() {
+
+  public Map<Class<?>, Session> getSessions() {
     return sessions;
   }
+
   public Throwable getException() {
     return exception;
   }
+
   public FailedJobCommandFactory getFailedJobCommandFactory() {
     return failedJobCommandFactory;
   }
+
   public ProcessEngineConfigurationImpl getProcessEngineConfiguration() {
-	  return processEngineConfiguration;
+    return processEngineConfiguration;
   }
+
   public ActivitiEventDispatcher getEventDispatcher() {
-  	return processEngineConfiguration.getEventDispatcher();
- }
+    return processEngineConfiguration.getEventDispatcher();
+  }
 }

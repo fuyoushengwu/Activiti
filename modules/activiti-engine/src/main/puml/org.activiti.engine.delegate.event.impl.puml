@@ -1,0 +1,210 @@
+@startuml
+hide @unlinked
+package "org.activiti.engine.delegate.event.impl" {
+class ActivitiActivityCancelledEventImpl extends ActivitiActivityEventImpl implements org.activiti.engine.delegate.event.ActivitiActivityCancelledEvent {
+    # cause:Object
+    + ActivitiActivityCancelledEventImpl()
+    + setCause(Object cause):void
+    + getCause():Object
+}
+class ActivitiActivityEventImpl extends ActivitiEventImpl implements org.activiti.engine.delegate.event.ActivitiActivityEvent {
+    # activityId:String
+    # activityName:String
+    # activityType:String
+    # behaviorClass:String
+    + ActivitiActivityEventImpl(ActivitiEventType type)
+    + getActivityId():String
+    + setActivityId(String activityId):void
+    + getActivityName():String
+    + setActivityName(String activityName):void
+    + getActivityType():String
+    + setActivityType(String activityType):void
+    + getBehaviorClass():String
+    + setBehaviorClass(String behaviorClass):void
+}
+ActivitiActivityEventImpl ..> org.activiti.engine.delegate.event.ActivitiEventType
+class ActivitiEntityEventImpl extends ActivitiEventImpl implements org.activiti.engine.delegate.event.ActivitiEntityEvent {
+    # entity:Object
+    + ActivitiEntityEventImpl(Object entity,ActivitiEventType type)
+    + getEntity():Object
+}
+ActivitiEntityEventImpl ..> org.activiti.engine.delegate.event.ActivitiEventType
+class ActivitiEntityExceptionEventImpl extends ActivitiEventImpl implements org.activiti.engine.delegate.event.ActivitiEntityEvent,org.activiti.engine.delegate.event.ActivitiExceptionEvent {
+    # entity:Object
+    # cause:Throwable
+    + ActivitiEntityExceptionEventImpl(Object entity,ActivitiEventType type,Throwable cause)
+    + getEntity():Object
+    + getCause():Throwable
+}
+ActivitiEntityExceptionEventImpl ..> org.activiti.engine.delegate.event.ActivitiEventType
+class ActivitiEntityWithVariablesEventImpl extends ActivitiEntityEventImpl implements org.activiti.engine.delegate.event.ActivitiEntityWithVariablesEvent {
+    # variables:Map
+    # localScope:boolean
+    + ActivitiEntityWithVariablesEventImpl(Object entity,Map variables,boolean localScope,ActivitiEventType type)
+    + getVariables():Map
+    + isLocalScope():boolean
+}
+ActivitiEntityWithVariablesEventImpl ..> org.activiti.engine.delegate.event.ActivitiEventType
+class ActivitiErrorEventImpl extends ActivitiActivityEventImpl implements org.activiti.engine.delegate.event.ActivitiErrorEvent {
+    # errorCode:String
+    + ActivitiErrorEventImpl(ActivitiEventType type)
+    + setErrorCode(String errorCode):void
+    + getErrorCode():String
+}
+ActivitiErrorEventImpl ..> org.activiti.engine.delegate.event.ActivitiEventType
+class ActivitiEventBuilder {
+    + {static} createGlobalEvent(ActivitiEventType type):org.activiti.engine.delegate.event.ActivitiEvent
+    + {static} createEvent(ActivitiEventType type,String executionId,String processInstanceId,String processDefinitionId):org.activiti.engine.delegate.event.ActivitiEvent
+    + {static} createEntityEvent(ActivitiEventType type,Object entity):org.activiti.engine.delegate.event.ActivitiEntityEvent
+    + {static} createProcessStartedEvent(Object entity,Map variables,boolean localScope):org.activiti.engine.delegate.event.ActivitiProcessStartedEvent
+    + {static} createEntityWithVariablesEvent(ActivitiEventType type,Object entity,Map variables,boolean localScope):org.activiti.engine.delegate.event.ActivitiEntityWithVariablesEvent
+    + {static} createSequenceFlowTakenEvent(ActivitiEventType type,String sequenceFlowId,String sourceActivityId,String sourceActivityName,String sourceActivityType,String sourceActivityBehaviorClass,String targetActivityId,String targetActivityName,String targetActivityType,String targetActivityBehaviorClass):org.activiti.engine.delegate.event.ActivitiSequenceFlowTakenEvent
+    + {static} createEntityEvent(ActivitiEventType type,Object entity,String executionId,String processInstanceId,String processDefinitionId):org.activiti.engine.delegate.event.ActivitiEntityEvent
+    + {static} createEntityExceptionEvent(ActivitiEventType type,Object entity,Throwable cause):org.activiti.engine.delegate.event.ActivitiEntityEvent
+    + {static} createEntityExceptionEvent(ActivitiEventType type,Object entity,Throwable cause,String executionId,String processInstanceId,String processDefinitionId):org.activiti.engine.delegate.event.ActivitiEntityEvent
+    + {static} createActivityEvent(ActivitiEventType type,String activityId,String activityName,String executionId,String processInstanceId,String processDefinitionId,String activityType,String behaviorClass):org.activiti.engine.delegate.event.ActivitiActivityEvent
+    + {static} createActivityCancelledEvent(String activityId,String activityName,String executionId,String processInstanceId,String processDefinitionId,String activityType,String behaviorClass,Object cause):org.activiti.engine.delegate.event.ActivitiActivityCancelledEvent
+    + {static} createCancelledEvent(String executionId,String processInstanceId,String processDefinitionId,Object cause):org.activiti.engine.delegate.event.ActivitiCancelledEvent
+    + createSignalEvent(ActivitiEventType type,String activityId,String signalName,Object signalData,String executionId,String processInstanceId,String processDefinitionId):org.activiti.engine.delegate.event.ActivitiSignalEvent
+    + createMessageEvent(ActivitiEventType type,String activityId,String messageName,Object payload,String executionId,String processInstanceId,String processDefinitionId): org.activiti.engine.delegate.event.ActivitiMessageEvent
+    + createErrorEvent(ActivitiEventType type,String activityId,String errorCode,String executionId,String processInstanceId,String processDefinitionId): org.activiti.engine.delegate.event.ActivitiErrorEvent
+    + createVariableEvent(ActivitiEventType type,String variableName,Object variableValue,VariableType variableType, String taskId, String executionId, String processInstanceId, String processDefinitionId): org.activiti.engine.delegate.event.ActivitiVariableEvent
+    + createMembershipEvent(ActivitiEventType type, String groupId, String userId): org.activiti.engine.delegate.event.ActivitiMembershipEvent
+    # {static} populateEventWithCurrentContext(ActivitiEventImpl event):void
+}
+class ActivitiEventDispatcherImpl implements org.activiti.engine.delegate.event.ActivitiEventDispatcher {
+    # eventSupport:ActivitiEventSupport
+    # enabled:boolean
+    + ActivitiEventDispatcherImpl()
+    + setEnabled(boolean enabled):void
+    + getEnabled():boolean
+    + addEventListener(ActivitiEventListener):void
+    + addEventListener(ActivitiEventListener,ActivitiEventType... types):void
+    + removeEventListener(ActivitiEventListener):void
+    + dispatchEvent(ActivitiEvent event):void
+    # extractProcessDefinitionEntityFromEvent(ActivitiEvent event):ProcessDefinitionEntity
+}
+ActivitiEventDispatcherImpl ..> org.activiti.engine.delegate.event.ActivitiEventListener
+ActivitiEventDispatcherImpl ..> org.activiti.engine.delegate.event.ActivitiEventType
+ActivitiEventDispatcherImpl ..> org.activiti.engine.delegate.event.ActivitiEvent
+class ActivitiEventImpl implements org.activiti.engine.delegate.event.ActivitiEvent {
+    # type:org.activiti.engine.delegate.event.ActivitiEventType
+    # executionId:String
+    # processInstanceId:String
+    # processDefinitionId:String
+    + ActivitiEventImpl(ActivitiEventType type)
+    + ActivitiEventImpl(ActivitiEventType type,String executionId,String processInstanceId,String processDefinitionId)
+    + getType():ActivitiEventType
+    + setType(ActivitiEventType type):void
+    + getExecutionId():String
+    + setExecutionId(String executionId):void
+    + getProcessDefinitionId():String
+    + setProcessDefinitionId(String processDefinitionId):void
+    + getProcessInstanceId():String
+    + setProcessInstanceId(String processInstanceId):void
+    + getEngineServices():EngineServices
+}
+ActivitiEventImpl ..> org.activiti.engine.delegate.event.ActivitiEventType
+ActivitiEventImpl ..> org.activiti.engine.EngineServices
+
+class ActivitiEventSupport {
+    # eventListeners:List<ActivitiEventListener>
+    # typedListeners:Map<ActivitiEventType,List<ActivitiEventListener>>
+    + ActivitiEventSupport()
+    + {synchronized} addEventListener(ActivitiEventListener):void
+    + {synchronized} addEventListener(ActivitiEventListener listener,ActivitiEventType... types):void
+    + removeEventListener(ActivitiEventListener):void
+    + dispatchEvent(ActivitiEvent event):void
+    # dispatchEvent(ActivitiEvent event,ActivitiEventListener listener):void
+}
+ActivitiEventSupport ..> org.activiti.engine.delegate.event.ActivitiEventListener
+ActivitiEventSupport ..> org.activiti.engine.delegate.event.ActivitiEventType
+ActivitiEventSupport ..> org.activiti.engine.delegate.event.ActivitiEvent
+class ActivitiMembershipEventImpl extends ActivitiEventImpl implements org.activiti.engine.delegate.event.ActivitiMembershipEvent {
+    # userId:String
+    # groupId:String
+    + ActivitiMembershipEventImpl(ActivitiEventType type)
+    + getUserId():String
+    + setUserId(String userId):void
+    + getGroupId():String
+    + setGroupId(String groupId):void
+}
+class ActivitiMessageEventImpl extends ActivitiActivityEventImpl implements org.activiti.engine.delegate.event.ActivitiMessageEvent {
+    # messageName:String
+    # messageData:Object
+    + ActivitiMessageEventImpl(ActivitiEventType type)
+    + getMessageName():String
+    + stMessageName(String messageName):void
+    + getMessageData():Object
+    + setMessageData(Object messageData):void
+}
+class ActivitiProcessCancelledEventImpl extends ActivitiEventImpl implements org.activiti.engine.delegate.event.ActivitiCancelledEvent {
+    # cause:Object
+    + ActivitiProcessCancelledEventImpl()
+    + getCause():Object
+    + setCause((Object cause):void
+}
+class ActivitiProcessStartedEventImpl extends ActivitiEntityWithVariablesEventImpl implements org.activiti.engine.delegate.event.ActivitiProcessStartedEvent {
+    # nestedProcessInstanceId:String
+    # nestedProcessDefinitionId:String
+    + ActivitiProcessStartedEventImpl(Object entity,Map variables,boolean localScope)
+    + getNestedProcessInstanceId():String
+    + getNestedProcessDefinitionId():String
+}
+class ActivitiSequenceFlowTakenEventImpl extends ActivitiEventImpl implements org.activiti.engine.delegate.event.ActivitiSequenceFlowTakenEvent {
+    # id:String
+    # sourceActivityId:String
+    # sourceActivityName:String
+    # sourceActivityType:String
+    # sourceActivityBehaviorClass:String
+    # targetActivityId:String
+    # targetActivityName:String
+    # targetActivityType:String
+    # targetActivityBehaviorClass:String
+    + ActivitiSequenceFlowTakenEventImpl(ActivitiEventType type)
+    + getId(): String
+    + setId(String): void
+    + getSourceActivityId(): String
+    + setSourceActivityId(String): void
+    + getSourceActivityName(): String
+    + setSourceActivityName(String): void
+    + getSourceActivityType(): String
+    + setSourceActivityType(String): void
+    + getSourceActivityBehaviorClass(): String
+    + setSourceActivityBehaviorClass(String): void
+    + getTargetActivityId(): String
+    + setTargetActivityId(String): void
+    + getTargetActivityName(): String
+    + setTargetActivityName(String): void
+    + getTargetActivityType(): String
+    + setTargetActivityType(String): void
+    + getTargetActivityBehaviorClass(): String
+    + setTargetActivityBehaviorClass(String): void
+}
+class ActivitiSignalEventImpl extends ActivitiActivityEventImpl implements org.activiti.engine.delegate.event.ActivitiSignalEvent {
+    # signalName:String
+    # signalData:Object
+    + ActivitiSignalEventImpl(ActivitiEventType type)
+    + getSignalName():String
+    + setSignalName(String signalName):void
+    + getSignalData():Object
+    + setSignalData(Object signalData):void
+}
+class ActivitiVariableEventImpl extends ActivitiEventImpl implements org.activiti.engine.delegate.event.ActivitiVariableEvent {
+    # variableName:String
+    # variableValue:Object
+    # variableType:VariableType
+    # taskId:String
+    + ActivitiVariableEventImpl(ActivitiEventType type)
+    + getVariableName():String
+    + setVariableName(String variableName):void
+    + getVariableValue():Object
+    + setVariableValue(Object variableValue):void
+    + getVariableType():VariableType
+    + setVariableType(VariableType variableType):void
+    + getTaskId():String
+    + setTaskId(String taskId):void
+}
+}
+/' package finished '/
+@enduml

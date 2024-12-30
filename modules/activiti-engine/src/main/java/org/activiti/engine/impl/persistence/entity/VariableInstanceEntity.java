@@ -1,9 +1,9 @@
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -46,7 +46,7 @@ public class VariableInstanceEntity implements VariableInstance, BulkDeleteable,
   protected String taskId;
 
   protected Long longValue;
-  protected Double doubleValue; 
+  protected Double doubleValue;
   protected String textValue;
   protected String textValue2;
   protected final ByteArrayRef byteArrayRef = new ByteArrayRef();
@@ -54,21 +54,19 @@ public class VariableInstanceEntity implements VariableInstance, BulkDeleteable,
   protected Object cachedValue;
   protected boolean forcedUpdate;
   protected boolean deleted = false;
-  
+
   // Default constructor for SQL mapping
-  protected VariableInstanceEntity() {
-  }
-  
-  public static VariableInstanceEntity createAndInsert(String name, VariableType type, Object value) {
+  protected VariableInstanceEntity() {}
+
+  public static VariableInstanceEntity createAndInsert(
+      String name, VariableType type, Object value) {
     VariableInstanceEntity variableInstance = create(name, type, value);
 
-    Context.getCommandContext()
-      .getDbSqlSession()
-      .insert(variableInstance);
-  
+    Context.getCommandContext().getDbSqlSession().insert(variableInstance);
+
     return variableInstance;
   }
-  
+
   public static VariableInstanceEntity create(String name, VariableType type, Object value) {
     VariableInstanceEntity variableInstance = new VariableInstanceEntity();
     variableInstance.name = name;
@@ -83,36 +81,41 @@ public class VariableInstanceEntity implements VariableInstance, BulkDeleteable,
     this.processInstanceId = execution.getProcessInstanceId();
     forceUpdate();
   }
-  
+
   public void forceUpdate() {
-	    forcedUpdate = true;
-	  
+    forcedUpdate = true;
   }
 
   public void delete() {
-    Context
-      .getCommandContext()
-      .getDbSqlSession()
-      .delete(this);
-    
-    if (!deleted && Context.getProcessEngineConfiguration() != null && Context.getProcessEngineConfiguration().getEventDispatcher().isEnabled()) {
-      Context.getProcessEngineConfiguration().getEventDispatcher().dispatchEvent(
-          createVariableDeleteEvent(this)
-        );
+    Context.getCommandContext().getDbSqlSession().delete(this);
+
+    if (!deleted
+        && Context.getProcessEngineConfiguration() != null
+        && Context.getProcessEngineConfiguration().getEventDispatcher().isEnabled()) {
+      Context.getProcessEngineConfiguration()
+          .getEventDispatcher()
+          .dispatchEvent(createVariableDeleteEvent(this));
     }
-    
+
     byteArrayRef.delete();
-    deleted = true; 
-    
+    deleted = true;
   }
-  
-  protected static ActivitiVariableEvent createVariableDeleteEvent(VariableInstanceEntity variableInstance) {
-	String procDefinitionId = null;
-	if (Context.isExecutionContextActive()) {
-		procDefinitionId = Context.getExecutionContext().getExecution().getProcessDefinitionId();
-	}
-    return ActivitiEventBuilder.createVariableEvent(ActivitiEventType.VARIABLE_DELETED, variableInstance.getName(), null, variableInstance.getType(),
-        variableInstance.getTaskId(), variableInstance.getExecutionId(), variableInstance.getProcessInstanceId(), procDefinitionId);
+
+  protected static ActivitiVariableEvent createVariableDeleteEvent(
+      VariableInstanceEntity variableInstance) {
+    String procDefinitionId = null;
+    if (Context.isExecutionContextActive()) {
+      procDefinitionId = Context.getExecutionContext().getExecution().getProcessDefinitionId();
+    }
+    return ActivitiEventBuilder.createVariableEvent(
+        ActivitiEventType.VARIABLE_DELETED,
+        variableInstance.getName(),
+        null,
+        variableInstance.getType(),
+        variableInstance.getTaskId(),
+        variableInstance.getExecutionId(),
+        variableInstance.getProcessInstanceId(),
+        procDefinitionId);
   }
 
   public Object getPersistentState() {
@@ -137,12 +140,11 @@ public class VariableInstanceEntity implements VariableInstance, BulkDeleteable,
     }
     return persistentState;
   }
-  
+
   public int getRevisionNext() {
-    return revision+1;
+    return revision + 1;
   }
-  
-  
+
   public boolean isDeleted() {
     return deleted;
   }
@@ -156,9 +158,9 @@ public class VariableInstanceEntity implements VariableInstance, BulkDeleteable,
   public void setExecutionId(String executionId) {
     this.executionId = executionId;
   }
-  
+
   // byte array value /////////////////////////////////////////////////////////
-  
+
   @Override
   public byte[] getBytes() {
     return byteArrayRef.getBytes();
@@ -168,18 +170,21 @@ public class VariableInstanceEntity implements VariableInstance, BulkDeleteable,
   public void setBytes(byte[] bytes) {
     byteArrayRef.setValue("var-" + name, bytes);
   }
-  
-  @Override @Deprecated
+
+  @Override
+  @Deprecated
   public ByteArrayEntity getByteArrayValue() {
     return byteArrayRef.getEntity();
   }
-  
-  @Override @Deprecated
+
+  @Override
+  @Deprecated
   public String getByteArrayValueId() {
     return byteArrayRef.getId();
   }
 
-  @Override @Deprecated
+  @Override
+  @Deprecated
   public void setByteArrayValue(byte[] bytes) {
     setBytes(bytes);
   }
@@ -187,7 +192,7 @@ public class VariableInstanceEntity implements VariableInstance, BulkDeleteable,
   // value ////////////////////////////////////////////////////////////////////
 
   public Object getValue() {
-    if (!type.isCachable() || cachedValue==null) {
+    if (!type.isCacheAble() || cachedValue == null) {
       cachedValue = type.getValue(this);
     }
     return cachedValue;
@@ -204,13 +209,15 @@ public class VariableInstanceEntity implements VariableInstance, BulkDeleteable,
   public String getId() {
     return id;
   }
+
   public void setId(String id) {
     this.id = id;
   }
-  
+
   public int getRevision() {
     return revision;
   }
+
   public void setRevision(int revision) {
     this.revision = revision;
   }
@@ -218,7 +225,7 @@ public class VariableInstanceEntity implements VariableInstance, BulkDeleteable,
   public String getName() {
     return name;
   }
-  
+
   public void setName(String name) {
     this.name = name;
   }
@@ -238,10 +245,11 @@ public class VariableInstanceEntity implements VariableInstance, BulkDeleteable,
   public void setLocalizedDescription(String localizedDescription) {
     this.localizedDescription = localizedDescription;
   }
-  
+
   public String getTypeName() {
     return typeName;
   }
+
   public void setTypeName(String typeName) {
     this.typeName = typeName;
   }
@@ -249,6 +257,7 @@ public class VariableInstanceEntity implements VariableInstance, BulkDeleteable,
   public VariableType getType() {
     return type;
   }
+
   public void setType(VariableType type) {
     this.type = type;
   }
@@ -256,33 +265,39 @@ public class VariableInstanceEntity implements VariableInstance, BulkDeleteable,
   public String getProcessInstanceId() {
     return processInstanceId;
   }
+
   public String getTaskId() {
     return taskId;
   }
+
   public void setTaskId(String taskId) {
     this.taskId = taskId;
   }
+
   public String getExecutionId() {
     return executionId;
   }
-  
+
   public Long getLongValue() {
     return longValue;
   }
+
   public void setLongValue(Long longValue) {
     this.longValue = longValue;
   }
-  
+
   public Double getDoubleValue() {
     return doubleValue;
   }
+
   public void setDoubleValue(Double doubleValue) {
     this.doubleValue = doubleValue;
   }
-  
+
   public String getTextValue() {
     return textValue;
   }
+
   public void setTextValue(String textValue) {
     this.textValue = textValue;
   }
@@ -290,6 +305,7 @@ public class VariableInstanceEntity implements VariableInstance, BulkDeleteable,
   public String getTextValue2() {
     return textValue2;
   }
+
   public void setTextValue2(String textValue2) {
     this.textValue2 = textValue2;
   }
@@ -297,6 +313,7 @@ public class VariableInstanceEntity implements VariableInstance, BulkDeleteable,
   public Object getCachedValue() {
     return cachedValue;
   }
+
   public void setCachedValue(Object cachedValue) {
     this.cachedValue = cachedValue;
   }
@@ -328,5 +345,4 @@ public class VariableInstanceEntity implements VariableInstance, BulkDeleteable,
     sb.append("]");
     return sb.toString();
   }
-  
 }

@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 
 public class TimerCatchIntermediateEventJobHandler extends TimerEventHandler implements JobHandler {
 
-  private static Logger log = LoggerFactory.getLogger(TimerCatchIntermediateEventJobHandler.class);
+  private static final Logger log = LoggerFactory.getLogger(TimerCatchIntermediateEventJobHandler.class);
 
   public static final String TYPE = "timer-intermediate-transition";
 

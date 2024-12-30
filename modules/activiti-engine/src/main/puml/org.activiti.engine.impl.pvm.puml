@@ -1,0 +1,104 @@
+@startuml
+!include org.activiti.engine.repository.puml
+!include org.activiti.engine.impl.variable.puml
+!include org.activiti.engine.impl.db.puml
+/' !include org.activiti.engine.delegate.puml '/
+/' !include org.activiti.engine.impl.pvm.process.puml '/
+/' !include org.activiti.engine.impl.pvm.delegate.puml '/
+hide @unlinked
+
+package "org.activiti.engine.impl.pvm" {
+
+class ProcessDefinitionBuilder {
+    # processDefinition:org.activiti.engine.impl.pvm.process.ProcessDefinitionImpl
+    # scopeStack:Stack<org.activiti.engine.impl.pvm.process.ScopeImpl>
+    # processElement:org.activiti.engine.impl.pvm.process.ProcessElementImpl
+    # transition:org.activiti.engine.impl.pvm.process.TransitionImpl
+    # unresolvedTransitions:List<Object[]>
+
+    + ProcessDefinitionBuilder()
+    + ProcessDefinitionBuilder(String processDefinitionId)
+    + createActivity(String id):ProcessDefinitionBuilder
+    + endActivity():ProcessDefinitionBuilder
+    + initial():ProcessDefinitionBuilder
+    + startTransition(String destinationActivityId):ProcessDefinitionBuilder
+    + startTransition(String destinationActivityId,String transitionId):ProcessDefinitionBuilder
+    + endTransition():ProcessDefinitionBuilder
+    + transition(String destinationActivityId):ProcessDefinitionBuilder
+    + transition(String destinationActivityId,String transitionId):ProcessDefinitionBuilder
+    + behavior(org.activiti.engine.impl.pvm.delegate.ActivityBehavior):ProcessDefinitionBuilder
+    + property(String name,Object value):ProcessDefinitionBuilder
+    + buildProcessDefinition():PvmProcessDefinition
+    # getActivity():org.activiti.engine.impl.pvm.process.ActivityImpl
+    + scope():ProcessDefinitionBuilder
+    + executionListener(org.activiti.engine.delegate.ExecutionListener listener):ProcessDefinitionBuilder
+    + executionListener(String eventName,org.activiti.engine.delegate.ExecutionListener listener):ProcessDefinitionBuilder
+}
+
+interface PvmActivity extends PvmScope {
+    + isAsync():boolean
+    + isExclusive():boolean
+    + getParent():PvmScope
+    + getIncomingTransitions():List<PvmTransition>
+    + getOutgoingTransitions():List<PvmTransition>
+    + findOutgoingTransition(String):PvmTransition
+}
+
+class PvmEvent {
+    + {static} EVENTNAME_START:String
+    + {static} EVENTNAME_END:String
+    + {static} EVENTNAME_TAKE:String
+}
+
+interface PvmExecution {
+    + signal(String signalName,Object signalData):void
+    + getActivity():PvmActivity
+    + hasVariable(String variableName):boolean
+    + setVariable(String variableName,Object value):void
+    + getVariable(String variableName):Object
+    + getVariables():Map<String,Object>
+}
+
+interface PvmProcessDefinition extends ReadOnlyProcessDefinition {
+    + getDeploymentId():String
+    + createProcessInstance():PvmProcessInstance
+}
+
+interface PvmProcessElement {
+    + getId():String
+    + getProcessDefinition():PvmProcessDefinition
+    + getProperty(String):Object
+}
+
+interface PvmProcessInstance extends PvmExecution {
+    + start():void
+    + findExecution(String activityId):PvmExecution
+    + findActiveActivityIds():List<String>
+    + isEnded():boolean
+    + deleteCascade(String deleteReason):void
+    + setBusinessKey(String businessKey):void
+}
+
+interface PvmScope extends PvmProcessElement {
+    + getActivities():List<? extends PvmActivity>
+    + findActivity(String activityId):PvmActivity
+}
+
+interface PvmTransition extends PvmProcessElement {
+    + getSource():PvmActivity
+    + getDestination():PvmActivity
+    + getSkipExpression():org.activiti.engine.delegate.Expression
+}
+interface ReadOnlyProcessDefinition extends PvmScope {
+    + getName():String
+    + getKey():String
+    + getDescription():String
+    + getInitial():PvmActivity
+    + getDiagramResourceName():String
+}
+
+/' package finished '/
+
+}
+
+@enduml

@@ -28,7 +28,6 @@ public class Scanner {
 	/**
 	 * Scan exception type
 	 */
-	@SuppressWarnings("serial")
 	public static class ScanException extends Exception {
 		final int position;
 		final String encountered;

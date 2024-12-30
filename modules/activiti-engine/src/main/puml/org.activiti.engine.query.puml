@@ -1,0 +1,27 @@
+@startuml
+package "org.activiti.engine.query" {
+interface QueryProperty {
+    + getName():String
+}
+
+interface Query<T extends Query<?,?>,U extends Object> {
+     + asc():T
+     + desc():T
+     + count():long
+     + singleResult():U
+     + list():List<U>
+     + listPage(int,int):List<U>
+}
+interface NativeQuery<T extends NativeQuery<?,?>,U extends Object> {
+    + sql(String):T
+    + parameter(String,Object):T
+    + count():long
+    + singleResult():U
+    + list():List<U>
+    + listPage(int firstResult,int maxResult):List<U>
+}
+}
+
+/' package finished '/
+
+@enduml

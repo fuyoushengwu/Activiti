@@ -1,9 +1,9 @@
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,7 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 
  * @author Daniel Meyer
  */
 public class AcquireJobsRunnableImpl implements AcquireJobsRunnable {
@@ -34,7 +33,7 @@ public class AcquireJobsRunnableImpl implements AcquireJobsRunnable {
   protected volatile boolean isJobAdded = false;
   protected final Object MONITOR = new Object();
   protected final AtomicBoolean isWaiting = new AtomicBoolean(false);
-  
+
   protected long millisToWait = 0;
 
   public AcquireJobsRunnableImpl(JobExecutor jobExecutor) {
@@ -52,7 +51,7 @@ public class AcquireJobsRunnableImpl implements AcquireJobsRunnable {
 
       try {
         AcquiredJobs acquiredJobs = commandExecutor.execute(jobExecutor.getAcquireJobsCmd());
-        
+
         for (List<String> jobIds : acquiredJobs.getJobIdBatches()) {
           jobExecutor.executeJobs(jobIds);
         }
@@ -61,20 +60,22 @@ public class AcquireJobsRunnableImpl implements AcquireJobsRunnable {
         millisToWait = jobExecutor.getWaitTimeInMillis();
         int jobsAcquired = acquiredJobs.getJobIdBatches().size();
         if (jobsAcquired >= maxJobsPerAcquisition) {
-          millisToWait = 0; 
+          millisToWait = 0;
         }
 
-      } catch (ActivitiOptimisticLockingException optimisticLockingException) { 
+      } catch (ActivitiOptimisticLockingException optimisticLockingException) {
         // See https://activiti.atlassian.net/browse/ACT-1390
         if (log.isDebugEnabled()) {
-          log.debug("Optimistic locking exception during job acquisition. If you have multiple job executors running against the same database, " +
-          		"this exception means that this thread tried to acquire a job, which already was acquired by another job executor acquisition thread." +
-          		"This is expected behavior in a clustered environment. " +
-          		"You can ignore this message if you indeed have multiple job executor acquisition threads running against the same database. " +
-          		"Exception message: {}", optimisticLockingException.getMessage());
+          log.debug(
+              "Optimistic locking exception during job acquisition. If you have multiple job executors running against the same database, "
+                  + "this exception means that this thread tried to acquire a job, which already was acquired by another job executor acquisition thread."
+                  + "This is expected behavior in a clustered environment. "
+                  + "You can ignore this message if you indeed have multiple job executor acquisition threads running against the same database. "
+                  + "Exception message: {}",
+              optimisticLockingException.getMessage());
         }
       } catch (Throwable e) {
-        log.error("exception during job acquisition: {}", e.getMessage(), e);          
+        log.error("exception during job acquisition: {}", e.getMessage(), e);
         millisToWait = jobExecutor.getWaitTimeInMillis();
       }
 
@@ -84,12 +85,12 @@ public class AcquireJobsRunnableImpl implements AcquireJobsRunnable {
             log.debug("job acquisition thread sleeping for {} millis", millisToWait);
           }
           synchronized (MONITOR) {
-            if(!isInterrupted) {
+            if (!isInterrupted) {
               isWaiting.set(true);
               MONITOR.wait(millisToWait);
             }
           }
-          
+
           if (log.isDebugEnabled()) {
             log.debug("job acquisition thread woke up");
           }
@@ -102,35 +103,34 @@ public class AcquireJobsRunnableImpl implements AcquireJobsRunnable {
         }
       }
     }
-    
+
     log.info("{} stopped job acquisition", jobExecutor.getName());
   }
 
   public void stop() {
     synchronized (MONITOR) {
-      isInterrupted = true; 
-      if(isWaiting.compareAndSet(true, false)) { 
-          MONITOR.notifyAll();
-        }
+      isInterrupted = true;
+      if (isWaiting.compareAndSet(true, false)) {
+        MONITOR.notifyAll();
       }
+    }
   }
 
-  public void jobWasAdded() {    
+  public void jobWasAdded() {
     isJobAdded = true;
-    if(isWaiting.compareAndSet(true, false)) { 
+    if (isWaiting.compareAndSet(true, false)) {
       // ensures we only notify once
-      // I am OK with the race condition      
+      // I am OK with the race condition
       synchronized (MONITOR) {
         MONITOR.notifyAll();
       }
-    }    
+    }
   }
 
-  
   public long getMillisToWait() {
     return millisToWait;
   }
-  
+
   public void setMillisToWait(long millisToWait) {
     this.millisToWait = millisToWait;
   }

@@ -1,0 +1,33 @@
+@startuml
+hide @unlinked
+package "org.activiti.engine.impl.event" {
+abstract class AbstractEventHandler implements org.activiti.engine.impl.event.EventHandler {
+    + handleEvent(org.activiti.engine.impl.persistence.entity.EventSubscriptionEntity subscription,Object payload,CommandContext commandContext):void
+    # dispatchActivitiesCanceledIfNeeded(EventSubscriptionEntity subscription,ExecutionEntity execution,ActivityImpl boundaryEventActivity,CommandContext commandContext):void
+    # dispatchExecutionCancelled(EventSubscriptionEntity subscription,ExecutionEntity execution,CommandContext commandContext):void
+    # dispatchActivityCancelled(EventSubscriptionEntity subscription,ExecutionEntity execution,ActivityImpl activity,CommandContext commandContext):void
+}
+class CompensationEventHandler implements EventHandler {
+    + {static} EVENT_HANDLER_TYPE:String
+    + getEventHandlerType():String
+    + handleEvent(org.activiti.engine.impl.persistence.entity.EventSubscriptionEntity subscription,Object payload,CommandContext commandContext):void
+
+}
+interface EventHandler {
+    + getEventHandlerType():String
+    + handleEvent(org.activiti.engine.impl.persistence.entity.EventSubscriptionEntity subscription,Object payload,CommandContext commandContext):void
+}
+class MessageEventHandler extends AbstractEventHandler {
+    + {static} EVENT_HANDLER_TYPE:String
+    + getEventHandlerType():String
+    + handleEvent(org.activiti.engine.impl.persistence.entity.EventSubscriptionEntity subscription,Object payload,CommandContext commandContext):void
+}
+class SignalEventHandler extends AbstractEventHandler {
+    + {static} EVENT_HANDLER_TYPE:String
+    + getEventHandlerType():String
+    + handleEvent(org.activiti.engine.impl.persistence.entity.EventSubscriptionEntity subscription,Object payload,CommandContext commandContext):void
+}
+}
+
+/' package finished '/
+@enduml

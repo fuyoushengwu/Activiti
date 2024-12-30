@@ -1,9 +1,9 @@
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,7 +18,6 @@ import java.util.List;
 import org.activiti.engine.impl.pvm.process.ActivityImpl;
 import org.activiti.engine.impl.pvm.process.ProcessDefinitionImpl;
 import org.activiti.engine.impl.pvm.process.ScopeImpl;
-
 
 /**
  * @author Tom Baeyens
@@ -40,14 +39,15 @@ public class AtomicOperationProcessStartInitial extends AbstractEventAtomicOpera
     ActivityImpl activity = (ActivityImpl) execution.getActivity();
     ProcessDefinitionImpl processDefinition = execution.getProcessDefinition();
     StartingExecution startingExecution = execution.getStartingExecution();
-    if (activity==startingExecution.getInitial()) {
+    if (activity == startingExecution.getInitial()) {
       execution.disposeStartingExecution();
       execution.performOperation(ACTIVITY_EXECUTE);
 
     } else {
-      List<ActivityImpl> initialActivityStack = processDefinition.getInitialActivityStack(startingExecution.getInitial());
+      List<ActivityImpl> initialActivityStack =
+          processDefinition.getInitialActivityStack(startingExecution.getInitial());
       int index = initialActivityStack.indexOf(activity);
-      activity = initialActivityStack.get(index+1);
+      activity = initialActivityStack.get(index + 1);
 
       InterpretableExecution executionToUse = null;
       if (activity.isScope()) {

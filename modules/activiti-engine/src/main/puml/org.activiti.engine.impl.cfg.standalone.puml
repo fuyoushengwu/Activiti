@@ -1,0 +1,19 @@
+@startuml
+hide @unlinked
+package "org.activiti.engine.impl.cfg.standalone" {
+class StandaloneMybatisTransactionContext implements org.activiti.engine.impl.cfg.TransactionContext {
+    # commandContext:org.activiti.engine.impl.interceptor.CommandContext
+    # stateTransactionListeners:Map<org.activiti.engine.impl.cfg.TransactionState,List<org.activiti.engine.impl.cfg.TransactionListener>>
+
+    + StandaloneMybatisTransactionContext(CommandContext)
+    + addTransactionListener(TransactionState,TransactionListener):void
+
+}
+class StandaloneMybatisTransactionContextFactory implements org.activiti.engine.impl.cfg.TransactionContextFactory {
+    + openTransactionContext(org.activiti.engine.impl.interceptor.CommandContext):org.activiti.engine.impl.cfg.TransactionContext
+}
+StandaloneMybatisTransactionContextFactory *--> StandaloneMybatisTransactionContext
+}
+
+/' package finished '/
+@enduml

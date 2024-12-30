@@ -1,9 +1,9 @@
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,7 +30,13 @@ import org.apache.commons.lang3.StringUtils;
  * @author Christian Lipphardt (camunda)
  * @author Joram Barrez
  */
-public class HistoricVariableInstanceEntity implements ValueFields, HistoricVariableInstance, PersistentObject, HasRevision, BulkDeleteable, Serializable {
+public class HistoricVariableInstanceEntity
+    implements ValueFields,
+        HistoricVariableInstance,
+        PersistentObject,
+        HasRevision,
+        BulkDeleteable,
+        Serializable {
 
   private static final long serialVersionUID = 1L;
 
@@ -43,10 +49,10 @@ public class HistoricVariableInstanceEntity implements ValueFields, HistoricVari
   protected String processInstanceId;
   protected String executionId;
   protected String taskId;
-  
+
   protected Date createTime;
   protected Date lastUpdatedTime;
-  
+
   protected Long longValue;
   protected Double doubleValue;
   protected String textValue;
@@ -56,10 +62,10 @@ public class HistoricVariableInstanceEntity implements ValueFields, HistoricVari
   protected Object cachedValue;
 
   // Default constructor for SQL mapping
-  protected HistoricVariableInstanceEntity() {
-  }
+  protected HistoricVariableInstanceEntity() {}
 
-  public static HistoricVariableInstanceEntity copyAndInsert(VariableInstanceEntity variableInstance) {
+  public static HistoricVariableInstanceEntity copyAndInsert(
+      VariableInstanceEntity variableInstance) {
     HistoricVariableInstanceEntity historicVariableInstance = new HistoricVariableInstanceEntity();
     historicVariableInstance.id = variableInstance.getId();
     historicVariableInstance.processInstanceId = variableInstance.getProcessInstanceId();
@@ -68,71 +74,66 @@ public class HistoricVariableInstanceEntity implements ValueFields, HistoricVari
     historicVariableInstance.revision = variableInstance.getRevision();
     historicVariableInstance.name = variableInstance.getName();
     historicVariableInstance.variableType = variableInstance.getType();
-    
+
     historicVariableInstance.copyValue(variableInstance);
-    
+
     Date time = Context.getProcessEngineConfiguration().getClock().getCurrentTime();
     historicVariableInstance.setCreateTime(time);
     historicVariableInstance.setLastUpdatedTime(time);
-    
-    Context.getCommandContext()
-      .getDbSqlSession()
-      .insert(historicVariableInstance);
-    
+
+    Context.getCommandContext().getDbSqlSession().insert(historicVariableInstance);
+
     return historicVariableInstance;
   }
-  
+
   public void copyValue(VariableInstanceEntity variableInstance) {
     this.textValue = variableInstance.getTextValue();
     this.textValue2 = variableInstance.getTextValue2();
     this.doubleValue = variableInstance.getDoubleValue();
     this.longValue = variableInstance.getLongValue();
-    
+
     this.variableType = variableInstance.getType();
-    if (variableInstance.getByteArrayValueId()!=null) {
+    if (variableInstance.getByteArrayValueId() != null) {
       setByteArrayValue(variableInstance.getByteArrayValue().getBytes());
     }
-    
+
     this.lastUpdatedTime = Context.getProcessEngineConfiguration().getClock().getCurrentTime();
   }
 
   public void delete() {
-    Context
-      .getCommandContext()
-      .getDbSqlSession()
-      .delete(this);
-    
+    Context.getCommandContext().getDbSqlSession().delete(this);
+
     byteArrayRef.delete();
   }
 
   public Object getPersistentState() {
-  	HashMap<String, Object> persistentState = new HashMap<String, Object>();
-  	
-  	persistentState.put("textValue", textValue);
-  	persistentState.put("textValue2", textValue2);
-  	persistentState.put("doubleValue", doubleValue);
-  	persistentState.put("longValue", longValue);
-  	persistentState.put("byteArrayRef", byteArrayRef.getId());
-  	persistentState.put("createTime", createTime);
-  	persistentState.put("lastUpdatedTime", lastUpdatedTime);
-  	persistentState.put("executionId", executionId);
-  	
-  	return persistentState;
+    HashMap<String, Object> persistentState = new HashMap<String, Object>();
+
+    persistentState.put("textValue", textValue);
+    persistentState.put("textValue2", textValue2);
+    persistentState.put("doubleValue", doubleValue);
+    persistentState.put("longValue", longValue);
+    persistentState.put("byteArrayRef", byteArrayRef.getId());
+    persistentState.put("createTime", createTime);
+    persistentState.put("lastUpdatedTime", lastUpdatedTime);
+    persistentState.put("executionId", executionId);
+
+    return persistentState;
   }
-  
+
   public int getRevisionNext() {
-    return revision+1;
+    return revision + 1;
   }
 
   public Object getValue() {
-    if (!variableType.isCachable() || cachedValue == null) {
+    if (!variableType.isCacheAble() || cachedValue == null) {
       cachedValue = variableType.getValue(this);
     }
     return cachedValue;
   }
-  
+
   // byte array value /////////////////////////////////////////////////////////
-  
+
   @Override
   public byte[] getBytes() {
     return byteArrayRef.getBytes();
@@ -142,18 +143,21 @@ public class HistoricVariableInstanceEntity implements ValueFields, HistoricVari
   public void setBytes(byte[] bytes) {
     byteArrayRef.setValue("hist.var-" + name, bytes);
   }
-  
-  @Override @Deprecated
+
+  @Override
+  @Deprecated
   public ByteArrayEntity getByteArrayValue() {
     return byteArrayRef.getEntity();
   }
-  
-  @Override @Deprecated
+
+  @Override
+  @Deprecated
   public String getByteArrayValueId() {
     return byteArrayRef.getId();
   }
 
-  @Override @Deprecated
+  @Override
+  @Deprecated
   public void setByteArrayValue(byte[] bytes) {
     setBytes(bytes);
   }
@@ -163,7 +167,7 @@ public class HistoricVariableInstanceEntity implements ValueFields, HistoricVari
   public String getId() {
     return id;
   }
-  
+
   public void setId(String id) {
     this.id = id;
   }
@@ -251,31 +255,31 @@ public class HistoricVariableInstanceEntity implements ValueFields, HistoricVari
   public void setTaskId(String taskId) {
     this.taskId = taskId;
   }
-  
+
   public Date getCreateTime() {
-		return createTime;
-	}
+    return createTime;
+  }
 
-	public void setCreateTime(Date createTime) {
-		this.createTime = createTime;
-	}
+  public void setCreateTime(Date createTime) {
+    this.createTime = createTime;
+  }
 
-	public Date getLastUpdatedTime() {
-		return lastUpdatedTime;
-	}
+  public Date getLastUpdatedTime() {
+    return lastUpdatedTime;
+  }
 
-	public void setLastUpdatedTime(Date lastUpdatedTime) {
-		this.lastUpdatedTime = lastUpdatedTime;
-	}
+  public void setLastUpdatedTime(Date lastUpdatedTime) {
+    this.lastUpdatedTime = lastUpdatedTime;
+  }
 
-	public String getExecutionId() {
+  public String getExecutionId() {
     return executionId;
   }
-  
+
   public void setExecutionId(String executionId) {
     this.executionId = executionId;
   }
-  
+
   public Date getTime() {
     return getCreateTime();
   }
@@ -308,5 +312,4 @@ public class HistoricVariableInstanceEntity implements ValueFields, HistoricVari
     sb.append("]");
     return sb.toString();
   }
-  
 }

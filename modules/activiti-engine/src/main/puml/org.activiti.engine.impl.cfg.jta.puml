@@ -1,0 +1,33 @@
+@startuml
+hide @unlinked
+package "org.activiti.engine.impl.cfg.jta" {
+
+class JtaTransactionContext implements TransactionContext {
+    # transactionManager:javax.transaction.TransactionManager
+    + JtaTransactionContext(javax.transaction.TransactionManager)
+    + commit():void
+    + rollback():void
+    + getTransaction():javax.transaction.Transaction
+    + addTransactionListener(org.activiti.engine.impl.cfg.TransactionState,org.activiti.engine.impl.cfg.TransactionListener):void
+}
+JtaTransactionContext ..> TransactionStateSynchronization
+
+class TransactionStateSynchronization implements javax.transaction.Synchronization {
+    # transactionListener:org.activiti.engine.impl.cfg.TransactionListener
+    # transactionState:org.activiti.engine.impl.cfg.TransactionState
+    - commandContext:org.activiti.engine.impl.interceptor.CommandContext
+    + TransactionSateSynchronization(org.activiti.engine.impl.cfg.TransactionState,org.activiti.engine.impl.cfg.TransactionListener,org.activiti.engine.impl.interceptor.CommandContext)
+    + beforeCompletion():void
+    + afterCompletion(int):void
+    # executeTransactionListenerInNewCommandContext():void
+}
+
+class JtaTransactionContextFactory implements TransactionContextFactory {
+    # transactionManager:javax.transaction.TransactionManager
+    + JtaTransactionContextFactory(javax.transaction.TransactionManager)
+    + openTransactionContext(org.activiti.engine.impl.interceptor.CommandContext):org.activiti.engine.impl.cfg.TransactionContext
+}
+JtaTransactionContextFactory *--> JtaTransactionContext
+}
+/' package finished '/
+@enduml

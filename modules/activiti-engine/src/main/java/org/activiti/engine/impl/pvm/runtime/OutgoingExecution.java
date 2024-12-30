@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
  */
 public class OutgoingExecution {
   
-  private static Logger log = LoggerFactory.getLogger(OutgoingExecution.class);
+  private static final Logger log = LoggerFactory.getLogger(OutgoingExecution.class);
   
   protected InterpretableExecution outgoingExecution;
   protected PvmTransition outgoingTransition;

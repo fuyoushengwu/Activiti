@@ -1,9 +1,9 @@
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -31,37 +31,42 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * @author Joram Barrez
  */
 public class StartEventParseHandler extends AbstractActivityBpmnParseHandler<StartEvent> {
-	
-	private static Logger logger = LoggerFactory.getLogger(StartEventParseHandler.class);
-  
+
+  private static final Logger logger = LoggerFactory.getLogger(StartEventParseHandler.class);
+
   public static final String PROPERTYNAME_INITIATOR_VARIABLE_NAME = "initiatorVariableName";
   public static final String PROPERTYNAME_INITIAL = "initial";
-  
+
   @Override
-  public Class< ? extends BaseElement> getHandledType() {
+  public Class<? extends BaseElement> getHandledType() {
     return StartEvent.class;
   }
-  
+
   @Override
   protected void executeParse(BpmnParse bpmnParse, StartEvent startEvent) {
-    ActivityImpl startEventActivity = createActivityOnCurrentScope(bpmnParse, startEvent, BpmnXMLConstants.ELEMENT_EVENT_START);
+    ActivityImpl startEventActivity =
+        createActivityOnCurrentScope(bpmnParse, startEvent, BpmnXMLConstants.ELEMENT_EVENT_START);
 
     ScopeImpl scope = bpmnParse.getCurrentScope();
     if (scope instanceof ProcessDefinitionEntity) {
-      createProcessDefinitionStartEvent(bpmnParse, startEventActivity, startEvent, (ProcessDefinitionEntity) scope);
+      createProcessDefinitionStartEvent(
+          bpmnParse, startEventActivity, startEvent, (ProcessDefinitionEntity) scope);
       selectInitial(bpmnParse, startEventActivity, startEvent, (ProcessDefinitionEntity) scope);
       createStartFormHandlers(bpmnParse, startEvent, (ProcessDefinitionEntity) scope);
     } else {
       createScopeStartEvent(bpmnParse, startEventActivity, startEvent);
     }
   }
-  
-  protected void selectInitial(BpmnParse bpmnParse, ActivityImpl startEventActivity, StartEvent startEvent, ProcessDefinitionEntity processDefinition) {
+
+  protected void selectInitial(
+      BpmnParse bpmnParse,
+      ActivityImpl startEventActivity,
+      StartEvent startEvent,
+      ProcessDefinitionEntity processDefinition) {
     if (processDefinition.getInitial() == null) {
       processDefinition.setInitial(startEventActivity);
     } else {
@@ -73,79 +78,102 @@ public class StartEventParseHandler extends AbstractActivityBpmnParseHandler<Sta
         if (currentInitialType.equals("messageStartEvent")) {
           processDefinition.setInitial(startEventActivity);
         } else {
-          throw new ActivitiException("multiple none start events or timer start events not supported on process definition");
+          throw new ActivitiException(
+              "multiple none start events or timer start events not supported on process definition");
         }
       }
     }
   }
-  
-  protected void createStartFormHandlers(BpmnParse bpmnParse, StartEvent startEvent, ProcessDefinitionEntity processDefinition) {
+
+  protected void createStartFormHandlers(
+      BpmnParse bpmnParse, StartEvent startEvent, ProcessDefinitionEntity processDefinition) {
     if (processDefinition.getInitial() != null) {
       if (startEvent.getId().equals(processDefinition.getInitial().getId())) {
         StartFormHandler startFormHandler = new DefaultStartFormHandler();
-        startFormHandler.parseConfiguration(startEvent.getFormProperties(), startEvent.getFormKey(), bpmnParse.getDeployment(), processDefinition);
+        startFormHandler.parseConfiguration(
+            startEvent.getFormProperties(),
+            startEvent.getFormKey(),
+            bpmnParse.getDeployment(),
+            processDefinition);
         processDefinition.setStartFormHandler(startFormHandler);
       }
     }
   }
-  
-  protected void createProcessDefinitionStartEvent(BpmnParse bpmnParse, ActivityImpl startEventActivity, StartEvent startEvent, ProcessDefinitionEntity processDefinition) {
+
+  protected void createProcessDefinitionStartEvent(
+      BpmnParse bpmnParse,
+      ActivityImpl startEventActivity,
+      StartEvent startEvent,
+      ProcessDefinitionEntity processDefinition) {
     if (StringUtils.isNotEmpty(startEvent.getInitiator())) {
-      processDefinition.setProperty(PROPERTYNAME_INITIATOR_VARIABLE_NAME, startEvent.getInitiator());
+      processDefinition.setProperty(
+          PROPERTYNAME_INITIATOR_VARIABLE_NAME, startEvent.getInitiator());
     }
 
     // all start events share the same behavior:
-    startEventActivity.setActivityBehavior(bpmnParse.getActivityBehaviorFactory().createNoneStartEventActivityBehavior(startEvent));
+    startEventActivity.setActivityBehavior(
+        bpmnParse.getActivityBehaviorFactory().createNoneStartEventActivityBehavior(startEvent));
     if (!startEvent.getEventDefinitions().isEmpty()) {
       EventDefinition eventDefinition = startEvent.getEventDefinitions().get(0);
-      if (eventDefinition instanceof TimerEventDefinition 
-      		|| eventDefinition instanceof MessageEventDefinition
-      		|| eventDefinition instanceof SignalEventDefinition) {
+      if (eventDefinition instanceof TimerEventDefinition
+          || eventDefinition instanceof MessageEventDefinition
+          || eventDefinition instanceof SignalEventDefinition) {
         bpmnParse.getBpmnParserHandlers().parseElement(bpmnParse, eventDefinition);
       } else {
         logger.warn("Unsupported event definition on start event", eventDefinition);
       }
     }
   }
-  
-  protected void createScopeStartEvent(BpmnParse bpmnParse, ActivityImpl startEventActivity, StartEvent startEvent) {
+
+  protected void createScopeStartEvent(
+      BpmnParse bpmnParse, ActivityImpl startEventActivity, StartEvent startEvent) {
 
     ScopeImpl scope = bpmnParse.getCurrentScope();
     Object triggeredByEvent = scope.getProperty("triggeredByEvent");
-    boolean isTriggeredByEvent = triggeredByEvent != null && ((Boolean) triggeredByEvent == true);
-    
+    boolean isTriggeredByEvent = triggeredByEvent != null && ((Boolean) triggeredByEvent);
+
     if (isTriggeredByEvent) { // event subprocess
-      
+
       // all start events of an event subprocess share common behavior
-      EventSubProcessStartEventActivityBehavior activityBehavior = 
-              bpmnParse.getActivityBehaviorFactory().createEventSubProcessStartEventActivityBehavior(startEvent, startEventActivity.getId()); 
+      EventSubProcessStartEventActivityBehavior activityBehavior =
+          bpmnParse
+              .getActivityBehaviorFactory()
+              .createEventSubProcessStartEventActivityBehavior(
+                  startEvent, startEventActivity.getId());
       startEventActivity.setActivityBehavior(activityBehavior);
-      
+
       if (!startEvent.getEventDefinitions().isEmpty()) {
         EventDefinition eventDefinition = startEvent.getEventDefinitions().get(0);
-        
-        if (eventDefinition instanceof org.activiti.bpmn.model.ErrorEventDefinition 
-                || eventDefinition instanceof MessageEventDefinition
-                || eventDefinition instanceof SignalEventDefinition) {
+
+        if (eventDefinition instanceof org.activiti.bpmn.model.ErrorEventDefinition
+            || eventDefinition instanceof MessageEventDefinition
+            || eventDefinition instanceof SignalEventDefinition) {
           bpmnParse.getBpmnParserHandlers().parseElement(bpmnParse, eventDefinition);
         } else {
-          logger.warn("start event of event subprocess must be of type 'error', 'message' or 'signal' for start event " + startEvent.getId());
+          logger.warn(
+              "start event of event subprocess must be of type 'error', 'message' or 'signal' for start event "
+                  + startEvent.getId());
         }
       }
-      
+
     } else { // "regular" subprocess
-      
-      if(!startEvent.getEventDefinitions().isEmpty()) {
-        logger.warn("event definitions only allowed on start event if subprocess is an event subprocess " + bpmnParse.getCurrentSubProcess().getId());
+
+      if (!startEvent.getEventDefinitions().isEmpty()) {
+        logger.warn(
+            "event definitions only allowed on start event if subprocess is an event subprocess "
+                + bpmnParse.getCurrentSubProcess().getId());
       }
       if (scope.getProperty(PROPERTYNAME_INITIAL) == null) {
         scope.setProperty(PROPERTYNAME_INITIAL, startEventActivity);
-        startEventActivity.setActivityBehavior(bpmnParse.getActivityBehaviorFactory().createNoneStartEventActivityBehavior(startEvent));
+        startEventActivity.setActivityBehavior(
+            bpmnParse
+                .getActivityBehaviorFactory()
+                .createNoneStartEventActivityBehavior(startEvent));
       } else {
-        logger.warn("multiple start events not supported for subprocess", bpmnParse.getCurrentSubProcess().getId());
+        logger.warn(
+            "multiple start events not supported for subprocess",
+            bpmnParse.getCurrentSubProcess().getId());
       }
     }
-
   }
-
 }

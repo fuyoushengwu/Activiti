@@ -1,0 +1,28 @@
+@startuml
+hide @unlinked
+package "org.activiti.engine.impl.history.handler" {
+class ActivityInstanceEndHandler implements org.activiti.engine.delegate.ExecutionListener {
+    + notify(org.activiti.engine.delegate.DelegateExecution execution):void
+    - isSourceTransitionNotExecutionActivityAndNonInterrupting(InterpretableExecution execution):boolean
+}
+class ActivityInstanceStartHandler implements org.activiti.engine.delegate.ExecutionListener {
+    + notify(org.activiti.engine.delegate.DelegateExecution execution):void
+}
+class CallActivityStartHandler implements org.activiti.engine.delegate.ExecutionListener {
+    + notify(org.activiti.engine.delegate.DelegateExecution execution):void
+}
+class ProcessInstanceEndHandler implements org.activiti.engine.delegate.ExecutionListener {
+    + notify(org.activiti.engine.delegate.DelegateExecution execution):void
+}
+class StartEventEndHandler implements org.activiti.engine.delegate.ExecutionListener {
+    + notify(org.activiti.engine.delegate.DelegateExecution execution):void
+}
+class UserTaskAssignmentHandler implements org.activiti.engine.delegate.TaskListener {
+    + notify(org.activiti.engine.delegate.DelegateTask task):void
+}
+class UserTaskIdHandler implements org.activiti.engine.delegate.TaskListener {
+    + notify(org.activiti.engine.delegate.DelegateTask task):void
+}
+}
+/' package finished '/
+@enduml

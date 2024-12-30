@@ -1,0 +1,289 @@
+@startuml
+hide @unlinked
+package "org.activiti.engine.impl.jobexecutor" {
+
+class AcquiredJobs {
+    # acquiredJobBatches:List<List<String>>
+    + acquiredJobs:Set<String>
+    + getJobIdBatches():List<List<String>>
+    + addJobIdBatch(List<String>):void
+    + contains(String jobId):boolean
+    + size():int
+}
+interface AcquireJobsRunnable extends Runnable {
+    + jobWasAdded():void
+    + stop():void
+}
+
+class AcquireJobsRunnableImpl implements AcquireJobsRunnable {
+    # jobExecutor:JobExecutor
+    # isInterrupted:boolean
+    # isJobAdded:boolean
+    # MONITOR:Object
+    # isWaiting:AtomicBoolean
+    # millisToWait:long
+
+    + AcquireJobsRunnableImpl(JobExecutor)
+    + run():void
+    + stop():void
+    + jobWasAdded():void
+    + getMillisToWait():long
+    + setMillisToWait(long ms):void
+}
+class AsyncContinuationJobHandler implements JobHandler {
+    + TYPE:String
+    + getType():String
+    + execute(JobEntity job,String configuration,ExecutionEntity execution,CommandContext commandContext):void
+}
+class AsyncJobAddedNotification implements org.activiti.engine.impl.cfg.TransactionListener {
+    # job:JobEntity
+    # asyncExecutor:AsyncExecutor
+    + AsyncJobAddedNotification(JobEntity job,AsyncExecutor asyncExecutor)
+    + execute(CommandContext):void
+}
+class CallerRunsRejectedJobsHandler implements RejectedJobsHandler {
+    + jobsRejected(JobExecutor jobExecutor,List<String> jobIds):void
+}
+CallerRunsRejectedJobsHandler *--> ExecuteJobsRunnable
+class DefaultFailedJobCommandFactory implements FailedJobCommandFactory {
+    + getCommand(String jobId,Throwable exception):Command<Object>
+}
+class DefaultJobExecutor extends JobExecutor {
+    # queueSize:int
+    # corePoolSize:int
+    # maxPoolSize:int
+    # keepAliveTime:long
+    # threadPoolQueue:BlockingQueue<Runnable>
+    # threadPoolExecutor:ThreadPoolExecutor
+    # startExecutingJobs():void
+    # stopExecutingJobs():void
+    + executeJobs(List<String> jobIds):void
+
+}
+DefaultJobExecutor ..> ExecuteJobsRunnable
+class ExecuteJobsRunnable implements Runnable {
+    - job:JobEntity
+    - jobIds:List<String>
+    - jobExecutor:JobExecutor
+    + ExecuteJobsRunnable(JobExecutor jobExecutor,JobEntity job)
+    + ExecuteJobsRunnable(JobExecutor jobExecutor,List<String> jobIds)
+    + run():void
+    # handleSingleJob():void
+    # handleMultipleJobs():void
+}
+ExecuteJobsRunnable ..> JobExecutorContext
+interface FailedJobCommandFactory {
+    + getCommand(String jobId,Throwable exception):Command<Object>
+}
+
+class FailedJobListener implements org.activiti.engine.impl.cfg.TransactionListener {
+    # commandExecutor:CommandExecutor
+    # jobId:String
+    # exception:Throwable
+    + FailedJobListener(CommandExecutor commandExecutor,String jobId)
+    + execute(CommandContext commandContext):void
+    + setException(Throwable exception):void
+}
+class GetUnlockedTimersByDuedateCmd implements Command<List<TimerEntity>> {
+    # duedate:Date
+    # page:Page
+    + GetUnlockedTimersByDuedateCmd(Date duedate,Page page)
+    + execute(CommandContext):List<TimerEntity>
+}
+class JobAddedNotification implements org.activiti.engine.impl.cfg.TransactionListener {
+    # jobExecutor:JobExecutor
+    + JobAddedNotification(JobExecutor jobExecutor)
+    + execute(CommandContext):void
+}
+abstract class JobExecutor {
+    # name:String
+    # commandExecutor:org.activiti.engine.impl.interceptor.CommandExecutor
+    # acquireJobsCmd:org.activiti.engine.impl.interceptor.Command<AcquiredJobs>
+    # acquireJobsRunnable:AcquireJobsRunnable
+    # rejectedJobsHandler:RejectedJobsHandler
+    # jobAcquisitionThread:Thread
+    # isAutoActivate:boolean
+    # isActive:boolean
+    # maxJobsPerAcquisition:int
+    # waitTimeInMillis:long
+    # lockOwner:String
+    # lockTimeInMillis:int
+    # clockReader:org.activiti.engine.runtime.ClockReader
+
+    + start():void
+    + shutdown():void
+    # ensureInitialization():void
+    # ensureCleanup():void
+    + jobWasAdded():void
+    # startJobAcquisitionThread():void
+    # stopJobAcquisitionThread():void
+    # {abstract} executeJobs(List<String> jobIds):void
+    # {abstract} startExecutingJobs():void
+    # {abstract} stopExecutingJobs():void
+    + jobDone(JobEntity job):void
+    + jobDone(String jobId):void
+    + getCommandExecutor():CommandExecutor
+    + getWaitTimeInMillis():long
+    + setWaitTimeInMillis(int waitMs):void
+    + getLockTimeInMillis():int
+    + setLockTimeInMillis(int lockMs):void
+    + getLockOwner():String
+    + setLockOwner(String lockOwner):void
+    + isAutoActivate():boolean
+    + setAutoActivate(boolean autoActivate):void
+    + setCommandExecutor(CommandExecutor commandExecutor):void
+    + getMaJobsPreAcquisition():int
+    + setMaxJobsPerAcquisition(int max):void
+    + getName():String
+    + getAcquireJobsCmd():Command<AcquiredJobs>
+    + setAcquireJobsCmd(Command<AcquiredJobs> acquireJobsCmd):void
+    + getAcquireJobsRunnable():AcquireJobsRunnable
+    + setAcquireJobsRunnable(AcquireJobsRunnable acquireJobsRunnable):void
+    + getRejectedJobsHandler():RejectedJobsHandler
+    + setRejectedJobsHandler(RejectedJobsHandler rejectedJobsHandler):void
+    + getCurrentTime():String
+    + setClockRead(ClockReader clockReader):void
+
+}
+
+interface JobExecutorContext {
+    + isExecutingExclusiveJob():boolean
+    + setCurrentJob(JobEntity job):void
+    + getCurrentJob():JobEntityÒ
+}
+interface JobHandler {
+    + getType():String
+    + execute(JobEntity job,String configuration,ExecutionEntity execution,CommandContext commandContext):void
+}
+class ManagedJobExecutor extends DefaultJobExecutor {
+    # threadFactory:ManagedThreadFactory
+    + getThreadFactory():ManagedThreadFactory
+    + setThreadFactory(ManagedThreadFactory threadFactory):void
+    + startExecutingJobs():void
+}
+
+class MultipleJobsExecutorContext implements JobExecutorContext {
+    # currentProcessorJobQueue:List<JobEntity>
+    # currentJob:JobEntity
+    + getCurrentProcessorJobQueue():List<JobEntity>
+    + isExecutingExclusiveJob():boolean
+    + setCurrentJob(JobEntity job):void
+    + getCurrentJob():JobEntity
+}
+class ProcessEventJobHandler implements JobHandler {
+    + {static} TYPE:String
+    + getType():String
+    + execute(JobEntity job,String configuration,ExecutionEntity execution,CommandContext commandContext):void
+}
+interface RejectedJobsHandler {
+    + jobsRejected(JobExecutor jobExecutor,List<String> jobIds):void
+}
+class SingleJobExecutorContext implements JobExecutorContext {
+    # currentProcessorJobQueue:List<JobEntity>
+    # currentJob:JobEntity
+    + getCurrentProcessorJobQueue():List<JobEntity>
+    + isExecutingExclusiveJob():boolean
+    + setCurrentJob(JobEntity job):void
+    + getCurrentJob():JobEntity
+}
+class TimerActivateProcessDefinitionHandler extends TimerChangeProcessDefinitionSuspensionStateJobHandler {
+    + {static} TYPE:String
+    + getType():String
+    + execute(JobEntity job,String configuration,ExecutionEntity execution,CommandContext commandContext):void
+}
+class TimerCatchIntermediateEventJobHandler extends TimerEventHandler implements JobHandler {
+    + {static} TYPE:String
+    + getType():String
+    + execute(JobEntity job,String configuration,ExecutionEntity execution,CommandContext commandContext):void
+}
+
+abstract TimerChangeProcessDefinitionSuspensionStateJobHandler implements JobHandler {
+    - {static} TYPE:String
+    + {static} createJobHandlerConfiguration(boolean includeProcessInstances):String
+    + {static} getIncludeProcessInstances(JSONObject jobHandlerCfgJson):boolean
+}
+
+class TimerDeclarationImpl {
+    # description:org.activiti.engine.delegate.Expression
+    # type:TimerDeclarationType
+    # endDateExpression:org.activiti.engine.delegate.Expression
+    # calendarNameExpression:org.activiti.engine.delegate.Expression
+    # jobHandlerType:String
+    # jobHandlerConfiguration:String
+    # repeat:String
+    # exclusive:boolean
+    # retries:int
+    # isInterruptingTimer:boolean
+    + TimerDeclarationImpl(String expression,TimerDeclarationType type,String jobHandlerType,Expression endDateExpression,Expression calendarNameExpression)
+    + TimerDeclarationImpl(Expression expression,TimerDeclarationType type,String jobHandlerType)
+    + getDescription():org.activiti.engine.delegate.Expression
+    + getJobHandlerType():String
+    + getJobHandlerConfiguration():String
+    + setJobHandlerConfiguration(String jobHandlerConfiguration):void
+    + getRepeat():String
+    + setRepeat(String repeat):void
+    + isExclusive():boolean
+    + setExclusive(boolean exclusive):void
+    + getRetries():int
+    + setRetries(int retries):void
+    + setJobHandlerType(String jobHandlerType):void
+    + isInterruptingTimer():boolean
+    + setInterruptingTimer(boolean interruptingTimer):void
+    + prepareTimerEntity(ExecutionEntity execution):void
+}
+
+enum TimerDeclarationType {
+    DATE("dueDate"),
+    DURATION("duration"),
+    CYCLE("cycle");
+
+    + calendarName:String
+    + TimerDeclarationType(String calendarName)
+}
+class TimerEventHandler {
+    ==static field==
+    + {static} PROPERTYNAME_TIMER_ACTIVITY_ID:String
+    + {static} PROPERTYNAME_END_DATE_EXPRESSION:String
+    + {static} PROPERTYNAME_PROCESS_DEFINITION_KEY:String
+    + {static} PROPERTYNAME_CALENDAR_NAME_EXPRESSION:String
+    ==static field==
+    + {static} createConfiguration(String id,Expression endDate,Expression calendarName):String
+    + {static} setActivityIdToConfiguration(String jobHandlerConfiguration,String activityId):String
+    + {static} getActivityIdFromConfiguration(String jobHandlerConfiguration):String
+    + {static} getCalendarNameFromConfiguration(String jobHandlerConfiguration):String
+    + {static} setEndDateToConfiguration(String jobHandlerConfiguration,Expression endDate):String
+    + {static} getEndDateFromConfiguration(String jobHandlerConfiguration):String
+    + {static} setProcessDefinitionKeyToConfiguration(String jobHandlerConfiguration,String activityId):String
+    + {static} getProcessDefinitionKeyFromConfiguration(String jobHandlerConfiguration):String
+    + {static} hasRealActivityId(String jobHandlerConfiguration):boolean
+}
+
+class TimerExecuteNestedActivityJobHandler extends TimerEventHandler implements JobHandler {
+    + {static} TYPE:String
+    + {static} PROPERTYNAME_TIMER_ACTIVITY_ID:String
+    + {static} PROPERTYNAME_END_DATE_EXPRESSION:String
+    + getType():String
+    + execute(JobEntity job,String configuration,ExecutionEntity execution,CommandContext commandContext):void
+    # dispatchActivityTimeoutIfNeeded(JobEntity job,ExecutionEntity execution,CommandContext commandContext):void
+    # dispatchExecutionTimeOut(JobEntity job,ExecutionEntity execution,CommandContext commandContext):void
+    # dispatchActivityTimeOut(JobEntity job,ActivityImpl activity,ExecutionEntity execution,CommandContext commandContext):void
+}
+
+class TimerStartEventJobHandler extends TimerEventHandler implements JobHandler {
+    + {static} TYPE:String
+    + getType():String
+    + execute(JobEntity job,String configuration,ExecutionEntity execution,CommandContext commandContext):void
+    # startProcessInstanceWithInitialActivity(JobEntity job,String configuration,DeploymentManager deploymentManager,CommandContext context):void
+    # startProcessDefinitionByKey(JobEntity job,String configuration,DeploymentManager deploymentManager,CommandContext context):void
+
+}
+class TimerSuspendProcessDefinitionHandler extends TimerChangeProcessDefinitionSuspensionStateJobHandler {
+     + {static} TYPE:String
+     + getType():String
+     + execute(JobEntity job,String configuration,ExecutionEntity execution,CommandContext commandContext):void
+}
+/' package finished  '/
+
+}
+
+@enduml

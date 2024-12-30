@@ -1,0 +1,758 @@
+@startuml
+!include org.activiti.engine.impl.el.puml
+!include org.activiti.engine.impl.javax.el.puml
+hide @unlinked
+
+package "org.activiti.engine.impl.juel" {
+class AstBinary extends AstRightValue {
+    + {static} ADD:AstBinary$Operator
+    + {static} AND:AstBinary$Operator
+    + {static} DIV:AstBinary$Operator
+    + {static} EQ:AstBinary$Operator
+    + {static} GE:AstBinary$Operator
+    + {static} GT:AstBinary$Operator
+    + {static} LE:AstBinary$Operator
+    + {static} LT:AstBinary$Operator
+    + {static} MOD:AstBinary$Operator
+    + {static} MUL:AstBinary$Operator
+    + {static} NE:AstBinary$Operator
+    + {static} OR:AstBinary$Operator
+    + {static} SUB:AstBinary$Operator
+    - operator:AstBinary$Operator
+    - left:AstNode
+    - right:AstNode
+    + AstBinary(AstNode left,AstNode right,AstBinary$Operator operator)
+    + getOperator():AstBinary$Operator
+    + eval(Bindings bindings,ELContext context):Object
+    + appendStructure(StringBuilder b,Bindings bindings):void
+    + getCardinality():int
+    + getChild(int i):AstNode
+
+}
+interface AstBinary$Operator {
+    + eval(Bindings bindings,ELContext context,AstNode left,AstNode right):Object
+}
+abstract class AstBinary$SimpleOperator implements AstBinary$Operator {
+    + eval(Bindings bindings,ELContext context,AstNode left,AstNode right):Object
+    + {abstract} apply(TypeConverter converter,Object o1,Object o2):Object
+}
+
+class AstBoolean extends AstLiteral {
+    - value:boolean
+    + AstBoolean(boolean value)
+    + eval(Bindings bindings,ELContext context):Object
+    + toString():String
+    + appendStructure(StringBuilder b,Bindings bindings):void
+}
+
+class AstBracket extends AstProperty {
+    # property:AstNode
+    + AstBracket(AstNode base,AstNode property,boolean lvalue,boolean strict)
+    # getProperty(Bindings bindings,ELContext context):Object
+    + toString():String
+    + appendStructure(StringBuilder b,Bindings bindings):void
+    + getCardinality():int
+    + getChild(int i):AstNode
+}
+
+class AstChoice extends AstRightValue {
+    - question:AstNode
+    - yes:AstNode
+    - no:AstNode
+    + AstChoice(AstNode question,AstNode yes,AstNode no)
+    + eval(Bindings bindings,ELContext context):Object
+    + toString():String
+    + appendStructure(StringBuilder b,Bindings bindings):void
+    + getCardinality():int
+    + getChild(int i):AstNode
+}
+
+class AstComposite extends AstRightValue {
+    - nodes:List<AstNode>
+    + AstComposite(List<AstNode> nodes)
+    + eval(Bindings bindings,ELContext context):Object
+    + toString():String
+    + appendStructure(StringBuilder b,Bindings bindings):void
+    + getCardinality():int
+    + getChild(int i):AstNode
+}
+
+class AstDot extends AstProperty {
+    # property:String
+    + AstDot(AstNode base,String property,boolean lvalue)
+    # getProperty(Bindings bindings,ELContext context):String
+    + toString():String
+    + appendStructure(StringBuilder b,Bindings bindings):void
+    + getCardinality():int
+}
+
+class AstEval extends AstNode {
+    - child:AstNode
+    - deferred:boolean
+    + AstEval(AstNode child,boolean deferred)
+    + isDeferred():boolean
+    + isLeftValue():boolean
+    + isMethodInvocation():boolean
+    + getValueReference(Bindings bindings,ELContext context):ValueReference
+    + eval(Bindings bindings,ELContext context):Object
+    + toString():String
+    + appendStructure(StringBuilder b,Bindings bindings):void
+    + getMethodInfo(Bindings bindings,ELContext context,Class<?> returnType,Class<?>[] paramTypes):MethodInfo
+    + invoke(Bindings bindings,ELContext context,Class<?> returnType,Class<?>[] paramTypes,Object[] paramValues):Object
+    + getType(Bindings bindings,ELContext context):Class<?>
+    + isLiteralText():boolean
+    + isReadOnly(Bindings bindings,ELContext context):boolean
+    + setValue(Bindings bindings,ELContext context):void
+    + getCardinality():int
+    + getChild(int i):AstNode
+}
+
+class AstFunction extends AstRightValue implements FunctionNode {
+    - index:int
+    - name:String
+    - params:AstParameters
+    - varargs:boolean
+    + AstFunction(String name,int index,AstParameters params)
+    + AstFunction(String name,int index,AstParameters params,boolean varargs)
+    # invoke(Bindings bindings,ELContext context,Object base,Method method):Object
+    + eval(Bindings bindings,ELContext context):Object
+    + toString():String
+    + appendStructure(StringBuilder b,Bindings bindings):void
+    + getIndex():int
+    + getName():String
+    + isVarArgs():boolean
+    + getParamCount():int
+    + getParam(int i):AstNode
+    + getCardinality():int
+    + getChild(int i):AstNode
+}
+
+class AstIdentifier extends AstNode implements IdentifierNode {
+    - name:String
+    - index:int
+    + AstIdentifier(String name,int index)
+    + getType(Bindings bindings,ELContext context):Class<?>
+    + isLeftValue():boolean
+    + isMethodInvocation():boolean
+    + isLiteralText():boolean
+    + getValueReference(Bindings bindings,ELContext context):ValueReference
+    + eval(Bindings bindings,ELContext context):Object
+    + setValue(Bindings bindings,ELContext context,Object value):void
+    + isReadOnly(Bindings bindings,ELContext context):boolean
+    # getMethod(Bindings bindings,ELContext context,Class<?> returnType,Class<?>[] paramTypes):Method
+    + getMethodInfo(Bindings bindings,ELContext context,Class<?> returnType,Class<?>[] paramTypes):MethodInfo
+    + invoke(Bindings bindings,ELContext context,Class<?> returnType,Class<?>[] paramTypes,Object[] params):Object
+    + toString():String
+    + appendStructure(StringBuilder b,Bindings bindings):void
+    + getIndex():int
+    + getName():String
+    + getCardinality():int
+    + getChild(int i):AstNode
+}
+
+abstract class AstLiteral extends AstRightValue {
+    + getCardinality():int
+    + getChild(int i):AstNode
+}
+
+class AstMethod extends AstNode {
+    - property:AstProperty
+    - params:AstParameters
+    + AstMethod(AstProperty property,AstParameters params)
+    + isLiteralText():boolean
+    + getType(Bindings bindings,ELContext context):Class<?>
+    + isReadOnly(Bindings bindings,ELContext context):boolean
+    + setValue(Bindings bindings,ELContext context,Object value):void
+    + getMethodInfo(Bindings bindings,ELContext context,Class<?> returnType,Class<?>[] paramTypes):MethodInfo
+    + isLeftValue():boolean
+    + isMethodInvocation():boolean
+    + getValueReference(Bindings bindings,ELContext context):ValueReference
+    + appendStructure(StringBuilder b,Bindings bindings):void
+    + eval(Bindings bindings,ELContext context):Object
+    + invoke(Bindings bindings,ELContext context,Class<?> returnType,Class<?>[] paramTypes,Object[] paramValues):Object
+    + getCardinality():int
+    + getChild(int i):AstNode
+    + toString():String
+}
+
+class AstNested extends AstRightValue {
+    - child:AstNode
+    + AstNested(AstNode child)
+    + eval(Bindings bindings,ELContext context)
+    + toString():String
+    + appendStructure(StringBuilder b,Bindings bindings):void
+    + getCardinality():int
+    + getChild(int i):AstNode
+}
+
+abstract class AstNode implements ExpressionNode {
+    + {final} getValue(Bindings bindings,ELContext context,Class<?> type):Object
+    + {abstract} appendStructure(StringBuilder,Bindings):void
+    + {abstract} eval(Bindings,ELContext):Object
+    + getStructuralId(Bindings bindings):String
+}
+
+class AstNull extends AstLiteral {
+    + eval(Bindings bindings,ELContext context):Object
+    + toString():String
+    + appendStructure(StringBuilder b,Bindings bindings):void
+}
+
+class AstNumber extends AstLiteral {
+    - value:Number
+    + AstNumber(Number value)
+    + eval(Bindings bindings,ELContext context):Object
+    + toString():String
+    + appendStructure(StringBuilder b,Bindings bindings):void
+}
+
+class AstParameters extends AstRightValue {
+    - nodes:List<AstNode>
+    + AstParameters(List<AstNode> nodes)
+    + eval(Bindings bindings,ELContext context):Object[]
+    + toString():String
+    + appendStructure(StringBuilder b,Bindings bindings):void
+    + getCardinality():int
+    + getChild(int i):AstNode
+}
+
+abstract class AstProperty extends AstNode {
+    # prefix:AstNode
+    # lvalue:boolean
+    # strict:boolean
+    + AstProperty(AstNode prefix,boolean lvalue,boolean strict)
+    # {abstract} getProperty(Bindings bindings,ELContext context):Object
+    # getPrefix():AstNode
+    + getValueReference(Bindings bindings,ELContext context):ValueReference
+    + eval(Bindings bindings,ELContext context):Object
+    + isLiteralText():boolean
+    + isLeftValue():boolean
+    + isMethodInvocation():boolean
+    + getType(Bindings bindings,ELContext context):Class<?>
+    + isReadOnly(Bindings bindings,ELContext context):boolean
+    + setValue(Bindings bindings,ELContext context,Object value):void
+    # findMethod(String name,Class<?> clazz,Class<?> returnType,Class<?>[] paramTypes):Method
+    + getMethodInfo(Bindings bindings,ELContext context,Class<?> returnType,Class<?>[] paramTypes):MethodInfo
+    + invoke(Bindings bindings,ELContext context,Class<?> returnType,Class<?>[] paramTypes,Object[] paramValues):Object
+    + getChild(int i):AstNode
+}
+
+abstract class AstRightValue extends AstNode {
+    + isLiteralText():boolean
+    + getType(Bindings bindings,ELContext context):boolean
+    + isReadOnly(Bindings bindings,ELContext context):boolean
+    + setValue(Bindings bindings,ELContext context,Object value):void
+    + getMethodInfo(Bindings bindings,ELContext context,Class<?> returnType,Class<?>[] paramTypes):MethodInfo
+    + invoke(Bindings bindings,ELContext context,Class<?> returnType,Class<?>[] paramTypes,Object[] paramValues):Object
+    + isLeftValue():boolean
+    + isMethodInvocation():boolean
+    + getValueReference(Bindings bindings,ELContext context):ValueReference
+}
+
+class AstString extends AstLiteral {
+    - value:String
+    + AstString(String value)
+    + eval(Bindings bindings,ELContext context):Object
+    + toString():String
+    + appendStructure(StringBuilder b,Bindings bindings):void
+}
+
+class AstText extends AstNode {
+    - value:String
+    + AstText(String value)
+    + isLiteralText():boolean
+    + isLeftValue():boolean
+    + isMethodInvocation():boolean
+    + getType(Bindings bindings,ELContext context):Class<?>
+    + isReadOnly(Bindings bindings,ELContext context):boolean
+    + setValue(Bindings bindings,ELContext context):void
+    + getValueReference(Bindings bindings,ELContext context):ValueReference
+    + eval(Bindings bindings,ELContext context):Object
+    + getMethodInfo(Bindings bindings,ELContext context,Class<?> returnType,Class<?>[] paramTypes):MethodInfo
+    + invoke(Bindings bindings,ELContext context,Class<?> returnType,Class<?>[] paramTypes,Object[] paramValues):Object
+    + toString():String
+    + appendStructure(StringBuilder b,Bindings bindings):void
+    + getCardinality():int
+    + getChild(int i):AstNode
+}
+
+class AstUnary extends AstRightValue {
+    + {static} EMPTY:AstUnary$Operator
+    + {static} NEG:AstUnary$Operator
+    + {static} NOT:AstUnary$Operator
+    - operator:Operator
+    - child:AstNode
+    + AstUnary(AstNode child,AstUnary$Operator operator)
+    + getOperator():AstUnary$Operator
+    + eval(Bindings bindings,ELContext context):Object
+    + toString():String
+    + appendStructure(StringBuilder b,Bindings bindings):void
+    + getCardinality():int
+    + getChild(int i):AstNode
+}
+
+interface AstUnary$Operator {
+    + eval(Bindings bindings,ELContext context,AstNode node):Object
+}
+
+abstract class SimpleOperator implements AstUnary$Operator {
+     + eval(Bindings bindings,ELContext context,AstNode node):Object
+     # apply(TypeConverter converter,Object o):Object
+ }
+
+class Bindings implements TypeConverter {
+    - {static} NO_FUNCTIONS:Method[]
+    - {static} NO_VARIABLES:ValueExpression[]
+    - functions:Method[]
+    - variables:ValueExpression[]
+    - converter:TypeConverter
+    + Bindings(Method[] functions,ValueExpression[] variables)
+    + Bindings(Method[] functions,ValueExpression[] variables,TypeConverter converter)
+    + getFunction(int index):Method
+    + isFunctionBound(int index):boolean
+    + getVariable(int index):ValueExpression
+    + isVariableBound(int index):boolean
+    + convert(Object value,Class<T> type):T
+    + equals(Object obj):boolean
+    + hasCode():int
+    - writeObject(ObjectOutputStream out):void
+    - readObject(ObjectInputStream in):void
+}
+
+class Bindings$MethodWrapper {
+    - method:Method
+    - writeObject(ObjectOutputStream out):void
+    - readObject(ObjectInputStream in):void
+}
+
+class Builder implements TreeBuilder {
+    # features:EnumSet<Builder$Feature>
+    + Builder()
+    + Builder(Builder$Feature ... features)
+    + isEnabled(Feature feature):boolean
+    + build(String expression):Tree
+    # createParser(String expression):Parser
+    + equals(Object obj):boolean
+    + hashCode():int
+}
+
+enum Builder$Feature {
+    METHOD_INVOCATIONS
+    NULL_PROPERTIES
+    VARARGS
+}
+
+class Cache implements TreeCache {
+    - primary:Map<String,Tree>
+    - secondary:Map<String,Tree>
+    + Cache(int size)
+    + Cache(int size,Map<String,Tree> secondary)
+    + get(String expression):Tree
+    + put(String expression,Tree tree):void
+}
+
+class ExpressionFactoryImpl extends org.activiti.engine.impl.javax.el.ExpressionFactory {
+    + {static} PROP_METHOD_INVOCATIONS:String
+    + {static} PROP_VAR_ARGS:String
+    + {static} PROP_NULL_PROPERTIES:String
+    + {static} PROP_CACHE_SIZE:String
+
+    - store:TreeStore
+    - converter:TypeConverter
+    == constructor ==
+    + ExpressionFactoryImpl()
+    + ExpressionFactoryImpl(ExpressionFactoryImpl$Profile profile)
+    + ExpressionFactoryImpl(Properties properties)
+    + ExpressionFactoryImpl(ExpressionFactoryImpl$Profile profile,Properties properties)
+    + ExpressionFactoryImpl((Properties properties,TypeConverter converter)
+    + ExpressionFactoryImpl(ExpressionFactoryImpl$Profile profile,Properties properties,TypeConverter converter)
+    + ExpressionFactoryImpl(TreeStore store)
+    + ExpressionFactoryImpl(TreeStore store,TypeConverter converter)
+    == method ==
+    - loadDefaultProperties():Properties
+    - loadProperties(String path):Properties
+    - getFeatureProperty(ExpressionFactoryImpl$Profile profile,Properties properties,Feature feature,String property):boolean
+    # createTreeStore(int defaultCacheSize,ExpressionFactoryImpl$Profile profile,Properties properties):TreeStore
+    # createTypeConverter(Properties properties):TypeConverter
+    # createTreeBuilder(Properties,Feature):TreeBuilder
+    - load(Class<?> clazz,Properties prop):Class<?>
+    + coerceToType(Object obj,Class<?> targetType):Object
+    + createValueExpression(Object instance,Class<?> expectedType):ObjectValueExpression
+    + createValueExpressionELContext context,String expression,Class<?> expectedType):TreeValueExpression
+    + createMethodExpression(ELContext context,String expression,Class<?> expectedReturnType,Class<?>[] expectedParamTypes):TreeMethodExpression
+}
+
+class ExpressionFactoryImpl$Profile {
+    JEE5
+    JEE6
+    - features:EnumSet<Builder$Feature>
+    - Profile(EnumSet<Builder$Feature> features)
+    ~ features():Builder$Feature[]
+    ~ contains(Builder$Feature feature):boolean
+}
+
+interface ExpressionNode extends Node {
+    + isLiteralText():boolean
+    + isLeftValue():boolean
+    + isMethodInvocation():boolean
+    + getValue(Bindings bindings,ELContext context,Class<?> expectedType):Object
+    + getValueReference(Bindings bindings,ELContext context):ValueReference
+    + getType(Bindings bindings,ELContext context):Class<?>
+    + isReadOnly(Bindings bindings,ELContext context):boolean
+    + setValue(Bindings bindings,ELContext context,Object value)
+    + getMethodInfo(Bindings bindings,ELContext context,Class<?> returnType,Class<?>[] paramTypes)
+    + invoke(Bindings bindings,ELContext context,Class<?> returnType,Class<?>[] paramTypes,Object[] paramValues):Object
+    + getStructuralId(Bindings bindings):String
+}
+
+interface FunctionNode extends Node {
+    + getName():String
+    + getIndex():int
+    + getParamCount():int
+    + isVarArgs():boolean
+}
+
+interface IdentifierNode extends Node {
+    + getName():String
+    + getIndex():int
+}
+
+class LocalMessage {
+    - {static} BUNDLE_NAME:String
+    - {static} RESOURCE_BUNDLE:java.util.ResourceBundle
+    + {static} get(String key,Object... args):String
+}
+
+interface Node {
+    + getCardinality():int
+    + getChild(int):Node
+}
+
+class NodePrinter {
+    + {static} dump(PrintWriter writer,Node node):void
+    - {static} dump(PrintWriter writer,Node node,Stack<Node> predecessors):void
+    - {static} isLastSibling(Node node,Node parent):boolean
+}
+
+class ObjectValueExpression extends org.activiti.engine.impl.javax.el.ValueExpression {
+    - converter:TypeConverter
+    - object:Object
+    - type:Class<?>
+    + ObjectValueExpression(TypeConverter converter,Object object,Class<?> type)
+    + equals(Object obj):boolean
+    + hashCode():int
+    + getValue(ELContext context):Object
+    + getExpressionString():String
+    + isLiteralText():boolean
+    + getType(ELContext context):Class<?>
+    + isReadOnly(ELContext context):boolean
+    + setValue(ELContext context,Object value):void
+    + toString():String
+    + getExpectedType():Class<?>
+}
+ObjectValueExpression *-->TypeConverter
+
+class Parser {
+    # context:Builder
+    # scanner:Scanner
+    - identifiers:List<IdentifierNode>
+    - functions:List<FunctionNode>
+    - lookahead:List<Parser$LookaheadToken>
+    - token:Scanner$Token
+    - position:int
+    # extensions:Map<Scanner$ExtensionToken,Parser$ExtensionHandler>
+
+    == constructor ==
+    + Parser(Builder builder,String input)
+    == method ==
+    # createScanner(String expression):Scanner
+    + putExtensionHandler(Scanner$ExtensionToken token,Parser$ExtensionHandler handler):void
+    # getExtensionHandler(Scanner$Token token):ExtensionHandler
+    # parseInteger(String):Number
+    # parseFloat(String):Float
+    # createAstBinary(AstNode left,AstNode right,AstBinary$Operator operator):AstBinary
+    # createAstBracket(AstNode base,AstNode property,boolean lvalue,boolean strict):AstBracket
+    # crateAstChoice(AstNode question,AstNode yes,AstNode no):AstChoice
+    # createAstComposite(List<AstNode> nodes):AstComposite
+    # createAstDot(AstNode base,String property,boolean lvalue):AstDot
+    # createAstFunction(String name,int index,AstParameters params):AstFunction
+    # createAstIdentifier(String name,int index):AstIdentifier
+    # createAstMethod(AstProperty property,AstParameters params):AstMethod
+    # createAstUnary(AstNode child,AstUnary$Operator operator):AstUnary
+    # getFunctions():List<FunctionNode>
+    # getIdentifiers():List<IdentifierNode>
+    # getToken():Scanner$Token
+    # lookahead(int index):Scanner$Token
+    # consumeToken():Scanner$Token
+    # consumeToken(Symbol):Token
+    + tree():Tree
+    # text():AstNode
+    # eval():AstEval
+    # eval(boolean,boolean):AstEval
+    # expr(boolean):AstNode
+    # or(boolean):AstNode
+    # add(boolean):AstNode
+    # eq(boolean):AstNode
+    # cmp(boolean):AstNode
+    # add(boolean):AstNode
+    # mul(boolean):AstNode
+    # unary(boolean):AstNode
+    # value():AstNode
+    # nonliteral():AstNode
+    # params():AstParameters
+    # literal():AstNode
+    # function(String,AstParameters):AstFunction
+    # identifier(String):AstIdentifier
+
+}
+class Parser$LookaheadToke {
+    ~ token:Scanner$Token
+    ~ position:int
+    + Parser$LookaheadToke(Scanner$Token token,int position)
+}
+class Parser$ExtensionPoint {
+    OR,AND,EQ,CMP,ADD,MUL,UNARY,LITERAL
+}
+abstract class Parser$ExtensionHandler {
+    - point:Parser$ExtensionPoint
+    + Parser$ExtensionHandler(Parser$ExtensionPoint point)
+    + getExtensionPoint():Parser$ExtensionPoint
+    + {abstract} createAstNode(AstNode... children):AstNode
+}
+
+
+class RootPropertyResolver extends ELResolver {
+    - map:Map<String,Object>
+    - readOnly:boolean
+    + RootPropertyResolver()
+    + RootPropertyResolver(boolean readOnly)
+    + getCommonPropertyType(ELContext context,Object property):boolean
+    + getFeatureDescriptors(ELContext context,Object base):Iterator<FeatureDescriptor>
+    + getType(ELContext context,Object base,Object property):Class<?>
+    + getValue(ELContext context,Object base,Object property):Object
+    + isReadOnly(ELContext context,Object base,Object property):boolean
+    + setValue(ELContext context,Object base,Object property,Object value):void
+    + invoke(ELContext context,Object base,Object method,Class<?>[] paramTypes,Object[] params):Object
+    + getProperty(String property):Object
+    + setProperty(String property,Object value):void
+    + isProperty(String property):boolean
+    + properties():Iterable<String>
+}
+
+class Scanner {
+    - {static} KEYMAP:Map<String,Token>
+    - {static} FIXMAP:Map<Symbol,Token>
+    - token:Scanner$Token
+    - position:int
+    - input:String
+    # builder:StringBuilder
+    + Scanner(String input)
+    + getInput():String
+    + getToken():Scanner$Token
+    + getPosition():int
+    # isDigit(char c):boolean
+    # keyword(String s):Token
+    # fixed(Symbol symbol):Token
+    # token(Symbol symbol,String image,int length):Token
+    # isEval():boolean
+    # nextText():Token
+    # nextString():Token
+    # nextNumber():Token
+    # nextEval():Token
+    # nextToken():Token
+    + next():Token
+}
+class Scanner$Token {
+    - symbol:Scanner$Symbol
+    - image:String
+    - length:int
+    + Scanner$Token(Scanner$Symbol symbol,String image)
+    + Scanner$Token(Scanner$Symbol symbol,String image,int length)
+    + getSymbol():Scanner$Symbol
+    + getImage():String
+    + getSize():int
+    + toString():String
+}
+class Scanner$ExtensionToken extends Scanner$Token {
+    + Scanner$ExtensionToken(String image)
+}
+enum Scanner$Symbol {
+    EOF,PLUS,MINUS,MUL,DIV,MOD,LPAREN,RPAREN,IDENTIFIER,
+    NOT,AND,OR,EMPTY,INSTANCEOF,INTEGER,FLOAT,TRUE,FALSE,STRING,NULL,
+    LE,LT,GE,GT,EQ,NE,QUESTION,COLON,TEXT,DOT,LBRACK,RBRACK,COMMA,
+    START_EVAL_DEFERRED,START_EVAL_DYNAMIC,END_EVAL,EXTENSION
+
+    - string:String
+    - Symbol()
+    - Symbol(String string)
+    + toString():String
+}
+
+class SimpleContext extends org.activiti.engine.impl.javax.el.ELContext {
+    - functions:SimpleContext$Functions
+    - variables:SimpleContext$Variables
+    - resolver:ELResolver
+    + SimpleContext()
+    + SimpleContext(ELResolver resolver)
+
+    + setFunction(String prefix,String localName,Method method):void
+    + setVariable(String name,ValueExpression valueExpression):void
+    + getFunctionMapper():FunctionMapper
+    + getVariableMapper():VariableMapper
+    + getELResolver():ELResolver
+    + setELResolver(ELResolver resolver):void
+}
+SimpleContext *--> SimpleContext$Functions
+SimpleContext *--> SimpleContext$Variables
+SimpleContext *--> org.activiti.engine.impl.javax.el.ELResolver
+
+class SimpleContext$Functions extends org.activiti.engine.impl.javax.el.FunctionMapper {
+    ~ map:Map<String,Method>
+    + resolveFunction(String prefix,String localName):Method
+    + setFunction(String prefix,String localName,Method method):void
+}
+class SimpleContext$Variables extends org.activiti.engine.impl.javax.el.VariableMapper {
+    ~ map:Map<String,ValueExpression>
+    + resolveVariable(String variable):ValueExpression
+    + setVariable(String variable,ValueExpression expression):ValueExpression
+}
+
+class SimpleResolver extends ELResolver {
+    - {static} DEFAULT_RESOLVER_READ_ONLY:CompositeELResolver
+    - {static} DEFAULT_RESOLVER_READ_WRITE:CompositeELResolver
+    - root:RootPropertyResolver
+    - delegate:CompositeELResolver
+    == constructor
+    + SimpleResolver(ELResolver resolver,boolean readOnly)
+    + SimpleResolver(ELResolver resolver)
+    + SimpleResolver(boolean readOnly)
+    + SimpleResolver()
+    == method ==
+    + getRootPropertyResolver():RootPropertyResolver
+    + getCommonPropertyType(ELContext context,Object base):Class<?>
+    + getFeatureDescriptors(ELContext context,Object base):Iterator<FeatureDescriptor>
+    + getType(ELContext context,Object base,Object property):Class<?>
+    + getValue(ELContext context,Object base,Object property):Object
+    + isReadOnly(ELContext context,Object base,Object property):boolean
+    + setValue(ELContext context,Object base,Object property,Object value):void
+    + invoke(ELContext context,Object base,Object method,Class<?> paramTypes,Object[] params):Object
+}
+
+class Tree {
+    - root:ExpressionNode
+    - functions:Collection<FunctionNode>
+    - identifiers:Collection<IdentifierNode>
+    - deferred:boolean
+    + Tree(ExpressionNode root,Collection<FunctionNode> functions,Collection<IdentifierNode> identifiers,boolean deferred)
+    + getFunctionNodes():Iterable<FunctionNode>
+    + getIdentifierNodes():Iterable<IdentifierNode>
+    + getRoot():ExpressionNode
+    + isDeferred():boolean
+    + toString():String
+    + bind(FunctionMapper fnMapper,VariableMapper varMapper):Bindings
+    + bind(FunctionMapper fnMapper,VariableMapper varMapper,TypeConverter converter):Bindings
+
+}
+Tree ..> org.activiti.engine.impl.javax.el.FunctionMapper
+Tree ..> org.activiti.engine.impl.javax.el.VariableMapper
+
+
+interface TreeBuilder {
+    + build(String expression):Tree
+}
+
+interface TreeCache {
+    + get(String expression):Tree
+    + put(String expression,Tree tree):void
+}
+
+class TreeMethodExpression extends org.activiti.engine.impl.javax.el.MethodExpression {
+    - builder:TreeBuilder
+    - bindings:Bindings
+    - expr:String
+    - type:Class<?>
+    - types:Class<?>[]
+    - deferred:boolean
+    - node:ExpressionNode
+    - structure:String
+    == constructor ==
+    + TreeMethodExpression(TreeStore store,FunctionMapper fnMapper,VariableMapper varMapper,TypeConverter converter,String expr,Class<?> returnTYpe,Class<?>[] paramTypes)
+    == method ==
+    - getStructuralId():String
+    + getMethodInfo(ELContext context):MethodInfo
+    + getExpressionString():String
+    + invoke(ELContext context,Object[] paramValues):Object
+    + isLiteralText():boolean
+    + isParametersProvided():boolean
+    + isDeferred():boolean
+    + equals(Object obj):boolean
+    + hashCode():int
+    + toString():String
+    - readObject(ObjectInputStream in):void
+}
+
+class TreeStore {
+    - cache:TreeCache
+    - builder:TreeBuilder
+    + TreeStore(TreeBuilder builder,TreeCache cache)
+    + getBuilder():TreeBuilder
+    + get(String expression):Tree
+}
+TreeStore *--> TreeCache
+TreeStore *--> TreeBuilder
+
+
+class TreeValueExpression extends org.activiti.engine.impl.javax.el.ValueExpression {
+    - builder:TreeBuilder
+    - bindings:Bindings
+    - expr:String
+    - type:Class<?>
+    - deferred:boolean
+    - node:ExpressionNode
+    - structure:String
+    == constructor ==
+    + TreeValueExpression(TreeStore,FunctionMapper,VariableMapper,TypeConverter,String,Class<?>)
+    == method ==
+    - getStructuralId():String
+    + getExpectedType():Class<?>
+    + getExpressionString():String
+    + getType(ELContext context):Class<?>
+    + getValue(ELContext context):Object
+    + isReadOnly(ELContext context):boolean
+    + setValue(ELContext context,Object value):void
+    + isLiteralText():boolean
+    + getValueReference(ELContext context):ValueReference
+    + equals(Object obj):boolean
+    + hashCode():int
+    + toString():String
+    + readObject(ObjectInputStream in):void
+
+}
+TreeValueExpression *--> Bindings
+
+
+interface TypeConverter {
+    + {static} DEFAULT:TypeConverter
+    + convert(Object,Class<T>):T
+}
+class TypeConverterImpl implements TypeConverter {
+    # coerceToBoolean(Object):Boolean
+    # coerceToCharacter(Object):Character
+    # coerceToBigDecimal(Object):BigDecimal
+    # coerceToBigInteger(Object):BigInteger
+    # coerceToDouble(Object):Double
+    # coerceToFloat((Object):Float
+    # coerceToLong(Object):Long
+    # coerceToInteger(Object):Integer
+    # coerceToShort(Object):Short
+    # coerceToByte(Object):Byte
+    # coerceToString(Object):String
+    # coerceToEnum(Object,Class<T>):T
+    # coerceStringToType(String,Class<?>:Object
+    # coerceToType(Object,Class<?>):Object
+}
+}
+
+/' package finished '/
+
+@enduml

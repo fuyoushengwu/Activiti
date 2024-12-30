@@ -592,7 +592,7 @@ class CustomVariableType implements VariableType {
   }
 
   @Override
-  public boolean isCachable() {
+  public boolean isCacheAble() {
     return true;
   }
 

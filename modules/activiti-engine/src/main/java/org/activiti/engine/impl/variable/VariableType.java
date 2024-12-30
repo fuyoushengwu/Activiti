@@ -30,7 +30,7 @@ public interface VariableType {
    *    fresh call to {@link #getValue(ValueFields)}.</p> 
    * @return whether variables of this type are cacheable.
    */
-  boolean isCachable();
+  boolean isCacheAble();
   
   /**
    * @return whether this variable type can store the specified value.

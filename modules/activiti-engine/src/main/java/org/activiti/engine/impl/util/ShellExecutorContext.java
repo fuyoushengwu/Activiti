@@ -21,16 +21,16 @@ import org.activiti.engine.cfg.security.ExecutorContext;
  */
 public class ShellExecutorContext implements ExecutorContext {
     private Boolean waitFlag;
-    private final Boolean cleanEnvBoolan;
+    private final Boolean cleanEnvBoolean;
     private final Boolean redirectErrorFlag;
     private final String directoryStr;
     private final String resultVariableStr;
     private final String errorCodeVariableStr;
     private List<String> argList;
 
-    public ShellExecutorContext(Boolean waitFlag, Boolean cleanEnvBoolan, Boolean redirectErrorFlag, String directoryStr, String resultVariableStr, String errorCodeVariableStr, List<String> argList) {
+    public ShellExecutorContext(Boolean waitFlag, Boolean cleanEnvBoolean, Boolean redirectErrorFlag, String directoryStr, String resultVariableStr, String errorCodeVariableStr, List<String> argList) {
         this.waitFlag = waitFlag;
-        this.cleanEnvBoolan = cleanEnvBoolan;
+        this.cleanEnvBoolean = cleanEnvBoolean;
         this.redirectErrorFlag = redirectErrorFlag;
         this.directoryStr = directoryStr;
         this.resultVariableStr = resultVariableStr;
@@ -46,8 +46,8 @@ public class ShellExecutorContext implements ExecutorContext {
         this.waitFlag = waitFlag;
     }
 
-    public Boolean getCleanEnvBoolan() {
-        return cleanEnvBoolan;
+    public Boolean getCleanEnvBoolean() {
+        return cleanEnvBoolean;
     }
 
     public Boolean getRedirectErrorFlag() {

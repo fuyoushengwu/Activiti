@@ -1,0 +1,222 @@
+@startuml
+
+/' !include org.activiti.engine.impl.pvm.puml '/
+/' !include org.activiti.engine.delegate.puml '/
+
+
+hide @unlinked
+
+package "org.activiti.engine.impl.pvm.process" {
+
+class ActivityImpl extends ScopeImpl implements org.activiti.engine.impl.pvm.PvmActivity,HasDIBounds {
+    # outgoingTransitions:List<TransitionImpl>
+    # namedOutgoingTransitions:Map<String,TransitionImpl>
+    # variables:Map<String,Object>
+    # incomingTransitions:List<TransitionImpl>
+    # activityBehavior:org.activiti.engine.impl.pvm.delegate.ActivityBehavior
+    # parent:ScopeImpl
+    # isScope:boolean
+    # isAsync:boolean
+    # isExclusive:boolean
+    # failedJobRetryTimeCycleValue:String
+    # x:int
+    # y:int
+    # width:int
+    # height:int
+
+    + ActivityImpl(String id,ProcessDefinitionImpl processDefinition)
+    + getFailedJobRetryTimeCycleValue():String
+    + setFailedJobRetryTimeCycleValue(String failedJobRetryTimeCycleValue):void
+    + createOutgoingTransition():TransitionImpl
+    + createOutgoingTransition(String transitionId):TransitionImpl
+    + createOutgoingTransition(String transitionId,org.activiti.engine.delegate.Expression skipExpression):TransitionImpl
+    + findOutgoingTransition(String transitionId):TransitionImpl
+    + getParentActivity():ActivityImpl
+    + setOutgoingTransitions(List<TransitionImpl> outgoingTransitions):void
+    + setParent(ScopeImpl parent):void
+    + setIncomingTransitions(List<TransitionImpl> incomingTransitions):void
+    + getOutgoingTransitions():List<PvmTransition>
+    + getActivityBehavior():org.activiti.engine.impl.pvm.delegate.ActivityBehavior
+    + setActivityBehavior(org.activiti.engine.impl.pvm.delegate.ActivityBehavior):void
+    + getParent():ScopeImpl
+    + getIncomingTransitions():List<PvmTransition>
+    + getVariables():Map<String,Object>
+    + setVariables(Map<String,Object>):void
+    + isScope():boolean
+    + setScope(boolean isScope):void
+    + getX():int
+    + setX(int x):void
+    + getY():int
+    + setY(int y):void
+    + getWidth():int
+    + setWidth(int width):void
+    + getHeight():int
+    + setHeight(int height):void
+    + isAsync():boolean
+    + setAsync(boolean isAsync):void
+    + isExclusive():boolean
+    + setExclusive(boolean isExclusive):void
+
+}
+ActivityImpl *--> TransitionImpl
+
+interface HasDIBounds {
+    + getWidth():int
+    + getHeight():int
+    + getX():int
+    + getY():int
+    + setWidth(int)
+    + setHeight(int)
+    + setX(int)
+    + setY(int)
+}
+
+class Lane implements HasDIBounds {
+    # id:String
+    # name:String
+    # flowNodeIds:List<String>
+    # x:int
+    # y:int
+    # width:int
+    # height:int
+
+    + setId(String id):void
+    + getId():String
+    + getName():String
+    + setName(String):void
+    + getWidth():int
+    + getHeight():int
+    + getX():int
+    + getY():int
+    + setWidth(int)
+    + setHeight(int)
+    + setX(int)
+    + setY(int)
+    + getFlowNodeIds():List<String>
+}
+
+class LaneSet {
+    # id:String
+    # lanes:List<Lane>
+    # name:String
+    + setId(String id):void
+    + getId():String
+    + getName():String
+    + setName(String):void
+    + getLanes():List<Lane>
+    + addLane(Lane laneToAdd):void
+    + getLaneForId(String id):Lane
+}
+
+class ParticipantProcess implements HasDIBounds {
+    # id:String
+    # name:String
+    # x:int
+    # y:int
+    # width:int
+    # height:int
+    + setId(String id):void
+    + getId():String
+    + getName():String
+    + setName(String):void
+    + getWidth():int
+    + getHeight():int
+    + getX():int
+    + getY():int
+    + setWidth(int)
+    + setHeight(int)
+    + setX(int)
+    + setY(int)
+}
+
+class ProcessDefinitionImpl extends ScopeImpl implements org.activiti.engine.impl.pvm.PvmProcessDefinition {
+    # name:String
+    # key:String
+    # description:String
+    # initial:ActivityImpl
+    # initialActivityStacks:Map<ActivityImpl,List<ActivityImpl>>
+    # laneSets:List<LaneSet>
+    # participantProcess:ParticipantProcess
+    + ProcessDefinitionImpl(String id)
+    + createProcessInstance():org.activiti.engine.impl.pvm.PvmProcessInstance
+    + createProcessInstanceForInitial(ActivityImpl initial):org.activiti.engine.impl.pvm.PvmProcessInstance
+    + getInitialActivityStack():List<ActivityImpl>
+    + getInitialActivityStack(ActivityImpl startActivity):List<ActivityImpl>
+    # newProcessInstance(ActivityImpl startActivity):org.activiti.engine.impl.pvm.runtime.InterpretableExecution
+    + getDiagramResourceName():String
+    + getDeploymentId():String
+    + addLaneSet(LaneSet newLaneSet):void
+    + getLaneForId(String):Lane
+    + getInitial():ActivityImpl
+    + setInitial(ActivityImpl initial):void
+    + getName():String
+    + setName(String name):String
+    + getKey():String
+    + setKey(String key):String
+    + getDescription():String
+    + getLaneSets():List<LaneSet>
+    + setParticipantProcess(ParticipantProcess participantProcess):void
+    + getParticipantProcess():ParticipantProcess
+}
+ProcessDefinitionImpl ..> org.activiti.engine.impl.pvm.PvmProcessInstance
+
+class ProcessElementImpl extends org.activiti.engine.impl.pvm.PvmProcessElement {
+    # id:String
+    # processDefinition:ProcessDefinitionImpl
+    # properties:Map<String,Object>
+    + ProcessElementImpl(String id,ProcessDefinitionImpl processDefinition)
+    + setProperty(String name,Object value):void
+    + getProperty(String name):Object
+    + getProperties():Map<String,Object>
+    + getId():String
+    + setProperties(Map<String,Object>):void
+    + getProcessDefinition():ProcessDefinitionImpl
+}
+
+
+abstract ScopeImpl extends ProcessElementImpl implements org.activiti.engine.impl.pvm.PvmScope {
+    # activities:List<ActivityImpl>
+    # namedActivities:Map<String,ActivityImpl>
+    # executionListeners:Map<String,List<org.activiti.engine.delegate.ExecutionListener>>
+    # ioSpecification:org.activiti.engine.impl.bpmn.data.IOSpecification
+
+    + ScopeImpl(String id,ProcessDefinitionImpl processDefinition)
+    + findActivity(String activityId):ActivityImpl
+    + createActivity():ActivityImpl
+    + createActivity(String activityId):ActivityImpl
+    + contains(ActivityImpl):boolean
+    + getExecutionListener(String eventName):List<org.activiti.engine.delegate.ExecutionListener>
+    + addExecutionListener(String eventName,org.activiti.engine.delegate.ExecutionListener listener)
+    + addExecutionListener(String eventName,org.activiti.engine.delegate.ExecutionListener listener,int index)
+    + getExecutionListeners():Map<String,List<org.activiti.engine.delegate.ExecutionListener>>
+    + getActivities():List<org.activiti.engine.impl.pvm.process.ActivityImpl>
+    + getIoSpecification():org.activiti.engine.impl.bpmn.data.IOSpecification
+    + setIoSpecification(org.activiti.engine.impl.bpmn.data.IOSpecification ioSpecification):void
+}
+ScopeImpl o--> org.activiti.engine.delegate.ExecutionListener
+ScopeImpl o--> org.activiti.engine.impl.bpmn.data.IOSpecification
+
+class TransitionImpl extends ProcessElementImpl implements org.activiti.engine.impl.pvm.PvmTransition {
+    # source:ActivityImpl
+    # destination:ActivityImpl
+    # executionListeners:List<org.activiti.engine.delegate.ExecutionListener>
+    # skipExpression:org.activiti.engine.delegate.Expression
+    # waypoints:List<Integer>
+
+    + TransitionImpl(String id,org.activiti.engine.delegate.Expression skipExpression,ProcessDefinitionImpl processDefinition)
+    + getSource():ActivityImpl
+    + setSource(ActivityImpl)
+    + getDestination():ActivityImpl
+    + setDestination(ActivityImpl)
+    + addExecutionListener(org.activiti.engine.delegate.ExecutionListener)
+    + getExecutionListener():List<org.activiti.engine.delegate.ExecutionListener>
+    + setExecutionListener(List<org.activiti.engine.delegate.ExecutionListener>)
+    + getWayPoints():List<Integer>
+    + setWayPoints(List<Integer>)
+    + getSkipExpression():org.activiti.engine.delegate.Expression
+    + setExpression(org.activiti.engine.delegate.Expression)
+}
+/' package finished '/
+}
+
+@enduml

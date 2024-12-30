@@ -1,0 +1,212 @@
+@startuml
+!include org.activiti.engine.repository.puml
+!include org.activiti.engine.impl.db.puml
+!include org.activiti.engine.impl.juel.puml
+hide @unlinked
+package "org.activiti.engine.impl.form" {
+class BooleanFormType extends org.activiti.engine.form.AbstractFormType {
+    + getName():String
+    + getMimeType():String
+    + convertFormValueToModelValue(String propertyValue):Object
+    + convertModelValueToFormValue(Object modelValue):String
+}
+
+class DateFormType extends org.activiti.engine.form.AbstractFormType {
+    # datePattern:String
+    # dateFormat:java.text.Format
+    + DateFormType(String datePattern)
+    + getName():String
+    + getInformation(String key):Object
+    + convertFormValueToModelValue(String propertyValue):Object
+    + convertModelValueTOFormValue(Object modelValue):String
+}
+
+class DefaultFormHandler implements FormHandler {
+    # formKey:Expression
+    # deploymentId:String
+    # formPropertyHandlers:List<FormPropertyHandler>
+    + parseConfiguration(List<FormProperty> formProperties,String formKey,DeploymentEntity deployment,ProcessDefinitionEntity processDefinition):void
+    # initializeFormProperties(FormDataImpl formData,ExecutionEntity execution):void
+    # submitFormProperties(Map<String,String> properties,ExecutionEntity execution):void
+    + getFormKey():Expression
+    + setFormKey(Expression formKey):void
+    + getDeploymentId():String
+    + setDeploymentId(String deploymentId):void
+    + getFormPropertyHandlers():List<FormPropertyHandler>
+    + setFormPropertyHandlers(List<FormPropertyHandler> formPropertyHandlers):void
+}
+DefaultFormHandler ..> org.activiti.bpmn.model.FormProperty
+DefaultFormHandler ..> org.activiti.engine.impl.persistence.entity.DeploymentEntity
+DefaultFormHandler ..> org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity
+DefaultFormHandler ..> org.activiti.engine.impl.form.FormDataImpl
+
+class DefaultStartFormHandler extends DefaultFormHandler implements StartFormHandler {
+    + parseConfiguration(List<FormProperty> formProperties,String formKey,DeploymentEntity deployment,ProcessDefinitionEntity processDefinition):void
+    + createStartFormData(ProcessDefinitionEntity processDefinition):StartFormData
+    + submitStartFormData(ExecutionEntity processInstance,Map<String,String> properties):ExecutionEntity
+}
+DefaultStartFormHandler ..> org.activiti.bpmn.model.FormProperty
+DefaultStartFormHandler ..> org.activiti.engine.form.StartFormData
+
+class DefaultTaskFormHandler extends DefaultFormHandler implements TaskFormHandler {
+    + createTaskFormData(TaskEntity task):TaskFormData
+}
+DefaultTaskFormHandler ..> org.activiti.engine.form.TaskFormData
+
+class DoubleFormType extends AbstractFormType {
+    + getName():String
+    + getMimeType():String
+    + convertFormValueToModelValue(String propertyValue):Object
+    + convertModelValueToFormValue(Object modelValue):String
+}
+
+class EnumType extends AbstractFormType {
+    # values:Map<String,String>
+    + EnumType(Map<String,String> values)
+    + getName():String
+    + getInformation(String key):Object
+    + convertFormValueToModelValue(String propertyValue):Object
+    + convertModelValueToFormValue(Object modelValue):String
+    # validateValue(String value):void
+}
+
+abstract class FormDataImpl implements org.activiti.engine.form.FormData {
+    # formKey:String
+    # deploymentId:String
+    # formProperties:List<FormProperty>
+    + getFormKey():String
+    + setFormKey(String formKey):void
+    + getDeploymentId():String
+    + setDeploymentId(String deploymentId):void
+    + getFormProperties():List<FormProperty>
+    + setFormProperties(List<FormProperty> formProperties):void
+}
+FormDataImpl ..> org.activiti.engine.form.FormProperty
+
+interface FormEngine {
+    + getName():String
+    + renderStartForm(StartFormData startFormData):Object
+    + renderTaskForm(TaskFormData taskFormData):Object
+}
+FormEngine ..> org.activiti.engine.form.StartFormData
+FormEngine ..> org.activiti.engine.form.TaskFormData
+
+interface FormHandler {
+    ~ current:ThreadLocal<FormHandler>
+    + parseConfiguration(List<FormProperty> properties,String formKey,DeploymentEntity deployment,ProcessDefinitionEntity processDefinition):void
+    + submitFormProperties(Map<String,String> properties,ExecutionEntity execution):void
+}
+FormHandler ..> org.activiti.bpmn.model.FormProperty
+
+class FormPropertyHandler {
+    # id:String
+    # name:String
+    # type:AbstractFormType
+    # isReadable:boolean
+    # isWritable:boolean
+    # isRequired:boolean
+    # variableName:String
+    # variableExpression:Expression
+    # defaultExpression:Expression
+    + createFormProperty(ExecutionEntity execution):FormProperty
+    + submitFormProperty(ExecutionEntity execution,Map<String,String> properties):void
+    + getId():String
+    + setId(String id):void
+    + getName():String
+    + setName(String name):void
+    + getType():AbstractFormType
+    + setType(AbstractFormType type):void
+    + isReadable():boolean
+    + setReadable(boolean isReadable):void
+    + getWritable():boolean
+    + setWritable(boolean isWritable):void
+    + isRequired():boolean
+    + setRequired(boolean isRequired):void
+    + getVariableName():String
+    + setVariableName(String variableName):void
+    + getVariableExpression():Expression
+    + setVariableExpression(expression variableExpression):void
+    + getDefaultExpression():Expression
+    + setDefaultExpression(Expression defaultExpression):void
+
+}
+FormPropertyHandler ..> org.activiti.engine.form.FormProperty
+
+class FormPropertyImpl implements FormProperty {
+    # id:String
+    # name:String
+    # type:FormType
+    # isRequired:boolean
+    # isReadable:boolean
+    # isWritable:boolean
+    # value:String
+    + FormPropertyImpl(FormPropertyHandler formPropertyHandler)
+    + getId():String
+    + setName():String
+    + getType():FormType
+    + isRequired():boolean
+    + isReadable():boolean
+    + isWriteAble():boolean
+    + getValue():String
+    + setValue(String value):void
+}
+FormPropertyImpl ..> org.activiti.engine.form.FormType
+
+class FormTypes {
+    # formTypes:Map<String,AbstractFormType>
+    + addFormType(AbstractFormType formType):void
+    + parseFormPropertyType(FormProperty formProperty):AbstractFormType
+}
+FormTypes ..> org.activiti.bpmn.model.FormProperty
+
+class JuelFormEngine implements FormEngine {
+    + getName():String
+    + renderStartForm(StartFormData startFormData):Object
+    + renderTaskForm(TaskFormData taskFormData):Object
+    # getFormTemplateString(FormData formInstance,String formKey):String
+}
+JuelFormEngine ..> org.activiti.engine.form.StartFormData
+JuelFormEngine ..> org.activiti.engine.form.TaskFormData
+
+class LongFormType extends AbstractFormType {
+    + getName():String
+    + getMimeType():String
+    + convertFormValueToModelValue(String propertyValue):Object
+    + convertModelValueToFormValue(Object modelValue):String
+}
+
+class StartFormDataImpl extends FormDataImpl implements org.activiti.engine.form.StartFormData {
+    # processDefinition:ProcessDefinitionEntity
+    + getProcessDefinition():ProcessDefinitionEntity
+    + setProcessDefinition(ProcessDefinitionEntity processDefinition):void
+}
+StartFormDataImpl ..> org.activiti.engine.repository.ProcessDefinition
+
+interface StartFormHandler extends FormHandler {
+    + createStartFormData(ProcessDefinitionEntity processDefinition):StartFormData
+}
+StartFormHandler ..> org.activiti.engine.form.StartFormData
+
+class StringFormType extends AbstractFormType {
+    + getName():String
+    + getMimeType():String
+    + convertModelValueToFormValue(Object (Object modelValue):String
+    + convertFormValueToModelValue(String propertyValue):Object
+}
+
+class TaskFormDataImpl extends FormDataImpl implements org.activiti.engine.form.TaskFormData {
+    # task:Task
+    + getTask():Task
+    + setTask(Task task):void
+}
+TaskFormDataImpl ..> org.activiti.engine.task.Task
+
+interface TaskFormHandler extends FormHandler {
+    + createTaskForm(TaskEntity task):TaskFormData
+    + getFormKey():Expression
+}
+TaskFormHandler ..> org.activiti.engine.form.TaskFormData
+}
+
+/' package finished '/
+@enduml

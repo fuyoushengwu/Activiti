@@ -1,9 +1,9 @@
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,18 +30,23 @@ import org.activiti.engine.impl.pvm.runtime.InterpretableExecution;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-
 /**
  * @author Tom Baeyens
  * @author Daniel Meyer
  */
 public class Context {
 
-  protected static ThreadLocal<Stack<CommandContext>> commandContextThreadLocal = new ThreadLocal<Stack<CommandContext>>();
-  protected static ThreadLocal<Stack<ProcessEngineConfigurationImpl>> processEngineConfigurationStackThreadLocal = new ThreadLocal<Stack<ProcessEngineConfigurationImpl>>();
-  protected static ThreadLocal<Stack<ExecutionContext>> executionContextStackThreadLocal = new ThreadLocal<Stack<ExecutionContext>>();
-  protected static ThreadLocal<JobExecutorContext> jobExecutorContextThreadLocal = new ThreadLocal<JobExecutorContext>();
-  protected static ThreadLocal<Map<String, ObjectNode>> bpmnOverrideContextThreadLocal = new ThreadLocal<Map<String, ObjectNode>>();
+  protected static ThreadLocal<Stack<CommandContext>> commandContextThreadLocal =
+      new ThreadLocal<Stack<CommandContext>>();
+  protected static ThreadLocal<Stack<ProcessEngineConfigurationImpl>>
+      processEngineConfigurationStackThreadLocal =
+          new ThreadLocal<Stack<ProcessEngineConfigurationImpl>>();
+  protected static ThreadLocal<Stack<ExecutionContext>> executionContextStackThreadLocal =
+      new ThreadLocal<Stack<ExecutionContext>>();
+  protected static ThreadLocal<JobExecutorContext> jobExecutorContextThreadLocal =
+      new ThreadLocal<JobExecutorContext>();
+  protected static ThreadLocal<Map<String, ObjectNode>> bpmnOverrideContextThreadLocal =
+      new ThreadLocal<Map<String, ObjectNode>>();
   protected static ResourceBundle.Control resourceBundleControl = new ResourceBundleControl();
 
   public static CommandContext getCommandContext() {
@@ -61,14 +66,16 @@ public class Context {
   }
 
   public static ProcessEngineConfigurationImpl getProcessEngineConfiguration() {
-    Stack<ProcessEngineConfigurationImpl> stack = getStack(processEngineConfigurationStackThreadLocal);
+    Stack<ProcessEngineConfigurationImpl> stack =
+        getStack(processEngineConfigurationStackThreadLocal);
     if (stack.isEmpty()) {
       return null;
     }
     return stack.peek();
   }
 
-  public static void setProcessEngineConfiguration(ProcessEngineConfigurationImpl processEngineConfiguration) {
+  public static void setProcessEngineConfiguration(
+      ProcessEngineConfigurationImpl processEngineConfiguration) {
     getStack(processEngineConfigurationStackThreadLocal).push(processEngineConfiguration);
   }
 
@@ -79,10 +86,10 @@ public class Context {
   public static ExecutionContext getExecutionContext() {
     return getStack(executionContextStackThreadLocal).peek();
   }
-  
+
   public static boolean isExecutionContextActive() {
-  	Stack<ExecutionContext> stack = executionContextStackThreadLocal.get();
-  	return stack != null && !stack.isEmpty();
+    Stack<ExecutionContext> stack = executionContextStackThreadLocal.get();
+    return stack != null && !stack.isEmpty();
   }
 
   public static void setExecutionContext(InterpretableExecution execution) {
@@ -95,50 +102,59 @@ public class Context {
 
   protected static <T> Stack<T> getStack(ThreadLocal<Stack<T>> threadLocal) {
     Stack<T> stack = threadLocal.get();
-    if (stack==null) {
+    if (stack == null) {
       stack = new Stack<T>();
       threadLocal.set(stack);
     }
     return stack;
   }
-  
+
   public static JobExecutorContext getJobExecutorContext() {
     return jobExecutorContextThreadLocal.get();
   }
-  
+
   public static void setJobExecutorContext(JobExecutorContext jobExecutorContext) {
     jobExecutorContextThreadLocal.set(jobExecutorContext);
   }
-  
+
   public static void removeJobExecutorContext() {
     jobExecutorContextThreadLocal.remove();
   }
-  
+
   public static ObjectNode getBpmnOverrideElementProperties(String id, String processDefinitionId) {
     ObjectNode definitionInfoNode = getProcessDefinitionInfoNode(processDefinitionId);
     ObjectNode elementProperties = null;
     if (definitionInfoNode != null) {
-      elementProperties = getProcessEngineConfiguration().getDynamicBpmnService().getBpmnElementProperties(id, definitionInfoNode);
+      elementProperties =
+          getProcessEngineConfiguration()
+              .getDynamicBpmnService()
+              .getBpmnElementProperties(id, definitionInfoNode);
     }
     return elementProperties;
   }
-  
-  public static ObjectNode getLocalizationElementProperties(String language, String id, String processDefinitionId, boolean useFallback) {
+
+  public static ObjectNode getLocalizationElementProperties(
+      String language, String id, String processDefinitionId, boolean useFallback) {
     ObjectNode definitionInfoNode = getProcessDefinitionInfoNode(processDefinitionId);
     ObjectNode localizationProperties = null;
     if (definitionInfoNode != null) {
-      if (useFallback == false) {
-        localizationProperties = getProcessEngineConfiguration().getDynamicBpmnService().getLocalizationElementProperties(
-            language, id, definitionInfoNode);
-        
+      if (!useFallback) {
+        localizationProperties =
+            getProcessEngineConfiguration()
+                .getDynamicBpmnService()
+                .getLocalizationElementProperties(language, id, definitionInfoNode);
+
       } else {
         HashSet<Locale> candidateLocales = new LinkedHashSet<Locale>();
-        candidateLocales.addAll(resourceBundleControl.getCandidateLocales(id, new Locale(language)));
+        candidateLocales.addAll(
+            resourceBundleControl.getCandidateLocales(id, new Locale(language)));
         candidateLocales.addAll(resourceBundleControl.getCandidateLocales(id, Locale.getDefault()));
         for (Locale locale : candidateLocales) {
-          localizationProperties = getProcessEngineConfiguration().getDynamicBpmnService().getLocalizationElementProperties(
-              locale.getLanguage(), id, definitionInfoNode);
-          
+          localizationProperties =
+              getProcessEngineConfiguration()
+                  .getDynamicBpmnService()
+                  .getLocalizationElementProperties(locale.getLanguage(), id, definitionInfoNode);
+
           if (localizationProperties != null) {
             break;
           }
@@ -147,24 +163,26 @@ public class Context {
     }
     return localizationProperties;
   }
-  
+
   public static void removeBpmnOverrideContext() {
     bpmnOverrideContextThreadLocal.remove();
   }
-  
+
   protected static ObjectNode getProcessDefinitionInfoNode(String processDefinitionId) {
     Map<String, ObjectNode> bpmnOverrideMap = getBpmnOverrideContext();
-    if (bpmnOverrideMap.containsKey(processDefinitionId) == false) {
-      ProcessDefinitionInfoCacheObject cacheObject = getProcessEngineConfiguration().getDeploymentManager()
-          .getProcessDefinitionInfoCache()
-          .get(processDefinitionId);
-      
+    if (!bpmnOverrideMap.containsKey(processDefinitionId)) {
+      ProcessDefinitionInfoCacheObject cacheObject =
+          getProcessEngineConfiguration()
+              .getDeploymentManager()
+              .getProcessDefinitionInfoCache()
+              .get(processDefinitionId);
+
       addBpmnOverrideElement(processDefinitionId, cacheObject.getInfoNode());
     }
-    
+
     return getBpmnOverrideContext().get(processDefinitionId);
   }
-  
+
   protected static Map<String, ObjectNode> getBpmnOverrideContext() {
     Map<String, ObjectNode> bpmnOverrideMap = bpmnOverrideContextThreadLocal.get();
     if (bpmnOverrideMap == null) {
@@ -172,7 +190,7 @@ public class Context {
     }
     return bpmnOverrideMap;
   }
-  
+
   protected static void addBpmnOverrideElement(String id, ObjectNode infoNode) {
     Map<String, ObjectNode> bpmnOverrideMap = bpmnOverrideContextThreadLocal.get();
     if (bpmnOverrideMap == null) {
@@ -181,7 +199,7 @@ public class Context {
     }
     bpmnOverrideMap.put(id, infoNode);
   }
-  
+
   static class ResourceBundleControl extends ResourceBundle.Control {
     @Override
     public List<Locale> getCandidateLocales(String baseName, Locale locale) {

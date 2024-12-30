@@ -1,0 +1,180 @@
+@startuml
+hide @unlinked
+
+package "org.activiti.engine.impl.asyncexecutor" {
+abstract class AbstractAsyncJobExecutor implements AsyncExecutor {
+    # keepAliveTime:long
+    # timerJobAcquisitionThread:Thread
+    # asyncJobAcquisitionThread:Thread
+    # timerJobRunnable:AcquireTimerJobsRunnable
+    # asyncJobsDueRunnable:AcquireAsyncJobsDueRunnable
+    # executeAsyncRunnableFactory:ExecuteAsyncRunnableFactory
+    # isAutoActivate:boolean
+    # isActive:boolean
+    # maxTimerJobsPerAcquisition:int
+    # maxAsyncJobsDuePerAcquisition:int
+    # defaultTimerJobAcquireWaitTimeInMillis:int
+    # defaultAsyncJobAcquireWaitTimeInMillis:int
+    # defaultQueueSizeFullWaitTime:int
+    # lockOwner:String
+    # timerLockTimeInMillis:int
+    # asyncJobLockTimeInMillis:int
+    # retryWaitTimeInMillis:int
+
+    # temporaryJobQueue:LinkedList<org.activiti.engine.impl.persistence.entity.JobEntity>
+    # commandExecutor:org.activiti.engine.impl.interceptor.CommandExecutor
+
+    + executeAsyncJob(org.activiti.engine.impl.persistence.entity.JobEntity):boolean
+    + {abstract} executeAsyncJob(Runnable):boolean
+    # doUnlockJob(org.activiti.engine.impl.persistence.entity.JobEntity):void
+    # unlockJob(org.activiti.engine.impl.persistence.entity.JobEntity,CommandContext):void
+    # createRunnableForJob(org.activiti.engine.impl.persistence.entity.JobEntity):Runnable
+    + start():void
+    # initialize():void
+    + shutdown():void
+    # {abstract} startExecutingAsyncJobs():void
+    # {abstract} stopExecutingAsyncJobs():void
+    # startJobAcquisitionThread():void
+    # stopJobAcquisitionThread():void
+    + getCommandExecutor():org.activiti.engine.impl.interceptor.CommandExecutor
+    + setCommandExecutor(org.activiti.engine.impl.interceptor.CommandExecutor):void
+    + isAutoActivate():boolean
+    + setAutoActivate(boolean autoActivate):void
+    + isActive():boolean
+    + getKeepAliveTime():long
+    + setKeepAliveTime(long keepAliveTime):void
+    + getLockOwner():String
+    + setLockOwner(String lockOwner):void
+    + getTimerLockTimeInMillis():long
+    + setTimerLockTimeInMillis(long ms):void
+    + getAsyncJobLockTimeInMillis():long
+    + setAsyncJobLockTimeInMillis(long ms):void
+    + getMaxTimerJobsPerAcquisition():int
+    + setMaxTimerHobsPerAcquisition(int max):void
+    + getMaxAsyncJobsQuePerAcquisition():int
+    + setMaxAsyncJobsQuePerAcquisition(int max):void
+    + getDefaultTimerJobAcquireWaitTimeInMillis():long
+    + setDefaultTimerJobAcquireWaitTimeInMillis(long ms):void
+    + getDefaultAsyncJobAcquireWaitTimeInMillis():long
+    + setDefaultAsyncJobAcquireWaitTimeInMillis(long ms):void
+    + getDefaultQueueSizeFullWaitTimeInMillis():long
+    + setDefaultQueueSizeFullWaitTimeInMillis(long ms):void
+    + setTimerJobRunnable(AcquireTimerJobsRunnable):void
+    _ setAsyncJobsDueRunnable(AcquireAsyncJobsDueRunnable):void
+    + getRetryWaitTimeInMillis():int
+    + setRetryWaitTimeInMillis(int retryWaitTimeInMillis):void
+    + getExecuteAsyncRunnableFactory():ExecuteAsyncRunnableFactory
+    + setExecuteAsyncRunnableFactory(ExecuteAsyncRunnableFactory executeAsyncRunnableFactory):void
+}
+AbstractAsyncJobExecutor *--> AcquireTimerJobsRunnable
+AbstractAsyncJobExecutor *--> AcquireAsyncJobsDueRunnable
+AbstractAsyncJobExecutor *--> ExecuteAsyncRunnableFactory
+
+class AcquireAsyncJobsDueRunnable implements Runnable {
+    # asyncExecutor:AsyncExecutor
+    # isInterrupted:boolean
+    # MONITOR:Object
+    # isWaiting:AtomicBoolean
+    # millisToWait:long
+
+    + AcquireAsyncJobsDueRunnable(AsyncExecutor)
+
+    + run():void
+    + stop():void
+    + getMillisToWait():long
+    + setMillisToWait(long millisToWait):void
+}
+class AcquiredJobEntities {
+    # acquiredJobs:Map<String,org.activiti.engine.impl.persistence.entity.JobEntity>
+    + addJob(org.activiti.engine.impl.persistence.entity.JobEntity):void
+    + getJobs():Collection<org.activiti.engine.impl.persistence.entity.JobEntity>
+    + contains(String jobId):boolean
+    + size():int
+}
+class AcquireTimerJobsRunnable implements Runnable {
+    # asyncExecutor:AsyncExecutor
+    # isInterrupted:boolean
+    # MONITOR:Object
+    # isWaiting:AtomicBoolean
+    # millisToWait:long
+
+    + AcquireTimerJobsRunnable(AsyncExecutor)
+
+    + stop():void
+    + getMillisToWait():long
+    + setMillisToWait(long millisToWait):void
+}
+
+interface AsyncExecutor {
+    + start():void
+    + shutdown():void
+    + executeAsyncJob(org.activiti.engine.impl.persistence.entity.JobEntity):boolean
+    + setCommandExecutor(org.activiti.engine.impl.interceptor.CommandExecutor):void
+    + getCommandExecutor():org.activiti.engine.impl.interceptor.CommandExecutor
+    + isAutoActivate():boolean
+    + setAutoActivate(boolean autoActivate):void
+    + isActive():boolean
+    + getLockOwner():String
+    + getTimerLockTimeInMillis():long
+    + setTimerLockTimeInMillis(long ms):void
+    + getAsyncJobLockTimeInMillis():long
+    + setAsyncJobLockTimeInMillis(long ms):void
+    + getDefaultTimerJobAcquireWaitTimeInMillis():long
+    + setDefaultTimerJobAcquireWaitTimeInMillis(long ms):void
+    + getDefaultAsyncJobAcquireWaitTimeInMillis():long
+    + setDefaultAsyncJobAcquireWaitTimeInMillis(long ms):void
+    + getDefaultQueueSizeFullWaitTimeInMillis():long
+    + setDefaultQueueSizeFullWaitTimeInMillis(long ms):void
+    + getMaxAsyncJobsQuePerAcquisition():int
+    + setMaxAsyncJobsQuePerAcquisition(int max):void
+    + getMaxTimerJobsPerAcquisition():int
+    + setMaxTimerHobsPerAcquisition(int max):void
+    + getRetryWaitTimeInMillis():int
+    + setRetryWaitTimeInMillis():void
+}
+class DefaultAsyncJobExecutor extends AbstractAsyncJobExecutor {
+    # corePoolSize:int
+    # maxPoolSize:int
+    # queueSize:int
+    # threadPoolQueue:BlockingQueue<Runnable>
+    # executorService:ExecutorService
+    # secondsToWaitOnShutdown:long
+
+     + executeAsyncJob(Runnable):boolean
+     + createRunnableForJob(org.activiti.engine.impl.persistence.entity.JobEntity):Runnable
+     + unlockJob(org.activiti.engine.impl.persistence.entity.JobEntity,CommandContext):void
+     + startExecutingAsyncJobs():void
+     + stopExecutingAsyncJobs():void
+
+}
+class DefaultExecuteAsyncRunnableFactory implements ExecuteAsyncRunnableFactory {
+    + createExecuteAsyncRunnable(org.activiti.engine.impl.persistence.entity.JobEntity,org.activiti.engine.impl.interceptor.CommandExecutor):Runnable
+}
+
+class ExecuteAsyncRunnable implements Runnable {
+    # job:org.activiti.engine.impl.persistence.entity.JobEntity
+    # commandExecutor:org.activiti.engine.impl.interceptor.CommandExecutor
+
+    + ExecuteAsyncRunnable(org.activiti.engine.impl.persistence.entity.JobEntity,org.activiti.engine.impl.interceptor.CommandExecutor)
+
+    + run():void
+    # lockJobIfNeeded():boolean
+    # unacquireJob():void
+    # executeJob():void
+    # unlockJobIfNeeded():void
+    # handleFailedJob(Throwable):void
+}
+
+interface ExecuteAsyncRunnableFactory {
+    + createExecuteAsyncRunnable(org.activiti.engine.impl.persistence.entity.JobEntity,org.activiti.engine.impl.interceptor.CommandExecutor):Runnable
+}
+class ManagedAsyncJobExecutor extends DefaultAsyncJobExecutor {
+    # threadFactory:ThreadFactory
+    + getThreadFactory():ThreadFactory
+    + setThreadFactory(ThreadFactory threadFactory):void
+    + startExecutingAsyncJobs():void
+
+
+/' package finished  '/
+}
+@enduml

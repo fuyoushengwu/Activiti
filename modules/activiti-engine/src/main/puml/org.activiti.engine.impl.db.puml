@@ -1,0 +1,309 @@
+@startuml
+hide @unlinked
+package org.activiti.engine.impl.db {
+
+abstract class AbstractDbSession implements org.activiti.engine.impl.interceptor.Session {
+    # dbSqlSession:DbSqlSession
+    + AbstractDbSession()
+}
+AbstractDbSession .right.> DbSqlSession
+
+class ActivitiVersion {
+    # mainVersion:String
+    # alternativeVersionStrings:List<String>
+    + ActivitiVersion(String mainVersion)
+    + ActivitiVersion(String mainVersion,List<String> alternativeVersionStrings)
+    + getMainVersion():String
+    + matches(String version):boolean
+}
+interface BulkDeleteable {}
+class DbIdGenerator implements org.activiti.engine.impl.cfg.IdGenerator {
+    # idBlockSize:int
+    # nextId:long
+    # lastId:long
+    # commandExecutor:CommandExecutor
+    # commandConfig:CommandConfig
+    + getNextId():String
+    + getNewBlock():void
+    + getIdBlockSize():int
+    + setIdBlockSize(int):void
+    + getCommandExecutor():CommandExecutor
+    + setCommandExecutor(CommandExecutor):void
+    + getCommandConfig():CommandConfig
+    + setCommandConfig(CommandConfig):void
+}
+class DbSqlSession implements org.activiti.engine.impl.interceptor.Session {
+    # {static} CLEAN_VERSION_REGEX:Pattern
+    # {static} ACTIVITI_VERSIONS:List<ActivitiVersion>
+    # sqlSession:org.apache.ibatis.session.SqlSession
+    # dbSqlSessionFactory:DbSqlSessionFactory
+    # insertedObjects:Map<Class<? extends PersistentObject>,List<PersistentObject>>
+    # cachedObjects:Map<Class<?>,Map<String,CachedObject>>
+    # deleteOperations:List<DeleteOperation>
+    # deserializedObjects:List<DeserializedObject>
+    # connectionMetadataDefaultCatalog:String
+    # connectionMetadataDefaultSchema:String
+    + DbSqlSession(DbSqlSessionFactory dbSqlSessionFactory)
+    + DbSqlSession(DbSqlSessionFactory dbSqlSessionFactory,Connection connection,String catalog,String schema)
+    + insert(PersistentObject persistentObject):void
+    + update(PersistentObject persistentObject):void
+    + update(String statement,Object parameters):int
+    + delete(String statement,Object parameter):void
+    + delete(PersistentObject persistentObject):boolean
+    + selectList(String statement):List<?>
+    + selectList(String statement,Object parameter):List<?>
+    + selectList(String statement,Object parameter,Page page):List<?>
+    + selectList(String statement,ListQueryParameterObject parameter,Page page):List<?>
+    + selectList(String statement,Object parameter,int firstResult,int maxResults):List<?>
+    + selectList(String statement, Object parameter, int firstResult, int maxResults):List<?>
+    + selectListWithRawParameter(String statement,Object parameter,int firstResult,int maxResults):List<?>
+    + selectListWithRawParameterWithoutFilter(String statement,Object parameter,int firstResult,int maxResults):List<?>
+    + selectOne(String statement,Object parameter):Object
+    + selectById(Class<T> entityClass,String id):T
+    # filterLoadedObjects(List<Object>):List<Object>
+    # cachePut(PersistentObject persistentObject,boolean storeState):CachedObject
+    # cacheFilter(PersistentObject persistentObject):PersistentObject
+    # cacheGet(Class<T> entityClass,String id):T
+    # cacheRemove(Class<?> persistentObjectClass,String persistentObjectId):void
+    + findInCache(Class<T> entityClass):List<T>
+    + findInCache(Class<T> entityClass,String id):T
+    + addDeserializedObject(DeserializedObject deserializedObjects):void
+    + flush():void
+    # removeUnnecessaryOperations():List<DeleteOperation>
+    # flushDeserializedObjects():void
+    + getUpdatedObjects():List<PersistentObject>
+    # isPersistentObjectDeleted(PersistentObject persistentObject):boolean
+    + pruneDeletedEntities(List<T> listToPrune):List<T>
+    # flushInserts():void
+    # flushPersistentObjects(Class<? extends PersistentObject> clazz,List<PersistentObject> objects):void
+    # flushRegularInsert(PersistentObject object,Class<? extends PersistentObject> clazz):void
+    # flushBulkInsert(List<PersistentObject> objects,Class<? extends PersistentObject> clazz):void
+    # flushUpdates(List<PersistentObject> objects):void
+    # flushDeletes(List<DeleteOperation removedOperations):void
+    # flushRegularDeletes():void
+    + close():void
+    + commit():void
+    + rollback():void
+    + dbSchemaCheckVersion():void
+    # getDbVersion():String
+    + dbSchemaCreate():void
+    # dbSchemaCreateEngine():void
+    # dbSchemaCreateHistory():void
+    # dbSchemaCreateIdentity():void
+    + dbSchemaDrop():void
+    + dbSchemaPrune():void
+    + executeMandatorySchemaResource(String operation,String component):void
+    + dbSchemaUpdate():String
+    + isEngineTablePresent():boolean
+    + isHistoryTablePresent():boolean
+    + isIdentityTablePresent():boolean
+    + isTablePresent(String tableName):boolean
+    # isUpgradeNeeded(String versionInDatabase):boolean
+    # getCleanVersion(String versionString):String
+    # prependDatabaseTablePrefix(String tableName):String
+    # dbSchemaUpgrade(String component,int currentDatabaseVersionsIndex):void
+    + getResourceForDbOperation(String directory,String operation,String component):String
+    + executeSchemaResource(String operation,String component,String resourceName,boolean isOptional):void
+    + performSchemaOperationsProcessEngineBuild():void
+    + performSchemaOperationsProcessEngineClose():void
+    + createDeploymentQuery():org.activiti.engine.impl.DeploymentQueryImpl
+    + createModelQueryImpl():org.activiti.engine.impl.ModelQueryImpl
+    + createProcessDefinitionQuery():org.activiti.engine.impl.ProcessDefinitionQueryImpl
+    + createProcessInstanceQuery():org.activiti.engine.impl.ProcessInstanceQueryImpl
+    + createExecutionQuery():org.activiti.engine.impl.ExecutionQueryImpl
+    + createTaskQuery():org.activiti.engine.impl.TaskQueryImpl
+    + createJobQuery():org.activiti.engine.impl.JobQueryImpl
+    + createHistoricProcessInstanceQuery():org.activiti.engine.impl.HistoricProcessInstanceQueryImpl
+    + createHistoricActivityInstanceQuery():org.activiti.engine.impl.HistoricActivityInstanceQueryImpl
+    + createHistoricTaskInstanceQuery():org.activiti.engine.impl.HistoricTaskInstanceQueryImpl
+    + createHistoricDetailQuery():org.activiti.engine.impl.HistoricDetailQueryImpl
+    + createHistoricVariableInstanceQuery():org.activiti.engine.impl.HistoricVariableInstanceQueryImpl
+    + createUserQuery():org.activiti.engine.impl.UserQueryImpl
+    + createGroupQuery():org.activiti.engine.impl.GroupQueryImpl
+    + getSqlSession():org.apache.ibatis.session.SqlSession
+    + getDbSqlSessionFactory():org.activiti.engine.impl.db.DbSqlSessionFactory
+}
+DbSqlSession ..> DbSqlSession$DeleteOperation
+
+
+interface DbSqlSession$DeleteOperation {
+    + getPersistentObjectClass():Class<? extends PersistentObject>
+    + sameIdentity(PersistentObject other):boolean
+    + clearCache():void
+    + execute():void
+}
+class DbSqlSession$BulkDeleteOperation implements DbSqlSession$DeleteOperation {
+    - statement:String
+    - parameter:Object
+    + BulkDeleteOperation(String statement,Object parameter)
+    + getPersistentObjectClass():Class<? extends PersistentObject>
+    + sameIdentity(PersistentObject):boolean
+    + clearCache():void
+    + execute():void
+}
+class DbSqlSession$CheckedDeleteOperation implements DbSqlSession$DeleteOperation {
+    # persistentObject:PersistentObject
+    + CheckedDeleteOperation(PersistentObject)
+    + getPersistentObjectClass():Class<? extends PersistentObject>
+    + sameIdentity(PersistentObject):boolean
+    + clearCache():void
+    + execute():void
+    + getPersistentObject():PersistentObject
+}
+class DbSqlSession$BulkCheckedDeleteOperation implements DbSqlSession$DeleteOperation {
+    # persistentObjectClass:Class<? extends PersistentObject>
+    # persistentObjects:List<PersistentObject>
+    + BulkCheckedDeleteOperation(Class<? extends PersistentObject>)
+    + addPersistentObject(PersistentObject):void
+    + sameIdentity(PersistentObject):boolean
+    + clearCache():void
+    + execute():void
+    + getPersistentObjectClass():Class<? extends PersistentObject>
+    + setPersistentObjectClass<Class<? extends PersistentObject>):void
+    + getPersistentObjects():List<PersistentObject>
+    + setPersistentObjects(List<PersistentObject>):void
+}
+
+class DbSqlSessionFactory implements org.activiti.engine.impl.interceptor.SessionFactory {
+    # {static} databaseSpecificStatements:Map<String,Map<String,String>>
+    + {static} databaseSpecificLimitBeforeStatements:Map<String,String>
+    + {static} databaseSpecificLimitAfterStatements:Map<String,String>
+    + {static} databaseSpecificLimitBetweenStatements:Map<String,String>
+    + {static} databaseSpecificOrderByStatements:Map<String,String>
+    + {static} databaseOuterJoinLimitBetweenStatements:Map<String,String>
+    + {static} databaseSpecificLimitBeforeNativeQueryStatements:Map<String,String>
+
+    # bulkInsertTableMap:Map<Class<? extends PersistentObject>,Boolean>
+    # databaseType:String
+    # databaseTablePrefix:String
+    + tablePrefixIsSchema:boolean
+    # databaseCatalog:String
+    # databaseSchema:String
+    # sqlSessionFactory:org.apache.ibatis.session.SqlSessionFactory
+    # idGenerator:org.activiti.engine.impl.cfg.IdGenerator
+    # statementMappings:Map<String,String>
+    # insertStatements:Map<Class<?>,String>
+    # bulkInsertStatements:Map<Class<?>,String>
+    # updateStatements:Map<Class<?>,String>
+    # deleteStatements:Map<Class<?>,String>
+    # bulkDeleteStatements:Map<Class<?>,String>
+    # selectStatements:Map<Class<?>,String>
+    # isDbIdentityUsed:boolean
+    # isDbHistoryUsed:boolean
+    # maxNrOfStatementsInBulkInsert:int
+
+    + getSessionType():Class<?>
+    + openSession():org.activiti.engine.impl.interceptor.Session
+    + getInsertStatement(PersistentObject):String
+    + getInsertStatement(Class<? extends PersistentObject>):String
+    + getBulkInsertStatement(Class<? extends PersistentObject>):String
+    + getUpdateStatement(PersistentObject):String
+    + getDeleteStatement(Class<?>):String
+    + getBulkDeleteStatement(Class<?>):String
+    + getSelectStatement(Class<?>):String
+    - getStatement(Class<?> persistentObjectClass,Map<Class<?>,String> cachedStatements,String prefix):String
+    # addDatabaseSpecificStatement(String databaseType,String activitiStatement,String ibatisStatement):void
+    + mapStatement(String):String
+    + setDatabaseType(String):void
+    + setBulkInsertEnabled(boolean isBulkInsertEnabled,String databaseType):void
+    # initBulkInsertEnabledMap(String databaseType):void
+    + isBulkInsertable(Class<? extends PersistentObject>):boolean
+    + getSqlSessionFactory():org.apache.ibatis.session.SqlSessionFactory
+    + setSqlSessionFactory(org.apache.ibatis.session.SqlSessionFactory):void
+    + getIdGenerator():IdGenerator
+    + setIdGenerator(IdGenerator):void
+    + getDatabaseType():String
+    + getStatementMappings():Map<String,String>
+    + setStatementMappings(Map<String,String>):void
+    + getInsertStatements():Map<Class<?>,String>
+    + setInsertStatements(Map<Class<?>,String>):void
+    + getBulkInsertStatements():Map<Class<?>,String>
+    + setBulkInsertStatements(Map<Class<?>,String>):void
+    + getUpdateStatements():Map<Class<?>,String>
+    + setUpdateStatements(Map<Class<?>,String>):void
+    + getDeleteStatements():Map<Class<?>,String>
+    + setDeleteStatements(Map<Class<?>,String>):void
+    + getBulkDeleteStatements():Map<Class<?>,String>
+    + setBulkDeleteStatements(Map<Class<?>,String>):void
+    + getSelectStatements():Map<Class<?>,String>
+    + setSelectStatements(Map<Class<?>,String>):void
+    + isDbIdentityUsed():boolean
+    + setDbIdentityUsed(boolean isDbIdentityUsed):void
+    + idDbHistoryUsed():boolean
+    + setDbHistoryUsed(boolean isDbHistoryUsed):void
+    + setDatabaseTablePrefix(String databaseTablePrefix):void
+    + getDatabaseTablePrefix():String
+    + getDatabaseCatalog():String
+    + setDatabaseCatalog(String databaseCatalog):void
+    + getDatabaseSchema():String
+    + setDatabaseSchema(String databaseSchema):void
+    + setTablePrefixIsSchema(boolean tablePrefixIsSchema):void
+    + isTablePrefixIsSchema():boolean
+    + getMaxNrOfStatementsInBulkInsert():int
+    + setMaxNrOfStatementsInBulkInsert(int maxNrOfStatementsInBulkInsert):void
+}
+DbSqlSessionFactory .left.> DbSqlSession
+class CachedObject {
+    # persistentObject:PersistentObject
+    # persistentObjectState:Object
+    + CachedObject(PersistentObject persistentObject,boolean storeState)
+    + getPersistentObject():PersistentObject
+    + getPersistentObjectState():Object
+}
+
+class EntityDependencyOrder {
+    + {static} DELETE_ORDER:List<Class<? extends PersistentObject>>
+    + {static} INSERT_ORDER:List<Class<? extends PersistentObject>>
+}
+interface HasRevision {
+    + setRevision(int)
+    + getRevision():int
+    + getRevisionNext():int
+}
+class IbatisVariableTypeHandler implements org.apache.ibatis.type.TypeHandler<org.activiti.engine.impl.variable.VariableType> {
+    # variableTypes:org.activiti.engine.impl.variable.VariableTypes
+    + getResult(ResultSet rs,String columnName):org.activiti.engine.impl.variable.VariableType
+    + getResult(CallableStatement cs,int columnIndex):org.activiti.engine.impl.variable.VariableType
+    + setParameter(PreparedStatement ps,int i,org.activiti.engine.impl.variable.VariableType parameter,JdbcType jdbcType):void
+    # getVariableTypes():org.activiti.engine.impl.variable.VariableTypes
+    + getResult(ResultSet resultSet,int columnIndex):org.activiti.engine.impl.variable.VariableType
+}
+class IdBlock {
+    ~ nextId:long
+    ~ lastId:long
+    + IdBlock(long nextId,long lastId)
+    + getNextId():long
+    + getLastId():long
+}
+class ListQueryParameterObject {
+    # maxResults:int
+    # firstResult:int
+    # parameter:Object
+    # databaseType:String
+
+    + ListQueryParameterObject()
+    + ListQueryParameterObject(Object parameter,int firstResult,int maxResults)
+    + getFirstResult():int
+    + getFirstRow():int
+    + getLastRow():int
+    + getMaxResults():int
+    + getParameter():Object
+    + setFirstResult(int firstResult):void
+    + setMaxResults(int maxResults):void
+    + setParameter(Object parameter):void
+    + getOrderBy():String
+    + getOrderByColumns():String
+    + setDatabaseType(String databaseType):void
+    + getDatabaseType():String
+}
+
+interface PersistentObject {
+    + getId():String
+    + setId(String)
+    + getPersistentState():Object
+}
+
+/' package finished '/
+}
+
+@enduml

@@ -1,9 +1,9 @@
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -35,7 +35,7 @@ import org.activiti.engine.impl.util.ReflectUtil;
 public class SerializableType extends ByteArrayType {
 
   public static final String TYPE_NAME = "serializable";
-  
+
   public String getTypeName() {
     return TYPE_NAME;
   }
@@ -45,19 +45,21 @@ public class SerializableType extends ByteArrayType {
     if (cachedObject != null) {
       return cachedObject;
     }
-    
+
     byte[] bytes = (byte[]) super.getValue(valueFields);
     if (bytes != null) {
-	    Object deserializedObject = deserialize(bytes, valueFields);
-	    
+      Object deserializedObject = deserialize(bytes, valueFields);
+
       valueFields.setCachedValue(deserializedObject);
-      
+
       if (valueFields instanceof VariableInstanceEntity) {
-        // we need to register the deserialized object for dirty checking, 
-        // so that it can be serialized again if it was changed. 
+        // we need to register the deserialized object for dirty checking,
+        // so that it can be serialized again if it was changed.
         Context.getCommandContext()
-          .getDbSqlSession()
-          .addDeserializedObject(new DeserializedObject(this, deserializedObject, bytes, (VariableInstanceEntity) valueFields));
+            .getDbSqlSession()
+            .addDeserializedObject(
+                new DeserializedObject(
+                    this, deserializedObject, bytes, (VariableInstanceEntity) valueFields));
       }
 
       return deserializedObject;
@@ -70,12 +72,18 @@ public class SerializableType extends ByteArrayType {
     valueFields.setCachedValue(value);
 
     if (valueFields.getBytes() == null) {
-      // TODO why the null check? won't this cause issues when setValue is called the second this with a different object?
+      // TODO why the null check? won't this cause issues when setValue is called the second this
+      // with a different object?
       if (valueFields instanceof VariableInstanceEntity) {
         // register the deserialized object for dirty checking.
         Context.getCommandContext()
-          .getDbSqlSession()
-          .addDeserializedObject(new DeserializedObject(this, valueFields.getCachedValue(), byteArray, (VariableInstanceEntity)valueFields));
+            .getDbSqlSession()
+            .addDeserializedObject(
+                new DeserializedObject(
+                    this,
+                    valueFields.getCachedValue(),
+                    byteArray,
+                    (VariableInstanceEntity) valueFields));
       }
     }
 
@@ -92,22 +100,24 @@ public class SerializableType extends ByteArrayType {
       oos = createObjectOutputStream(baos);
       oos.writeObject(value);
     } catch (Exception e) {
-      throw new ActivitiException("Couldn't serialize value '"+value+"' in variable '"+valueFields.getName()+"'", e);
+      throw new ActivitiException(
+          "Couldn't serialize value '" + value + "' in variable '" + valueFields.getName() + "'",
+          e);
     } finally {
       IoUtil.closeSilently(oos);
     }
     return baos.toByteArray();
   }
-  
+
   public Object deserialize(byte[] bytes, ValueFields valueFields) {
     ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
     try {
       ObjectInputStream ois = createObjectInputStream(bais);
-      Object deserializedObject = ois.readObject();
 
-      return deserializedObject;
+      return ois.readObject();
     } catch (Exception e) {
-      throw new ActivitiException("Couldn't deserialize object in variable '"+valueFields.getName()+"'", e);
+      throw new ActivitiException(
+          "Couldn't deserialize object in variable '" + valueFields.getName() + "'", e);
     } finally {
       IoUtil.closeSilently(bais);
     }
@@ -120,13 +130,14 @@ public class SerializableType extends ByteArrayType {
 
   protected ObjectInputStream createObjectInputStream(InputStream is) throws IOException {
     return new ObjectInputStream(is) {
-      protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
+      protected Class<?> resolveClass(ObjectStreamClass desc)
+          throws IOException, ClassNotFoundException {
         return ReflectUtil.loadClass(desc.getName());
       }
     };
   }
 
-	protected ObjectOutputStream createObjectOutputStream(OutputStream os) throws IOException {
+  protected ObjectOutputStream createObjectOutputStream(OutputStream os) throws IOException {
     return new ObjectOutputStream(os);
   }
 }

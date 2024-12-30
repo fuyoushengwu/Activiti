@@ -1,9 +1,9 @@
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -49,13 +49,12 @@ import org.activiti.engine.impl.javax.el.VariableMapper;
 import org.activiti.engine.impl.juel.SimpleResolver;
 import org.activiti.engine.impl.util.ReflectUtil;
 
-
 /**
  * ScriptEngine that used JUEL for script evaluation and compilation (JSR-223).
- * 
- * Uses EL 1.1 if available, to resolve expressions. Otherwise it reverts to EL
- * 1.0, using {@link ExpressionFactoryResolver}.
- * 
+ *
+ * <p>Uses EL 1.1 if available, to resolve expressions. Otherwise it reverts to EL 1.0, using {@link
+ * ExpressionFactoryResolver}.
+ *
  * @author Frederik Heremans
  */
 public class JuelScriptEngine extends AbstractScriptEngine implements Compilable {
@@ -105,7 +104,8 @@ public class JuelScriptEngine extends AbstractScriptEngine implements Compilable
     return new SimpleBindings();
   }
 
-  protected Object evaluateExpression(ValueExpression expr, ScriptContext ctx) throws ScriptException {
+  protected Object evaluateExpression(ValueExpression expr, ScriptContext ctx)
+      throws ScriptException {
     try {
       return expr.getValue(createElContext(ctx));
     } catch (ELException elexp) {
@@ -120,7 +120,8 @@ public class JuelScriptEngine extends AbstractScriptEngine implements Compilable
     compositeResolver.add(new MapELResolver());
     compositeResolver.add(new JsonNodeELResolver());
     compositeResolver.add(new ResourceBundleELResolver());
-    compositeResolver.add(new DynamicBeanPropertyELResolver(ItemInstance.class, "getFieldValue", "setFieldValue"));
+    compositeResolver.add(
+        new DynamicBeanPropertyELResolver(ItemInstance.class, "getFieldValue", "setFieldValue"));
     compositeResolver.add(new BeanELResolver());
     return new SimpleResolver(compositeResolver);
   }
@@ -139,9 +140,11 @@ public class JuelScriptEngine extends AbstractScriptEngine implements Compilable
     return strBuffer.toString();
   }
 
-  protected ValueExpression parse(String script, ScriptContext scriptContext) throws ScriptException {
+  protected ValueExpression parse(String script, ScriptContext scriptContext)
+      throws ScriptException {
     try {
-      return expressionFactory.createValueExpression(createElContext(scriptContext), script, Object.class);
+      return expressionFactory.createValueExpression(
+          createElContext(scriptContext), script, Object.class);
     } catch (ELException ele) {
       throw new ScriptException(ele);
     }
@@ -164,27 +167,28 @@ public class JuelScriptEngine extends AbstractScriptEngine implements Compilable
       scriptCtx.setAttribute("lang:import", getImportMethod(), ScriptContext.ENGINE_SCOPE);
     }
 
-    ELContext elContext = new ELContext() {
+    ELContext elContext =
+        new ELContext() {
 
-      ELResolver resolver = createElResolver();
-      VariableMapper varMapper = new ScriptContextVariableMapper(scriptCtx);
-      FunctionMapper funcMapper = new ScriptContextFunctionMapper(scriptCtx);
+          final ELResolver resolver = createElResolver();
+          final VariableMapper varMapper = new ScriptContextVariableMapper(scriptCtx);
+          final FunctionMapper funcMapper = new ScriptContextFunctionMapper(scriptCtx);
 
-      @Override
-      public ELResolver getELResolver() {
-        return resolver;
-      }
+          @Override
+          public ELResolver getELResolver() {
+            return resolver;
+          }
 
-      @Override
-      public VariableMapper getVariableMapper() {
-        return varMapper;
-      }
+          @Override
+          public VariableMapper getVariableMapper() {
+            return varMapper;
+          }
 
-      @Override
-      public FunctionMapper getFunctionMapper() {
-        return funcMapper;
-      }
-    };
+          @Override
+          public FunctionMapper getFunctionMapper() {
+            return funcMapper;
+          }
+        };
     // Store the elcontext in the scriptContext to be able to reuse
     scriptCtx.setAttribute("elcontext", elContext, ScriptContext.ENGINE_SCOPE);
     return elContext;
@@ -192,7 +196,7 @@ public class JuelScriptEngine extends AbstractScriptEngine implements Compilable
 
   private static Method getPrintMethod() {
     try {
-      return JuelScriptEngine.class.getMethod("print", new Class[] { Object.class });
+      return JuelScriptEngine.class.getMethod("print", new Class[] {Object.class});
     } catch (Exception exp) {
       // Will never occur
       return null;
@@ -205,7 +209,8 @@ public class JuelScriptEngine extends AbstractScriptEngine implements Compilable
 
   private static Method getImportMethod() {
     try {
-      return JuelScriptEngine.class.getMethod("importFunctions", new Class[] { ScriptContext.class, String.class, Object.class });
+      return JuelScriptEngine.class.getMethod(
+          "importFunctions", new Class[] {ScriptContext.class, String.class, Object.class});
     } catch (Exception exp) {
       // Will never occur
       return null;
@@ -213,9 +218,9 @@ public class JuelScriptEngine extends AbstractScriptEngine implements Compilable
   }
 
   public static void importFunctions(ScriptContext ctx, String namespace, Object obj) {
-    Class< ? > clazz = null;
+    Class<?> clazz = null;
     if (obj instanceof Class) {
-      clazz = (Class< ? >) obj;
+      clazz = (Class<?>) obj;
     } else if (obj instanceof String) {
       try {
         clazz = ReflectUtil.loadClass((String) obj);
@@ -237,7 +242,7 @@ public class JuelScriptEngine extends AbstractScriptEngine implements Compilable
 
   /**
    * Class representing a compiled script using JUEL.
-   * 
+   *
    * @author Frederik Heremans
    */
   private class JuelCompiledScript extends CompiledScript {
@@ -259,9 +264,8 @@ public class JuelScriptEngine extends AbstractScriptEngine implements Compilable
   }
 
   /**
-   * ValueMapper that uses the ScriptContext to get variable values or value
-   * expressions.
-   * 
+   * ValueMapper that uses the ScriptContext to get variable values or value expressions.
+   *
    * @author Frederik Heremans
    */
   private class ScriptContextVariableMapper extends VariableMapper {
@@ -298,12 +302,12 @@ public class JuelScriptEngine extends AbstractScriptEngine implements Compilable
 
   /**
    * FunctionMapper that uses the ScriptContext to resolve functions in EL.
-   * 
+   *
    * @author Frederik Heremans
    */
-  private class ScriptContextFunctionMapper extends FunctionMapper {
+  private static class ScriptContextFunctionMapper extends FunctionMapper {
 
-    private ScriptContext scriptContext;
+    private final ScriptContext scriptContext;
 
     ScriptContextFunctionMapper(ScriptContext ctx) {
       this.scriptContext = ctx;
@@ -326,5 +330,4 @@ public class JuelScriptEngine extends AbstractScriptEngine implements Compilable
       }
     }
   }
-
 }

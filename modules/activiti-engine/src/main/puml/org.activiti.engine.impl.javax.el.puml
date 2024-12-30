@@ -1,0 +1,227 @@
+@startuml
+/' !include  org.activiti.engine.impl.el.puml '/
+package "org.activiti.engine.impl.javax.el" {
+
+class ArrayELResolver extends ELResolver {
+    - readOnly:boolean
+    + ArrayELResolver()
+    + ArrayELResolver(boolean readOnly)
+    + getCommonPropertyType(ELContext context,Object base):Class<?>
+    + getFeatureDescriptors(ELContext context,Object base):Iterator<FeatureDescriptor>
+    + getType(ELContext context,Object base,Object property):Class<?>
+    + getValue(ELContext context,Object base,Object property):Object
+    + isReadOnly(ELContext context,Object base,Object property):boolean
+    + setValue(ELContext context,Object base,Object property,Object value):void
+}
+
+class BeanELResolver$BeanProperty {
+    - descriptor:java.beans.PropertyDescriptor
+    == constructor ==
+    + BeanELResolver$BeanProperty(java.beans.PropertyDescriptor)
+    == constructor ==
+    + getPropertyType():Class<?>
+    + getReadMethod():Method
+    + getWriteMethod():Method
+    + isReadOnly():boolean
+}
+BeanELResolver$BeanProperty *--> BeanELResolver
+
+class BeanELResolver$BeanProperties {
+    - map:Map<String,BeanELResolver$BeanProperty>
+    == constructor ==
+    + BeanELResolver$BeanProperties(Class<?>)
+    == constructor ==
+    + getBeanProperty(String property):BeanELResolver$BeanProperty
+}
+BeanELResolver$BeanProperties *--> BeanELResolver
+
+class BeanELResolver extends ELResolver {
+    - readOnly:boolean
+    - cache:ConcurrentHashMap<Class<?>,BeanProperties>
+    - defaultFactory:ExpressionFactory
+
+    + BeanELResolver()
+    + BeanELResolver(boolean)
+    + getCommonPropertyType(ELContext context,Object base):Class<?>
+    + getFeatureDescriptors(ELContext context,Object base):Iterator<FeatureDescriptor>
+    + getType(ELContext context,Object base,Object property):Class<?>
+    + getValue(ELContext context,Object base,Object property):Object
+    + isReadOnly(ELContext context,Object base,Object property):boolean
+    + setValue(ELContext context,Object base,Object property,Object value):void
+    + invoke(ELContext context,Object base,Object method,Class<?>[] paramTypes,Object[] params):Object
+}
+BeanELResolver *-->ExpressionFactory
+
+class CompositeELResolver extends ELResolver {
+    - resolvers:List<ELResolver>
+    + add(ELResolver)
+    + getCommonPropertyType(ELContext context,Object base):Class<?>
+    + getFeatureDescriptors(ELContext context,Object base):Iterator<FeatureDescriptor>
+    + getType(ELContext context,Object base,Object property):Class<?>
+    + getValue(ELContext context,Object base,Object property):Object
+    + isReadOnly(ELContext context,Object base,Object property):boolean
+    + setValue(ELContext context,Object base,Object property,Object value):void
+    + invoke(ELContext context,Object base,Object method,Class<?>[] paramTypes,Object[] params):Object
+}
+
+class DynamicBeanPropertyELResolver extends ELResolver {
+    # subject:Class<?>
+    # readMethodName:String
+    # writeMethodName:String
+    # readOnly:boolean
+
+    + DynamicBeanPropertyELResolver(boolean readOnly,Class<?> subject,String readMethodName,String writeMethodName)
+    + DynamicBeanPropertyELResolver(Class<?> subject,String readMethodName,String writeMethodName)
+    + getCommonPropertyType(ELContext context,Object base):Class<?>
+    + getFeatureDescriptors(ELContext context,Object base):Iterator<FeatureDescriptor>
+    + getType(ELContext context,Object base,Object property):Class<?>
+    + getValue(ELContext context,Object base,Object property):Object
+    + isReadOnly(ELContext context,Object base,Object property):boolean
+    + setValue(ELContext context,Object base,Object property,Object value):void
+}
+
+abstract class ELContext {
+    - {final} context:Map<Class<?>,Object>
+    - locale:Locale
+    - resolved:boolean
+
+    + getContext(Class<?>):Object
+    + {abstract} getELResolver():ELResolver
+    + {abstract} getFunctionMapper():FunctionMapper
+    + {abstract} getVariableMapper():VariableMapper
+    + getLocale():Locale
+    + isPropertyResolved():boolean
+    + pubContext(Class<?> key,Object contextObject)
+    + setLocale(Locale locale)
+    + setPropertyResolved(boolean resolved)
+}
+FunctionMapper <.. ELContext
+VariableMapper <.. ELContext
+
+class ELContextEvent extends java.util.EventObject {
+    + ELContextEvent(ELContext source)
+    + getSource():ELContext
+}
+ELContextEvent ..> ELContext
+
+interface ELContextListener extends java.util.EventListener {
+    + contextCreated(ELContextEvent):void
+}
+ELContextListener ..> ELContextEvent
+
+abstract class ELResolver {
+    + {abstract} getCommonPropertyType(ELContext,Object):Class<?>
+    + {abstract} getFeatureDescriptors(ELContext,Object):Iterator<FeatureDescriptor>
+    + {abstract} getType(ELContext,Object,Object):Class<?>
+    + {abstract} getValue(ELContext,Object,Object):Object
+    + {abstract} isReadOnly(ELContext,Object,Object):boolean
+    + {abstract} setValue(ELContext,Object,Object):void
+    + {abstract} invoke(ELContext,Object,Object,Class<?>,Object[]):Object
+}
+ELContext <.. ELResolver
+
+abstract class Expression {
+    + {abstract} equals(Object obj):boolean
+    + {abstract} getExpressionString():String
+    + {abstract} hashCode():int
+    + {abstract} isLiteralText():boolean
+}
+
+abstract class ExpressionFactory {
+    + {static} newInstance():ExpressionFactory
+    + {static} newInstance(Properties):ExpressionFactory
+    - {static} newInstance(Properties,String):ExpressionFactory
+    + {abstract} coerceToType(Object,Class<?>):Object
+    + {abstract} createMethodExpression(ELContext,String,Class<?>,Class<?>[]):MethodExpression
+    + {abstract} createValueExpression(ELContext,String,Class<?>):ValueExpression
+    + {abstract} createValueExpression(Object,Class<?>):ValueExpression
+}
+ExpressionFactory ..> Expression
+
+abstract class FunctionMapper {
+    + {abstract} resolveFunction(String prefix,String localName):Method
+}
+
+class JsonNodeELResolver extends ELResolver {
+    - {final} readOnly:boolean
+    + JsonNodeELResolver()
+    + JsonNodeELResolver(boolean readOnly)
+    + getCommonPropertyType(ELContext context,Object base):Class<?>
+    + getFeatureDescriptors(ELContext context,Object base):Iterator<FeatureDescriptor>
+    + getType(ELContext context,Object base,Object property):Class<?>
+    + getValue(ELContext context,Object base,Object property):Object
+    + isReadOnly(ELContext context,Object base,Object property):boolean
+    + setValue(ELContext context,Object base,Object property,Object value):void
+}
+
+class ListELResolver extends ELResolver {
+    - readOnly:boolean
+    + ListELResolver()
+    + ListELResolver(boolean readOnly)
+    + getCommonPropertyType(ELContext context,Object base):Class<?>
+    + getFeatureDescriptors(ELContext context,Object base):Iterator<FeatureDescriptor>
+    + getType(ELContext context,Object base,Object property):Class<?>
+    + getValue(ELContext context,Object base,Object property):Object
+    + isReadOnly(ELContext context,Object base,Object property):boolean
+    + setValue(ELContext context,Object base,Object property,Object value):void
+}
+
+class MapELResolver extends ELResolver {
+    - readOnly:boolean
+    + MapELResolver()
+    + MapELResolver(boolean readOnly)
+    + getCommonPropertyType(ELContext context,Object base):Class<?>
+    + getFeatureDescriptors(ELContext context,Object base):Iterator<FeatureDescriptor>
+    + getType(ELContext context,Object base,Object property):Class<?>
+    + getValue(ELContext context,Object base,Object property):Object
+    + isReadOnly(ELContext context,Object base,Object property):boolean
+    + setValue(ELContext context,Object base,Object property,Object value):void
+}
+
+abstract class MethodExpression extends Expression {
+    + {abstract} getMethodInfo(ELContext context):MethodInfo
+    + {abstract} invoke(ELContext context,Object[] params):Object
+}
+MethodInfo <.. MethodExpression
+
+class MethodInfo {
+    - name:String
+    - returnType:Class<?>
+    - paramTypes:Class<?>[]
+    + MethodInfo(String name,Class<?> returnType,Class<?>[] paramTypes)
+    + getName():String
+    + getReturnType():Class<?>
+    + getParamTypes():Class<?>{}
+}
+
+class ResourceBundleELResolver extends ELResolver {
+    + getCommonPropertyType(ELContext context,Object base):Class<?>
+    + getFeatureDescriptors(ELContext context,Object base):Iterator<FeatureDescriptor>
+    + getType(ELContext context,Object base,Object property):Class<?>
+    + getValue(ELContext context,Object base,Object property):Object
+    + isReadOnly(ELContext context,Object base,Object property):boolean
+    + setValue(ELContext context,Object base,Object property,Object value):void
+}
+
+abstract class ValueExpression extends Expression {
+    + {abstract} getExpectedType():Class<?>
+    + {abstract} getType(ELContext):Class<?>
+    + {abstract} getValue(ELContext):Object
+    + {abstract} isReadOnly(ELContext):boolean
+    + {abstract} setValue(ELContext,Object)
+    + getValueReference(ELContext):ValueReference
+}
+ValueReference <.. ValueExpression
+
+class ValueReference {
+    - base:Object
+    - property:Object
+}
+
+abstract class VariableMapper {
+    + {abstract} resolveVariable(String variable):ValueExpression
+    + {abstract} setVariable(String variable,ValueExpression expression):ValueExpression
+}
+}
+/' packager finished  '/
+@enduml

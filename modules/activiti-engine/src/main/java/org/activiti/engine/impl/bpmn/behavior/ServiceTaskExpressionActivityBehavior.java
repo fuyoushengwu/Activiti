@@ -1,9 +1,9 @@
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,9 +25,9 @@ import org.apache.commons.lang3.StringUtils;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
- * ActivityBehavior that evaluates an expression when executed. Optionally, it
- * sets the result of the expression as a variable on the execution.
- * 
+ * ActivityBehavior that evaluates an expression when executed. Optionally, it sets the result of
+ * the expression as a variable on the execution.
+ *
  * @author Tom Baeyens
  * @author Christian Stettler
  * @author Frederik Heremans
@@ -41,7 +41,11 @@ public class ServiceTaskExpressionActivityBehavior extends TaskActivityBehavior 
   protected Expression skipExpression;
   protected String resultVariable;
 
-  public ServiceTaskExpressionActivityBehavior(String serviceTaskId, Expression expression, Expression skipExpression, String resultVariable) {
+  public ServiceTaskExpressionActivityBehavior(
+      String serviceTaskId,
+      Expression expression,
+      Expression skipExpression,
+      String resultVariable) {
     this.serviceTaskId = serviceTaskId;
     this.expression = expression;
     this.skipExpression = skipExpression;
@@ -51,20 +55,29 @@ public class ServiceTaskExpressionActivityBehavior extends TaskActivityBehavior 
   public void execute(ActivityExecution execution) throws Exception {
     Object value = null;
     try {
-      boolean isSkipExpressionEnabled = SkipExpressionUtil.isSkipExpressionEnabled(execution, skipExpression);
-      if (!isSkipExpressionEnabled || 
-              (isSkipExpressionEnabled && !SkipExpressionUtil.shouldSkipFlowElement(execution, skipExpression))) {
-        
+      boolean isSkipExpressionEnabled =
+          SkipExpressionUtil.isSkipExpressionEnabled(execution, skipExpression);
+      if (!isSkipExpressionEnabled
+          || !SkipExpressionUtil.shouldSkipFlowElement(execution, skipExpression)) {
+
         if (Context.getProcessEngineConfiguration().isEnableProcessDefinitionInfoCache()) {
-          ObjectNode taskElementProperties = Context.getBpmnOverrideElementProperties(serviceTaskId, execution.getProcessDefinitionId());
-          if (taskElementProperties != null && taskElementProperties.has(DynamicBpmnConstants.SERVICE_TASK_EXPRESSION)) {
-            String overrideExpression = taskElementProperties.get(DynamicBpmnConstants.SERVICE_TASK_EXPRESSION).asText();
-            if (StringUtils.isNotEmpty(overrideExpression) && overrideExpression.equals(expression.getExpressionText()) == false) {
-              expression = Context.getProcessEngineConfiguration().getExpressionManager().createExpression(overrideExpression);
+          ObjectNode taskElementProperties =
+              Context.getBpmnOverrideElementProperties(
+                  serviceTaskId, execution.getProcessDefinitionId());
+          if (taskElementProperties != null
+              && taskElementProperties.has(DynamicBpmnConstants.SERVICE_TASK_EXPRESSION)) {
+            String overrideExpression =
+                taskElementProperties.get(DynamicBpmnConstants.SERVICE_TASK_EXPRESSION).asText();
+            if (StringUtils.isNotEmpty(overrideExpression)
+                && !overrideExpression.equals(expression.getExpressionText())) {
+              expression =
+                  Context.getProcessEngineConfiguration()
+                      .getExpressionManager()
+                      .createExpression(overrideExpression);
             }
           }
         }
-        
+
         value = expression.getValue(execution);
         if (resultVariable != null) {
           execution.setVariable(resultVariable, value);

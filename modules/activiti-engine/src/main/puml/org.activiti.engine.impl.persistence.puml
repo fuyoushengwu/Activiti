@@ -1,0 +1,80 @@
+@startuml
+package "org.activiti.engine.impl.persistence" {
+
+class AbstractManager implements org.activiti.engine.impl.interceptor.Session{
+    + insert(org.activiti.engine.impl.db.PersistentObject):void
+    + delete(org.activiti.engine.impl.db.PersistentObject):void
+    + getDbSqlSession():org.activiti.engine.impl.db.DbSqlSession
+    + getSession(Class<T> sessionClass):T
+    + getDeploymentManager():org.activiti.engine.impl.persistence.entity.DeploymentEntityManager
+    + getResourceManager():org.activiti.engine.impl.persistence.entity.ResourceEntityManager
+    + getByteArrayManager():org.activiti.engine.impl.persistence.entity.ByteArrayEntityManager
+    + getProcessDefinitionManager():org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntityManager
+    + getProcessDefinitionInfoManager():org.activiti.engine.impl.persistence.entity.ProcessDefinitionInfoEntityManager
+    + getModelManager():org.activiti.engine.impl.persistence.entity.ModelEntityManager
+    + getProcessInstanceManager():org.activiti.engine.impl.persistence.entity.ProcessInstanceEntityManager
+    + getTaskManager():org.activiti.engine.impl.persistence.entity.TaskEntityManager
+    + getIdentityLinkManager():org.activiti.engine.impl.persistence.entity.IdentityLinkEntityManager
+    + getEventSubscriptionManager():org.activiti.engine.impl.persistence.entity.EventSubscriptionEntityManager
+    + getVariableInstanceManager():org.activiti.engine.impl.persistence.entity.VariableInstanceEntityManager
+    + getHistoricProcessInstanceManager():org.activiti.engine.impl.persistence.entity.HistoricProcessInstanceEntityManager
+    + getHistoricDetailManager():org.activiti.engine.impl.persistence.entity.HistoricDetailEntityManager
+    + getHistoricActivityInstanceManager():org.activiti.engine.impl.persistence.entity.HistoricActivityInstanceEntityManager
+    + getHistoricVariableInstanceManager():org.activiti.engine.impl.persistence.entity.HistoricVariableInstanceEntityManager
+    + getHistoricTaskInstanceManager():org.activiti.engine.impl.persistence.entity.HistoricTaskInstanceEntityManager
+    + getHistoricIdentityLinkEntityManager():org.activiti.engine.impl.persistence.entity.HistoricIdentityLinkEntityManager
+    + getUserIdentityManager():org.activiti.engine.impl.persistence.entity.UserIdentityManager
+    + getGroupIdentityManager():org.activiti.engine.impl.persistence.entity.GroupIdentityManager
+    + getIdentityInfoManager():org.activiti.engine.impl.persistence.entity.IdentityInfoManager
+    + getMembershipIdentityManager():org.activiti.engine.impl.persistence.entity.MembershipIdentityManager
+    + getAttachmentManager():org.activiti.engine.impl.persistence.entity.AttachmentEntityManager
+    + getHistoryManager():org.activiti.engine.impl.persistence.entity.EventLogEntryEntityManager
+    + getProcessEngineConfiguration():org.activiti.engine.ProcessEngineConfiguration
+    + close():void
+    + flush():void
+}
+
+class ByteArrayRefTypeHandler extends org.apache.ibatis.type.TypeReference<org.activiti.engine.impl.persistence.entity.ByteArrayRef> implements org.apache.ibatis.type.TypeHandler<org.activiti.engine.impl.persistence.entity.ByteArrayRef> {
+    + setParameter(PreparedStatement ps, int i, org.activiti.engine.impl.persistence.entity.ByteArrayRef parameter, String type)
+    + getResult(ResultSet rs, String columnName):org.activiti.engine.impl.persistence.entity.ByteArrayRef
+    + getResult(ResultSet rs, int columnIndex):org.activiti.engine.impl.persistence.entity.ByteArrayRef
+}
+
+class DefaultHistoryManagerSessionFactory implements org.activiti.engine.impl.interceptor.SessionFactory {
+    + getSessionType():Class<?>
+    + openSession():org.activiti.engine.impl.interceptor.Session
+}
+DefaultHistoryManagerSessionFactory o--> org.activiti.engine.impl.history.DefaultHistoryManager
+
+class GenericManagerFactory implements org.activiti.engine.impl.interceptor.SessionFactory {
+    # managerImplementation:Class<? extends org.activiti.engine.impl.interceptor.Session>
+    + GenericManagerFactory(Class< ? extends org.activiti.engine.impl.interceptor.Session>)
+    + getSessionType():Class<?>
+    + openSession():org.activiti.engine.impl.interceptor.Session
+}
+class GroupEntityManagerFactory implements org.activiti.engine.impl.interceptor.SessionFactory {
+    + getSessionType():Class<?>
+    + openSession():org.activiti.engine.impl.interceptor.Session
+}
+GroupEntityManagerFactory o--> org.activiti.engine.impl.persistence.entity.GroupEntityManager
+class MembershipEntityManagerFactory implements org.activiti.engine.impl.interceptor.SessionFactory {
+    + getSessionType():Class<?>
+    + openSession():org.activiti.engine.impl.interceptor.Session
+}
+MembershipEntityManagerFactory o--> org.activiti.engine.impl.persistence.entity.MembershipEntityManager
+class StrongUuidGenerator implements org.activiti.engine.impl.cfg.IdGenerator {
+    # timeBasedGenerator:com.fasterxml.uuid.impl.TimeBasedGenerator
+    + StrongUuidGenerator()
+    # ensureGeneratorInitialized():void
+    + getNextId():String
+}
+class UserEntityManagerFactory implements org.activiti.engine.impl.interceptor.SessionFactory {
+    + getSessionType():Class<?>
+    + openSession():org.activiti.engine.impl.interceptor.Session
+}
+UserEntityManagerFactory o--> org.activiti.engine.impl.persistence.entity.UserEntityManager
+}
+
+/' package finished '/
+
+@enduml

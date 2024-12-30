@@ -31,13 +31,13 @@ import org.activiti.engine.impl.juel.Builder.Feature;
 
 /**
  * Expression factory implementation.
- * 
+ * <p>
  * This class is also used as an EL "service provider". The <em>JUEL</em> jar file specifies this
  * class as el expression factory implementation in
  * <code>META-INF/services/javax.el.ExpressionFactory</code>. Calling
  * {@link ExpressionFactory#newInstance()} will then return an instance of this class, configured as
  * described below.
- * 
+ * <p>
  * If no properties are specified at construction time, properties are read from
  * <ol>
  * <li>
@@ -52,7 +52,7 @@ import org.activiti.engine.impl.juel.Builder.Feature;
  * <code>JAVA_HOME/lib/el.properties</code> or {@link System#getProperties()}.</li>
  * </ol>
  * There are also constructors to explicitly pass in an instance of {@link Properties}.
- * 
+ * <p>
  * Having this, the following properties are read:
  * <ul>
  * <li>
@@ -96,7 +96,7 @@ public class ExpressionFactoryImpl extends ExpressionFactory {
 		}
 
 		Feature[] features() {
-			return features.toArray(new Feature[features.size()]);
+			return features.toArray(new Feature[0]);
 		}
 
 		boolean contains(Feature feature) {
@@ -299,7 +299,7 @@ public class ExpressionFactoryImpl extends ExpressionFactory {
 	}
 
 	private boolean getFeatureProperty(Profile profile, Properties properties, Feature feature, String property) {
-		return Boolean.valueOf(properties.getProperty(property, String.valueOf(profile.contains(feature))));
+		return Boolean.parseBoolean(properties.getProperty(property, String.valueOf(profile.contains(feature))));
 	}
 
 	/**
@@ -353,7 +353,7 @@ public class ExpressionFactoryImpl extends ExpressionFactory {
 			return TypeConverter.DEFAULT;
 		}
 		try {
-			return TypeConverter.class.cast(clazz.newInstance());
+			return (TypeConverter) clazz.newInstance();
 		} catch (Exception e) {
 			throw new ELException("TypeConverter " + clazz + " could not be instantiated", e);
 		}
@@ -376,17 +376,9 @@ public class ExpressionFactoryImpl extends ExpressionFactory {
 		try {
 			if (Builder.class.isAssignableFrom(clazz)) {
 				Constructor<?> constructor = clazz.getConstructor(Feature[].class);
-				if (constructor == null) {
-					if (features == null || features.length == 0) {
-						return TreeBuilder.class.cast(clazz.newInstance());
-					} else {
-						throw new ELException("Builder " + clazz + " is missing constructor (can't pass features)");
-					}
-				} else {
-					return TreeBuilder.class.cast(constructor.newInstance((Object) features));
-				}
-			} else {
-				return TreeBuilder.class.cast(clazz.newInstance());
+                return (TreeBuilder) constructor.newInstance((Object) features);
+            } else {
+				return (TreeBuilder) clazz.newInstance();
 			}
 		} catch (Exception e) {
 			throw new ELException("TreeBuilder " + clazz + " could not be instantiated", e);

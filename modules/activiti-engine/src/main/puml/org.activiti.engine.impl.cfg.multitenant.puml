@@ -1,0 +1,56 @@
+@startuml
+hide @unlinked
+package "org.activiti.engine.impl.cfg.multitenant" {
+class ExecuteSchemaOperationCommand implements org.activiti.engine.impl.interceptor.Command<Void> {
+    # schemaOperation:String
+    # tenantInfoHolder:TenantInfoHolder
+    + ExecuteSchemaOperationCommand(Sting schemaOperation)
+    + execute(org.activiti.engine.impl.interceptor.CommandContext commandContext):Void
+}
+
+class MultiSchemaMultiTenantProcessEngineConfiguration extends org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl {
+    # tenantInfoHolder:TenantInfoHolder
+    # booted:boolean
+    + MultiSchemaMultiTenantProcessEngineConfiguration(TenantInfoHolder tenantInfoHolder)
+    + registerTenant(String tenantId,javax.sql.DataSource dataSource):void
+    # initAsyncExecutor():void
+    + buildProcessEngine():org.activiti.engine.ProcessEngine
+    # createTenantSchema(String tenantId):void
+    # createTenantAsyncJobExecutor(String tenantId):void
+    # createTransactionInterceptor():org.activiti.engine.impl.interceptor.CommandInterceptor
+}
+MultiSchemaMultiTenantProcessEngineConfiguration *--> TenantAwareDataSource
+MultiSchemaMultiTenantProcessEngineConfiguration *--> ExecuteSchemaOperationCommand
+
+class TenantAwareDataSource implements javax.sql.DataSource {
+    # tenantInfoHolder:TenantInfoHolder
+    # dataSources:Map<Object,javax.sql.DataSource>
+    + TenantAwareDataSource(TenantInfoHolder tenantInfoHolder)
+    + addDataSource(Object key,javax.sql.DataSource dataSource):void
+    + removeDataSource(Object key):void
+    + getConnection():Connection
+    + getConnection(String username,String password):Connection
+    + getCurrentDataSource():javax.sql.DataSource
+    + getLoginTimeout():int
+    + getParentLogger():Logger
+    + unwrap(Class<T> iface):T
+    + isWrapperFor(Class<?> iface):boolean
+    + getDataSources():Map<Object,javax.sql.DataSource>
+    + setDataSources(Map<Object,javax.sql.DataSource> dataSources):void
+    + getLogWriter():PrintWriter
+    + setLogWriter(PrintWriter logWriter):void
+    + setLoginTimeout(int seconds):void
+}
+TenantAwareDataSource *--> TenantInfoHolder
+
+interface TenantInfoHolder {
+    + getAllTenants():Collection<(String>
+    + setCurrentTenantId(String):void
+    + getCurrentTenantId():String
+    + clearCurrentTenantId():void
+}
+/' package finished '/
+
+}
+
+@enduml

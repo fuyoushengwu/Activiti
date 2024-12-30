@@ -119,7 +119,7 @@ public class JobRetryCmd implements Command<Object> {
     			ActivitiEventType.JOB_RETRIES_DECREMENTED, job));
     }
     
-    if (processEngineConfig.isAsyncExecutorEnabled() == false) {
+    if (!processEngineConfig.isAsyncExecutorEnabled()) {
       JobExecutor jobExecutor = processEngineConfig.getJobExecutor();
       JobAddedNotification messageAddedNotification = new JobAddedNotification(jobExecutor);
       TransactionContext transactionContext = commandContext.getTransactionContext();
@@ -133,7 +133,6 @@ public class JobRetryCmd implements Command<Object> {
     Calendar newDateCal = new GregorianCalendar();
     if (oldDate != null) {
       newDateCal.setTime(oldDate);
-      
     } else {
       newDateCal.setTime(commandContext.getProcessEngineConfiguration().getClock().getCurrentTime());
     }
@@ -168,7 +167,7 @@ public class JobRetryCmd implements Command<Object> {
         }
         
         ProcessDefinitionEntity processDefinition = null;
-        if (job.getTenantId() != null && job.getTenantId().length() > 0) {
+        if (job.getTenantId() != null && !job.getTenantId().isEmpty()) {
           processDefinition = deploymentManager.findDeployedLatestProcessDefinitionByKeyAndTenantId(processId, job.getTenantId());
         } else {
           processDefinition = deploymentManager.findDeployedLatestProcessDefinitionByKey(processId);

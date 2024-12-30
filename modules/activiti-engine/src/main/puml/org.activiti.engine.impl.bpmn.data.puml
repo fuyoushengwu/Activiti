@@ -1,0 +1,169 @@
+@startuml
+hide @unlinked
+package "org.activiti.engine.impl.bpmn.data" {
+abstract class AbstractDataAssociation {
+    # source:String
+    # sourceExpression:Expression
+    # target:String
+
+    # AbstractDataAssociation(String source,String target)
+    # AbstractDataAssociation(Expression sourceExpression,String target)
+
+    + {abstract} evaluate(ActivityExecution):void
+    + getSource():String
+    + getTarget():String
+    + getSourceExpression():Expression
+}
+class Assignment {
+    # fromExpression:Expression
+    # toExpression:Expression
+    + Assignment(Expression fromExpression,Expression toExpression)
+    + evaluate(ActivityExecution execution)
+}
+class ClassStructureDefinition implements FieldBaseStructureDefinition {
+    # id:String
+    # classStructure:Class<?>
+    + ClassStructureDefinition(Class<?> classStructure)
+    + ClassStructureDefinition(String id,Class<?> classStructure)
+    + getId():String
+    + getFieldSize():int
+    + getFieldNameAt(int index):String
+    + getFieldTypeAt(int index):Class<?>
+    + createInstance():StructureInstance
+}
+ClassStructureDefinition ..> FieldBaseStructureInstance
+class Data {
+    # id:String
+    # name:String
+    # definition:ItemDefinition
+    + Data(String id,String name,ItemDefinition definition)
+    + getId():String
+    + getName():String
+    + getDefinition():ItemDefinition
+}
+class DataRef {
+    # idRef:String
+    + DataRef(String idRef)
+    + getIdRef():String
+}
+interface FieldBaseStructureDefinition extends StructureDefinition {
+    + getFieldSize():int
+    + getFiledNameAt(int index):String
+    + getFieldTypeAt(int index):Class<?>
+}
+class FieldBaseStructureInstance implements StructureInstance {
+    # structureDefinition:FieldBaseStructureDefinition
+    # fieldValues:Map<String,Object>
+    + FieldBaseStructureInstance(FieldBaseStructureDefinition structureDefinition)
+    + getFieldValue(String fieldName):Object
+    + setFieldValue(String fieldName,Object value):void
+    + getFieldSize():int
+    + getFieldNameAt(int index):String
+    + toArray():Object[]
+    + loadFrom(Object[] array):void
+}
+FieldBaseStructureInstance ..> FieldBaseStructureDefinition
+class IOSpecification {
+    # dataInputs:List<Data>
+    # dataOutputs:List<Data>
+    # dataInputRefs:List<DataRef>
+    # dataOutputRefs:List<DataRef>
+    + IOSpecification()
+    + initialize(ActivityExecution execution):void
+    + getDataInputs():List<Data>
+    + getDataOutputs():List<Data>
+    + addInput(Data data):void
+    + addOutput(Data data):void
+    + addInputRef(DataRef dataRef):void
+    + addOutputRef(DataRef dataRef):void
+    + getFirstDataInputName():String
+    + getFirstDataOutputName():String
+}
+
+class ItemDefinition {
+    # id:String
+    # structure:StructureDefinition
+    # isCollection:boolean
+    # itemKind:ItemKind
+    - ItemDefinition()
+    + ItemDefinition(String id,StructureDefinition structure)
+    + createInstance():ItemInstance
+    + getStructureDefinition():StructureDefinition
+    + isCollection():boolean
+    + setCollection(boolean):void
+    + getItemKind():ItemInstance
+    + setItemKind():ItemKind
+    + getId():String
+}
+class ItemInstance {
+    # item:ItemDefinition
+    # structureInstance:StructureInstance
+    + ItemInstance(ItemDefinition item,StructureInstance structureInstance)
+    + getItem():ItemDefinition
+    + getStructureInstance():StructureInstance
+    + getFieldBaseStructureInstance():FieldBaseStructureInstance
+    + getFieldValue(String fieldName):Object
+    + setFieldValue(String fieldName,Object value):void
+}
+ItemInstance *--> ItemDefinition
+enum ItemKind {
+    Information
+    Physical
+}
+class PrimitiveStructureDefinition implements StructureDefinition {
+    # id:String
+    # primitiveClass:Class<?>
+    + PrimitiveStructureDefinition(String id,Class<?> primitiveClass)
+    + getId():String
+    + getPrimitiveClass():Class<?>
+    + createInstance():StructureInstance
+}
+PrimitiveStructureDefinition ..> PrimitiveStructureInstance
+class PrimitiveStructureInstance implements StructureInstance {
+    # primitive:Object
+    # definition:PrimitiveStructureDefinition
+    + PrimitiveStructureInstance(PrimitiveStructureDefinition definition)
+    + PrimitiveStructureInstance(PrimitiveStructureDefinition definition,Object primitive)
+    + getPrimitive():Object
+    + toArray():Object[]
+    + loadFrom(Object[])
+}
+
+class SimpleDataInputAssociation extends AbstractDataAssociation {
+    # assignments:List<Assignment>
+    + SimpleDataInputAssociation(Expression sourceExpression,String target)
+    + SimpleDataInputAssociation(String source,String target)
+    + addAssignment(Assignment assignment):void
+    + evaluate(ActivityExecution execution):void
+}
+SimpleDataInputAssociation *--> Assignment
+class SimpleStructureDefinition implements FieldBaseStructureDefinition {
+    # id:String
+    # fieldNames:List<String>
+    # fieldTypes:List<Class<?>>
+    + SimpleStructureDefinition(String id)
+    + getFieldSize():int
+    + getId():String
+    + setFieldName(int index,String fieldName,Class<?> type):void
+    + getFieldNameAt(int index):String
+    + getFieldTypeAt(int index):Class<?>
+    + createInstance():StructureInstance
+}
+SimpleStructureDefinition ..> FieldBaseStructureInstance
+interface StructureDefinition {
+    + getId():String
+    + createInstance():StructureInstance
+}
+interface StructureInstance {
+    + toArray():Object[]
+    + loadFrom(Object[] array):void
+}
+class TransformationDataOutputAssociation extends AbstractDataAssociation {
+    # transformation:Expression
+    + TransformationDataOutputAssociation(String sourceRef,String targetRef,Expression transformation)
+    + evaluate(ActivityExecution execution):void
+}
+
+}
+/' package finished '/
+@enduml

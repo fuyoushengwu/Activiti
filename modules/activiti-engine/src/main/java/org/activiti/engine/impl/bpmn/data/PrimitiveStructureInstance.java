@@ -41,12 +41,11 @@ public class PrimitiveStructureInstance implements StructureInstance {
   }
 
   public void loadFrom(Object[] array) {
-    for (int i = 0; i < array.length; i++) {
-      Object object = array[i];
-      if (this.definition.getPrimitiveClass().isInstance(object)) {
-        this.primitive = object;
-        return;
+      for (Object object : array) {
+          if (this.definition.getPrimitiveClass().isInstance(object)) {
+              this.primitive = object;
+              return;
+          }
       }
-    }
   }
 }

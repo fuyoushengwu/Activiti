@@ -1,0 +1,161 @@
+@startuml
+hide @unlinked
+package "org.activiti.engine.impl.bpmn.parser" {
+class BpmnParse implements org.activiti.bpmn.constants.BpmnXMLConstants {
+    # name:String
+    # validateSchema:boolean
+    # validateProcess:boolean
+    # streamSource:org.activiti.engine.impl.util.io.StreamSource
+    # sourceSystemId:String
+    # bpmnModel:org.activiti.bpmn.model.BpmnModel
+    # targetNamespace:String
+    # deployment:org.activiti.engine.impl.persistence.entity.DeploymentEntity
+    # processDefinitions:List<org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity>
+    # sequenceFlows:Map<String,org.activiti.engine.impl.pvm.process.TransitionImpl>
+    # bpmnParserHandlers:org.activiti.engine.impl.bpmn.parser.BpmnParseHandlers
+    # currentProcessDefinition:org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity
+    # currentFlowElement:org.activiti.bpmn.model.FlowElement
+    # currentActivity:org.activiti.engine.impl.pvm.process.ActivityImpl
+    # currentSubprocessStack:LinkedList<org.activiti.bpmn.model.SubProcess>
+    # currentScopeStack:LinkedList<org.activiti.engine.impl.pvm.process.ScopeImpl>
+    # messages:Map<String,org.activiti.engine.impl.bpmn.webservice.MessageDefinition>
+    # structures:Map<String,org.activiti.engine.impl.bpmn.data.StructureDefinition>
+    # interfaceImplementations:Map<String,org.activiti.engine.impl.bpmn.webservice.BpmnInterfaceImplementation>
+    # operationImplementations:Map<String,org.activiti.engine.impl.bpmn.webservice.OperationImplementation>
+    # itemDefinitions:Map<String,org.activiti.engine.impl.bpmn.data.ItemDefinition>
+    # bpmnInterfaces:Map<String,org.activiti.engine.impl.bpmn.webservice.BpmnInterface>
+    # operations:Map<String,org.activiti.engine.impl.bpmn.webservice.Operation>
+    # importers:Map<String,org.activiti.engine.impl.bpmn.parser.XMLImporter>
+    # prefixs:Map<String,String>
+    # expressionManager:org.activiti.engine.impl.el.ExpressionManager
+    # activityBehaviorFactory:org.activiti.engine.impl.bpmn.parser.factory.ActivityBehaviorFactory
+    # listenerFactory:org.activiti.engine.impl.bpmn.parser.factory.ListenerFactory
+    + BpmnParse(BpmnParser parser)
+    # initializeXSDItemDefinitions():void
+    # deployment(org.activiti.engine.impl.persistence.entity.DeploymentEntity deployment):BpmnParse
+    # execute():BpmnParse
+    + name():BpmnParse
+    + sourceInputStream(InputStream inputStream):BpmnParse
+    + sourceResource(String resource):BpmnParse
+    + sourceUrl(URL url):BpmnParse
+    + sourceUrl(String url):BpmnParse
+    + sourceResource(String resource,ClassLoader classLoader):BpmnParse
+    + sourceString(String string):BpmnParse
+    # setStreamSource(StreamSource streamSource):void
+    # createImports():void
+    # createItemDefinitions():void
+    # createMessage():void
+    # createOperations():void
+    # transformProcessDefinitions():void
+    == Diagram interchange ==
+    + processDI():void
+    + createBPMNShape(String key,org.activiti.bpmn.model.GraphicInfo graphicInfo,org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity entity):void
+    + createDIBounds(org.activiti.bpmn.model.GraphicInfo graphicInfo,org.activiti.engine.impl.pvm.process.HasDIBounds target):void
+    + createBPMNEdge(String key,List<org.activiti.bpmn.model.GraphicInfo> graphicList):void
+    == Diagram interchange ==
+    + addStructure(org.activiti.engine.impl.bpmn.data.StructureDefinition structure):void
+    + addService(org.activiti.engine.impl.bpmn.webservice.BpmnInterfaceImplementation implementation):void
+    + addOperation(org.activiti.engine.impl.bpmn.webservice.OperationImplementation implementation):void
+}
+BpmnParse ..> XMLImporter
+
+
+class BpmnParseHandlers {
+    # parseHandlers:Map<Class<? extends org.activiti.bpmn.model.BaseElement>,List<org.activiti.engine.parse.BpmnParseHandler>>
+    + BpmnParseHandlers()
+    + getHandlersFor(Class<? extends org.activiti.bpmn.model.BaseElement> clazz):List<org.activiti.engine.parse.BpmnParseHandler>
+    + addHandlers(List<org.activiti.engine.parse.BpmnParseHandler> parseHandlers):void
+    + addHandler(org.activiti.engine.parse.BpmnParseHandler handler):void
+    + parseElement(BpmnParse bpmnParse,org.activiti.bpmn.model.BaseElement element):void
+}
+class BpmnParser {
+    # expressionManager:org.activiti.engine.impl.el.ExpressionManager
+    # activityBehaviorFactory:org.activiti.engine.impl.bpmn.parser.factory.ActivityBehaviorFactory
+    # listenerFactory:org.activiti.engine.impl.bpmn.parser.factory.ListenerFactory
+    # bpmnParseFactory:org.activiti.engine.impl.cfg.BpmnParseFactory
+    # bpmnParserHandlers:org.activiti.engine.impl.bpmn.parser.BpmnParseHandlers
+    + createParse():BpmnParse
+    + getActivityBehaviorFactory():org.activiti.engine.impl.bpmn.parser.factory.ActivityBehaviorFactory
+    + setActivityBehaviorFactory(org.activiti.engine.impl.bpmn.parser.factory.ActivityBehaviorFactory factory):void
+    + getListenerFactory():org.activiti.engine.impl.bpmn.parser.factory.ListenerFactory
+    + setListenerFactory(org.activiti.engine.impl.bpmn.parser.factory.ListenerFactory factory):void
+    + getBpmnParseFactory():org.activiti.engine.impl.cfg.BpmnParseFactory
+    + setBpmnParseFactory(org.activiti.engine.impl.cfg.BpmnParseFactory factory):void
+    + getExpressionManager():org.activiti.engine.impl.el.ExpressionManager
+    + setExpressionManager(org.activiti.engine.impl.el.ExpressionManager manager):void
+    + getBpmnParserHandlers():org.activiti.engine.impl.bpmn.parser.BpmnParseHandlers
+    + setBpmnParserHandlers(org.activiti.engine.impl.bpmn.parser.BpmnParseHandlers handlers):void
+}
+class CompensateEventDefinition {
+    # activityRef:String
+    # waitForCompletion:boolean
+    + getActivityRef():String
+    + setActivityRef(String activityRef):void
+    + isWaitForCompletion():boolean
+    + setWaitForCompletion(boolean waitForCompletion):void
+}
+class Error {
+    # id:String
+    # errorCode:String
+    + getId():String
+    + setId(String id):void
+    + getErrorCode():String
+    + setErrorCode(String errorCode):void
+}
+class ErrorEventDefinition {
+    # handlerActivityId:String
+    # errorCode:String
+    # precedence:Integer
+    + ErrorEventDefinition(String handlerActivityId)
+    + getErrorCode():String
+    + setErrorCode(String errorCode):void
+    + getHandlerActivityId():String
+    + getPrecedence():Integer
+    + setPrecedence(Integer precedence):void
+    + catches(String errorCode):boolean
+}
+class EventSubscriptionDeclaration {
+    # eventName:String
+    # eventType:String
+    # async:boolean
+    # activityId:String
+    # isStartEvent:boolean
+    # configuration:String
+
+    + EventSubscriptionDeclaration(String eventName,String eventType)
+
+    + getEventName():String
+    + isAsync():boolean
+    + setAsync(boolean async):void
+    + setActivityId(String activityId):void
+    + getActivityId():String
+    + isStartEvent():boolean
+    + setStartEvent(boolean isStartEvent):void
+    + getEventType():String
+    + getConfiguration():String
+    + setConfiguration(String configuration):void
+    + prepareEventSubscriptionEntity(ExecutionEntity execution):void
+}
+class FieldDeclaration {
+    # name:String
+    # type:String
+    # value:Object
+    + FieldDeclaration(String name,String type,Object value)
+    + FieldDeclaration()
+    + getName():String
+    + setName(String name):void
+    + getType():String
+    + setType(String type):void
+    + getValue():Object
+    + setValue(Object value):void
+}
+
+interface XMLImporter {
+    + importFrom(org.activiti.bpmn.model.Import theImport,BpmnParse parse):void
+}
+
+}
+
+/' package finished '/
+
+@enduml

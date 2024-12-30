@@ -1,0 +1,131 @@
+@startuml
+package "org.activiti.engine.impl.calendar" {
+class AdvancedCycleBusinessCalendar extends CycleBusinessCalendar {
+    - defaultScheduleVersion:Integer
+    - {static} resolvers:Map<Integer,AdvancedScheduleResolver>
+    + AdvancedCycleBusinessCalender(ClockReader clockReader)
+    + AdvancedCycleBusinessCalender(ClockReader clockReader, Integer defaultScheduleVersion)
+}
+AdvancedCycleBusinessCalendar *--> AdvancedScheduleResolver
+
+interface AdvancedScheduleResolver {
+    + resolve(String duedateDescription,ClockReader clockReader,TimeZone timeZone):Date
+}
+class AdvancedSchedulerResolverWithoutTimeZone implements AdvancedScheduleResolver {
+    + resolve(String duedateDescription,ClockReader clockReader,TimeZone timeZone):Date
+}
+class AdvancedSchedulerResolverWithTimeZone implements AdvancedScheduleResolver {
+    + resolve(String duedateDescription,ClockReader clockReader,TimeZone timeZone):Date
+}
+
+interface BusinessCalendar {
+    + resolveDuedate(String duedateDescription): Date
+    + resolveDuedate(String duedateDescription, int maxIterations): Date
+    + validateDuedate(String duedateDescription, int maxIterations, Date endDate, Date newTimer): Boolean
+    + resolveEndDate(String endDateString): Date
+}
+
+abstract class BusinessCalendarImpl implements BusinessCalendar {
+    - clockReader: org.activiti.engine.runtime.ClockReader
+
+    + BusinessCalendarImpl(ClockReader clockReader)
+    + resolveDuedate(String duedateDescription): Date
+    + abstract resolveDuedate(String duedateDescription, int maxIterations): Date
+    + validateDuedate(String duedateDescription, int maxIterations, Date endDate, Date newTimer): Boolean
+    + resolveEndDate(String endDateString): Date
+}
+interface BusinessCalendarManager {
+    + getBusinessCalendar(String businessCalendarRef): BusinessCalendar
+}
+BusinessCalendar <--* BusinessCalendarManager
+class CronExpression {
+    - cronExpression: String
+    - timeZone: TimeZone
+    # seconds:TreeSet<Integer>
+    # minutes:TreeSet<Integer>
+    # hours:TreeSet<Integer>
+    # daysOfMonth:TreeSet<Integer>
+    # months:TreeSet<Integer>
+    # daysOfWeek:TreeSet<Integer>
+    # years:TreeSet<Integer>
+    # lastDayOfMonth: boolean
+    # nthdayOfWeek:int
+    # lastDayOfMonth: boolean
+    # nearestWeekday: boolean
+    # lastdayOffset:int
+    # expressionParsed:boolean
+    == construct ==
+    + CronExpression(String cronExpression,ClockReader clockReader,TimeZone timeZone)
+    + CronExpression(String cronExpression,ClockReader clockReader)
+    == construct ==
+    + getTimeZone():TimeZone
+    + setTimeZone(TimeZone timeZone):void
+    # buildExpression(String expression):void
+    # storeExpressionVals(int pos,String s,int type):int
+    # checkNext(int pos,String s,int val,int type):int
+    # skipWhiteSpace(int i,String s):int
+    # findNextWhiteSpace(int i,String s):int
+    # addToSet(int val,int end,int incr,int type):void
+    # getSet(int type):TreeSet<Integer>
+    # getValue(int v,String s,int i):ValueSet
+    # getNumericValue(String s,int i):int
+    # getMonthNumber(String s):int
+    # getDayOfWeekNumber(String s):int
+    + getTimeAfter(Date afterTime):Date
+    + getTimeAfter(Calendar afterTime):Calendar
+    # setCalendarHour(Calendar cal,int hour):void
+    # isLeapYear(int year):boolean
+    # getLastDayOfMonth():int
+}
+
+class CycleBusinessCalendar extends BusinessCalendarImpl {
+    + {static} NAME: String
+    + CycleBusinessCalendar(ClockReader clockReader)
+    + resolveDuedate(String duedate, int maxIterations): Date
+    + validateDuedate(String duedate, int maxIterations, Date endDate, Date newTimer): Boolean
+}
+class DefaultBusinessCalendar implements BusinessCalendar {
+    - {static} units:Map<String,Integer>
+    + resolveDuedate(String duedateDescription,int maxIterations): Date
+    + resolveDuedate(String duedateDescription): Date
+}
+class DueDateBusinessCalendar extends BusinessCalendarImpl {
+    + {static} NAME: String
+    + DueDateBusinessCalendar(ClockReader clockReader)
+    + resolveDuedate(String duedate,int maxIterations): Date
+}
+class DurationBusinessCalendar extends BusinessCalendarImpl {
+    + {static} NAME: String
+    + DurationBusinessCalendar(ClockReader clockReader)
+    + resolveDuedate(String duedate,int maxIterations): Date
+}
+class DurationHelper {
+    - start:Calendar
+    - end:Calendar
+    - period:Duration
+    - isRepeat:boolean
+    - times:int
+    - maxIterations:int
+    - repeatWithNoBounds:boolean
+    - datatypeFactory:DatatypeFactory
+    # clockReader:ClockReader
+    + DurationHelper(String expression,int maxIterations,ClockReader clockReader)
+    + DurationHelper(String expression,ClockReader clockReader)
+    + getCalendarAfter():Calendar
+    + getCalendarAfter(Calendar time):Calendar
+    + isValidDate(Date newTimer):boolean
+    + getDateAfter():Date
+    + getStart():Calendar
+    + getEnd():Calendar
+    + getPeriod():Duration
+    + isRepeat():boolean
+    + getTimes():int
+}
+class MapBusinessCalendarManager implements BusinessCalendarManager {
+    - businessCalendars:Map<String,BusinessCalendar>
+    + MapBusinessCalendarManager()
+    + MapBusinessCalendarManager(Map<String,BusinessCalendar> businessCalendars)
+    + getBusinessCalendar(String businessCalendarRef): BusinessCalendar
+    + addBusinessCalendar(String businessCalendarRef,BusinessCalendar businessCalendar):BusinessCalendarManager
+}
+@enduml

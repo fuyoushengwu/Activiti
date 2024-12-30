@@ -1,0 +1,19 @@
+@startuml
+hide @unlinked
+package "org.activiti.engine.event" {
+interface EventLogEntry {
+    + getLogNumber():long
+    + getType():String
+    + getProcessDefinitionId():String
+    + getProcessInstanceId():String
+    + getExecutionId():String
+    + getTaskId():String
+    + getTimeStamp():String
+    + getUserId():String
+    + getData():byte[]
+}
+}
+
+/' package finished '/
+
+@enduml

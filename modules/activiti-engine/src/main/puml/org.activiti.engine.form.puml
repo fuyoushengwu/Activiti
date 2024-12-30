@@ -1,0 +1,38 @@
+@startuml
+hide @unlinked
+package "org.activiti.engine.form" {
+abstract class AbstractFormType implements FormType {
+    + {abstract} convertFormValueToModelValue(String propertyValue):Object
+    + {abstract} convertModelValueToFormValue(Object modelValue):String
+    + getInformation(String key):Object
+}
+interface FormData {
+    + getFormKey():String
+    + getDeploymentId():String
+    + getFormProperties():List<FormProperty>
+}
+interface FormProperty {
+    + getId():String
+    + getName():String
+    + getType():FormType
+    + getValue():Object
+    + isReadable():boolean
+    + isWritable():boolean
+    + isRequired():boolean
+}
+interface FormType {
+    + getName():String
+    + getInformation(String key):Object
+}
+interface StartFormData extends FormData {
+    + getProcessDefinition():ProcessDefinition
+}
+StartFormData ..> org.activiti.engine.repository.ProcessDefinition
+interface TaskFormData extends FormData {
+    + getTask():Task
+}
+TaskFormData ..> org.activiti.engine.task.Task
+}
+/' package finished '/
+
+@enduml

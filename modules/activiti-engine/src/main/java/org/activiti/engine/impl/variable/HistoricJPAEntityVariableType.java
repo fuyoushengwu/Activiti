@@ -25,7 +25,7 @@ public class HistoricJPAEntityVariableType extends JPAEntityVariableType {
   private static final HistoricJPAEntityVariableType INSTANCE = new HistoricJPAEntityVariableType();
   
   @Override
-  public boolean isCachable() {
+  public boolean isCacheAble() {
     return true;
   }
   

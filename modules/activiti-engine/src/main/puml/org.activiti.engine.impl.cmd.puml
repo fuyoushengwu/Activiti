@@ -1,0 +1,130 @@
+@startuml
+hide @unlinked
+
+package "org.activiti.engine.impl.cmd" {
+abstract class AbstractSetProcessDefinitionStateCmd implements Command<Void> {
+    # processDefinitionId:String
+    # processDefinitionKey:String
+    # processDefinitionEntity:org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity
+    # includeProcessInstances:boolean
+    # executionDate:Date
+    # tenantId:String
+    + AbstractSetProcessDefinitionStateCmd(ProcessDefinitionEntity entity,boolean includeProcessInstances,Date executionDate,String tenantId)
+    + AbstractSetProcessDefinitionStateCmd(String processDefinitionId,String processDefinitionKey,boolean includeProcessInstances,Date executionDate,String  tenantId)
+    + execute(org.activiti.engine.impl.interceptor.CommandContext):Void
+    # findProcessDefinition(org.activiti.engine.impl.interceptor.CommandContext):List<ProcessDefinitionEntity>
+    # createTimerForDelayedExecution(CommandContext commandContext,List<ProcessDefinitionEntity> definitions):void
+    # changeProcessDefinitionState(CommandContext commandContext,List<ProcessDefinitionEntity> definitions):void
+    # fetchProcessInstancesPage(CommandContext commandContext,ProcessDefinition processDefinition,int currentPageStartIndex):List<ProcessInstance>
+    # {abstract} getProcessDefinitionSuspensionState():SuspensionState
+    # {abstract} getDelayedExecutionJobHandlerType():String
+    # {abstract} getProcessInstanceChangeStateCmd(ProcessInstance processInstance):AbstractSetProcessInstanceStateCmd
+}
+abstract class AbstractSetProcessInstanceStateCmd implements Command<Void> {
+    # executionId:String
+    + AbstractSetProcessInstanceStateCmd(String executionId)
+    + execute(org.activiti.engine.impl.interceptor.CommandContext):Void
+    # getNextState():SuspensionState
+}
+
+class AcquireAsyncJobsDueCmd implements org.activiti.engine.impl.interceptor.Command<org.activiti.engine.impl.asyncexecutor.AcquiredJobEntities> {
+    - asyncExecutor:org.activiti.engine.impl.asyncexecutor.AsyncExecutor
+    + AcquireAsyncJobDueCmd(org.activiti.engine.impl.asyncexecutor.AsyncExecutor)
+    + execute(org.activiti.engine.impl.interceptor.CommandContext):org.activiti.engine.impl.asyncexecutor.AcquiredJobEntities
+    # lockJob(org.activiti.engine.impl.interceptor.CommandContext,org.activiti.engine.impl.persistence.entity.JobEntity,int lockTimeInMs):void
+}
+class AcquireJobsCmd implements org.activiti.engine.impl.interceptor.Command<org.activiti.engine.impl.jobexecutor.AcquiredJobs> {
+    - jobExecutor:org.activiti.engine.impl.jobexecutor.JobExecutor
+    + AcquireJobsCmd(org.activiti.engine.impl.jobexecutor.JobExecutor)
+    + execute(org.activiti.engine.impl.interceptor.CommandContext):org.activiti.engine.impl.jobexecutor.AcquiredJobs
+    # lockJob(org.activiti.engine.impl.interceptor.CommandContext,org.activiti.engine.impl.persistence.entity.JobEntity,String lockOwner,int lockTimeInMs):void
+}
+class AcquireTimerJobsCmd implements org.activiti.engine.impl.interceptor.Command<org.activiti.engine.impl.asyncexecutor.AcquiredJobEntities> {
+    - lockOwner:String
+    - lockTimeInMillis:int
+    - maxJobsPerAcquisition:int
+    + AcquireTimerJobsCmd(String lockOwner,int lockTimeInMillis,int maxJobsPerAcquisition)
+    + execute(org.activiti.engine.impl.interceptor.CommandContext):org.activiti.engine.impl.asyncexecutor.AcquiredJobEntities
+    # lockJob(org.activiti.engine.impl.interceptor.CommandContext,org.activiti.engine.impl.persistence.entity.JobEntity,String lockOwner,int lockTimeInMs):void
+}
+class ActivateProcessDefinitionCmd extends AbstractSetProcessDefinitionStateCmd {
+    + ActivateProcessDefinitionCmd(ProcessDefinitionEntity entity,boolean includeProcessInstances,Date executionDate,String tenantId)
+    + ActivateProcessDefinitionCmd(String processDefinitionId,String processDefinitionKey,boolean includeProcessInstances,Date executionDate,String  tenantId)
+    # getProcessDefinitionSuspensionState():SuspensionState
+    # getDeployedExecutionJobHandlerType():String
+    # getProcessInstanceChangeStateCmd(ProcessInstance processInstance):AbstractSetProcessInstanceStateCmd
+}
+class ActivateProcessInstanceCmd extends AbstractSetProcessInstanceStateCmd {
+    + ActivateProcessInstanceCmd(String executionId)
+    + getNewState():SuspensionState
+}
+class CreateUserCmd implements org.activiti.engine.impl.interceptor.Command<org.activiti.engine.identity.User> {
+    # userId:String
+    + CreateUserCmd(String userId)
+    + execute(org.activiti.engine.impl.interceptor.CommandContext):org.activiti.engine.identity.User
+}
+
+class ExecuteAsyncJobCmd implements org.activiti.engine.impl.interceptor.Command<Object> {
+    # job: org.activiti.engine.impl.persistence.entity.JobEntity
+    + ExecuteAsyncJobCmd(org.activiti.engine.impl.persistence.entity.JobEntity job)
+    + execute(org.activiti.engine.impl.interceptor.CommandContext):Object
+}
+class ExecuteJobsCmd implements org.activiti.engine.impl.interceptor.Command<Object> {
+    # jobId:String
+    # job:JobEntity
+    + ExecuteJobsCmd(String jobId)
+    + ExecuteJobsCmd(JobEntity job)
+    + execute(org.activiti.engine.impl.interceptor.CommandContext):Object
+    + getJobId():String
+}
+class GetNextIdBlockCmd implements Command<IdBlock> {
+    + GetNextIdBlockCmd(int idBlockSize)
+    + execute(CommandContext):IdBlock
+}
+class JobRetryCmd implements org.activiti.engine.impl.interceptor.Command<Object> {
+    # jobId: String
+    # exception: Throwable
+    + JobRetryCmd(String jobId, Throwable exception)
+    + execute(org.activiti.engine.impl.interceptor.CommandContext):Object
+    + calculateDueDate(CommandContext commandContext,int waitTimeInSeconds,Date oldData):Date
+}
+
+class LockExclusiveJobCmd implements org.activiti.engine.impl.interceptor.Command<Object> {
+    # job: org.activiti.engine.impl.persistence.entity.JobEntity
+    + LockExclusiveJobCmd(org.activiti.engine.impl.persistence.entity.JobEntity job)
+    + execute(org.activiti.engine.impl.interceptor.CommandContext):Object
+}
+class StartProcessInstanceCmd<T> implements Command<ProcessInstance> {
+    # processDefinitionKey: String
+    # processDefinitionId:String
+    # variables:Map<String,Object>
+    # businessKey: String
+    # tenantId:String
+    # processInstanceName:String
+    + StartProcessInstanceCmd(String processDefinitionKey,String processDefinitionId,String businessKey,Map<String,Object> variables)
+    + StartProcessInstanceCmd(String processDefinitionKey,String processDefinitionId,String businessKey,Map<String,Object> variables,String tenantId)
+    + StartProcessInstanceCmd(org.activiti.engine.impl.runtime.ProcessInstanceBuilderImpl builder)
+    + execute(CommandContext):ProcessInstance
+
+}
+class SuspendProcessDefinitionCmd extends AbstractSetProcessDefinitionStateCmd {
+    + SuspendProcessDefinitionCmd(ProcessDefinitionEntity entity,boolean includeProcessInstances,Date executionDate,String tenantId)
+    + SuspendProcessDefinitionCmd(String processDefinitionId,String processDefinitionKey,boolean includeProcessInstances,Date executionDate,String  tenantId)
+    # getProcessDefinitionSuspensionState():SuspensionState
+    # getDeployedExecutionJobHandlerType():String
+    # getProcessInstanceChangeStateCmd(ProcessInstance processInstance):AbstractSetProcessInstanceStateCmd
+}
+
+class SuspendProcessInstanceCmd extends AbstractSetProcessInstanceStateCmd {
+    + SuspendProcessInstanceCmd(String executionId)
+    + getNewState():SuspensionState
+}
+
+class UnlockExclusiveJobCmd implements org.activiti.engine.impl.interceptor.Command<Object> {
+    # job: org.activiti.engine.impl.persistence.entity.JobEntity
+    + UnlockExclusiveJobCmd(org.activiti.engine.impl.persistence.entity.JobEntity job)
+    + execute(org.activiti.engine.impl.interceptor.CommandContext):Object
+}
+}
+
+@enduml

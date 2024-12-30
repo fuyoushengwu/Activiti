@@ -69,7 +69,7 @@ public class StartProcessInstanceCmd<T> implements Command<ProcessInstance>, Ser
       .getDeploymentManager();
     
     // Find the process definition
-    ProcessDefinitionEntity processDefinition = null;
+    ProcessDefinitionEntity processDefinition;
     if (processDefinitionId != null) {
       processDefinition = deploymentManager.findDeployedProcessDefinitionById(processDefinitionId);
       if (processDefinition == null) {
@@ -80,7 +80,7 @@ public class StartProcessInstanceCmd<T> implements Command<ProcessInstance>, Ser
       if (processDefinition == null) {
         throw new ActivitiObjectNotFoundException("No process definition found for key '" + processDefinitionKey +"'", ProcessDefinition.class);
       }
-    } else if (processDefinitionKey != null && tenantId != null && !ProcessEngineConfiguration.NO_TENANT_ID.equals(tenantId)) {
+    } else if (processDefinitionKey != null) {
     	 processDefinition = deploymentManager.findDeployedLatestProcessDefinitionByKeyAndTenantId(processDefinitionKey, tenantId);
        if (processDefinition == null) {
          throw new ActivitiObjectNotFoundException("No process definition found for key '" + processDefinitionKey +"' for tenant identifier " + tenantId, ProcessDefinition.class);

@@ -1,0 +1,96 @@
+@startuml
+/' !include org.activiti.engine.repository.puml '/
+/' !include org.activiti.engine.impl.db.puml '/
+hide @unlinked
+package "org.activiti.engine.impl.persistence.deploy" {
+class DefaultDeploymentCache<T> implements DeploymentCache<T> {
+    # cache:Map<String,T>
+    + DefaultDeploymentCache()
+    + DefaultDeploymentCache(int limit)
+    + get(String id):T
+    + add(String id,T value):void
+    + remove(String id):void
+    + clear():void
+    + size():int
+}
+interface Deployer {
+    + deploy(DeploymentEntity deployment,Map<String,Object> deploymentSettings)
+}
+interface DeploymentCache<T> {
+    + get(String id):T
+    + add(String id,T object)
+    + remove(String id)
+    + clear()
+}
+class DeploymentManager {
+    # processDefinitionCache:DeploymentCache<org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity>
+    # bpmnModelCache:DeploymentCache<org.activiti.bpmn.model.BpmnModel>
+    # processDefinitionInfoCache:ProcessDefinitionInfoCache
+    # knowledgeBaseCache:DeploymentCache<Object>
+    # deployers:List<Deployer>
+
+    + deploy(org.activiti.engine.impl.persistence.entity.DeploymentEntity):void
+    + deploy(org.activiti.engine.impl.persistence.entity.DeploymentEntity deployment,Map<String,Object> deploymentSettings):void
+    + findDeployedProcessDefinitionById(String processDefinitionId):org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity
+    + findProcessDefinitionByIdFromDatabase(String processDefinitionId):org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity
+    + isProcessDefinitionSuspended(String processDefinitionId):boolean
+    + getBpmnModelById(String processDefinitionId):org.activiti.bpmn.model.BpmnModel
+    + findDeployedLatestProcessDefinitionByKey(String processDefinitionKey):org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity
+    + findDeployedLatestProcessDefinitionByKeyAndTenantId(String processDefinitionKey,String tenantId):org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity
+    + findDeployedProcessDefinitionByKeyAndVersion(String processDefinitionKey,Integer processDefinitionVersion):org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity
+    + resolveProcessDefinition(org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity):org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity
+    + removeDeployment(String deploymentId,boolean cascade):void
+    + getDeployers():List<Deployer>
+    + setDeployers(List<Deployer>):void
+    + getProcessDefinitionCache():DeploymentCache<org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity>
+    + setProcessDefinitionCache(DeploymentCache<org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity>):void
+    + getBpmnModelCache():DeploymentCache<org.activiti.bpmn.model.BpmnModel>
+    + setBpmnModelCache(DeploymentCache<org.activiti.bpmn.model.BpmnModel>):void
+    + getProcessDefinitionInfoCache():ProcessDefinitionInfoCache
+    + setProcessDefinitionInfoCache(ProcessDefinitionInfoCache):void
+    + getKnowledgeBaseCache():DeploymentCache<Object>
+    + setKnowledgeBaseCache(DeploymentCache<Object>):void
+}
+DeploymentManager ..> DeploymentCache
+DeploymentManager ..> ProcessDefinitionInfoCache
+DeploymentManager ..> Deployer
+class MultiSchemaMultiTenantProcessDefinitionCache<ProcessDefinitionEntity> implements DeploymentCache {
+    # tenantInfoHolder:TenantInfoHolder
+    # cacheLimit:int
+    # caches:Map<String,DeploymentCache<ProcessDefinitionEntity>>
+    + MultiSchemaMultiTenantProcessDefinitionCache(TenantInfoHolder tenantInfoHolder,int cacheLimit)
+    + getDeploymentCacheForCurrentTenant():DeploymentCache<ProcessDefinitionEntity>
+    # createTenantDeploymentCache(String currentTenant):DeploymentCache<ProcessDefinitionEntity>
+    + get(String id):ProcessDefinitionEntity
+    + add(String id,ProcessDefinitionEntity value):void
+    + remove(String id):void
+    + clear():void
+}
+class ProcessDefinitionInfoCache {
+    # cache:Map<String,ProcessDefinitionInfoCacheObject>
+    # commandExecutor:org.activiti.engine.impl.interceptor.CommandExecutor
+    + ProcessDefinitionInfoCache(org.activiti.engine.impl.interceptor.CommandExecutor)
+    + ProcessDefinitionInfoCache(org.activiti.engine.impl.interceptor.CommandExecutor,int)
+    + get(String processDefinitionId):ProcessDefinitionInfoCacheObject
+    + add(String id,ProcessDefinitionInfoCacheObject obj):void
+    + remove(String id):void
+    + clear():void
+    + size():int
+}
+ProcessDefinitionInfoCache o--> ProcessDefinitionInfoCacheObject
+class ProcessDefinitionInfoCacheObject {
+    # id:String
+    # revision:int
+    # infoNode:com.fasterxml.jackson.databind.node.ObjectNode
+    + getId():String
+    + setId(String):void
+    + getRevision():int
+    + setRevision(int):void
+    + getInfoNode():com.fasterxml.jackson.databind.node.ObjectNode
+    + setInfoNode(com.fasterxml.jackson.databind.node.ObjectNode):void
+
+}
+}
+
+/' package finished '/
+@enduml

@@ -33,7 +33,7 @@ public class HistoricProcessInstanceEntityManager extends AbstractManager {
 
   public HistoricProcessInstanceEntity findHistoricProcessInstance(String processInstanceId) {
     if (getHistoryManager().isHistoryEnabled()) {
-      return (HistoricProcessInstanceEntity) getDbSqlSession().selectById(HistoricProcessInstanceEntity.class, processInstanceId);
+      return getDbSqlSession().selectById(HistoricProcessInstanceEntity.class, processInstanceId);
     }
     return null;
   }

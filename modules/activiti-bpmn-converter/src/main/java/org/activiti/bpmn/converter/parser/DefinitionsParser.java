@@ -1,9 +1,9 @@
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,13 +27,13 @@ import org.apache.commons.lang3.StringUtils;
  * @author Tijs Rademakers
  */
 public class DefinitionsParser implements BpmnXMLConstants {
-  
-  protected static final List<ExtensionAttribute> defaultAttributes = Arrays.asList(
-      new ExtensionAttribute(TYPE_LANGUAGE_ATTRIBUTE), 
-      new ExtensionAttribute(EXPRESSION_LANGUAGE_ATTRIBUTE), 
-      new ExtensionAttribute(TARGET_NAMESPACE_ATTRIBUTE)
-  );
-  
+
+  protected static final List<ExtensionAttribute> defaultAttributes =
+      Arrays.asList(
+          new ExtensionAttribute(TYPE_LANGUAGE_ATTRIBUTE),
+          new ExtensionAttribute(EXPRESSION_LANGUAGE_ATTRIBUTE),
+          new ExtensionAttribute(TARGET_NAMESPACE_ATTRIBUTE));
+
   @SuppressWarnings("unchecked")
   public void parse(XMLStreamReader xtr, BpmnModel model) throws Exception {
     model.setTargetNamespace(xtr.getAttributeValue(null, TARGET_NAMESPACE_ATTRIBUTE));
@@ -43,7 +43,7 @@ public class DefinitionsParser implements BpmnXMLConstants {
         model.addNamespace(prefix, xtr.getNamespaceURI(i));
       }
     }
-    
+
     for (int i = 0; i < xtr.getAttributeCount(); i++) {
       ExtensionAttribute extensionAttribute = new ExtensionAttribute();
       extensionAttribute.setName(xtr.getAttributeLocalName(i));

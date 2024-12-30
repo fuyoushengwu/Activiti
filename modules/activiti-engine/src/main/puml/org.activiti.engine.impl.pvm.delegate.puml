@@ -1,0 +1,59 @@
+@startuml
+!include org.activiti.engine.delegate.puml
+hide @unlinked
+package "org.activiti.engine.impl.pvm.delegate" {
+
+interface ActivityBehavior {
+    + execute(ActivityExecution execution)
+}
+
+interface ActivityExecution extends org.activiti.engine.delegate.DelegateExecution {
+    + getActivity():org.activiti.engine.impl.pvm.PvmActivity
+    + take(org.activiti.engine.impl.pvm.PvmTransition):void
+    + createExecution():ActivityExecution
+    + createSubProcessInstance(org.activiti.engine.impl.pvm.PvmProcessDefinition):org.activiti.engine.impl.pvm.PvmProcessInstance
+    + getParent():org.activiti.engine.impl.pvm.delegate.ActivityExecution
+    + getProcessInstance():org.activiti.engine.impl.pvm.delegate.ActivityExecution
+    + getExecutions():List<? extends ActivityExecution>
+    + end():void
+    + setActive(boolean active):void
+    + isActive():boolean
+    + isEnded():boolean
+    + setEnded(boolean ended):void
+    + setConcurrent(boolean isConcurrent):void
+    + isConcurrent():boolean
+    + isProcessInstanceType():boolean
+    + inactivate():void
+    + isScope():boolean
+    + setScope(boolean isScope):void
+    + findInactiveConcurrentExecutions(org.activiti.engine.impl.pvm.PvmActivity):List<ActivityExecution>
+    + takeAll(List<org.activiti.engine.impl.pvm.PvmTransition> outgoingTransitions,List<ActivityExecution> joinedExecutions):void
+    + executeActivity(org.activiti.engine.impl.pvm.PvmActivity):void
+    + destroyScope(String reason):void
+}
+interface CompositeActivityBehavior extends ActivityBehavior {
+    + lastExecutionEnded(ActivityExecution execution):void
+}
+interface ExecutionListener <<deprecated>> {
+    + notify(ExecutionListenerExecution execution):void
+}
+ExecutionListener ..> ExecutionListenerExecution
+
+interface  ExecutionListenerExecution extends org.activiti.engine.delegate.DelegateExecution {
+    + getEventName():String
+    + getEventSource():org.activiti.engine.impl.pvm.PvmProcessElement
+    + getDeleteReason():String
+}
+interface SignallableActivityBehavior extends ActivityBehavior {
+    + signal(ActivityExecution execution,String signalEvent,Object signalData):void
+}
+interface SubProcessActivityBehavior extends ActivityBehavior {
+    + completing(org.activiti.engine.delegate.DelegateExecution execution,org.activiti.engine.delegate.DelegateExecution subProcessInstance):void
+    + completed(ActivityExecution execution):void
+}
+interface TaskListener <<deprecated>> {
+    + notify(org.activiti.engine.delegate.DelegateTask):void
+}
+
+/'  package finished '/
+@enduml

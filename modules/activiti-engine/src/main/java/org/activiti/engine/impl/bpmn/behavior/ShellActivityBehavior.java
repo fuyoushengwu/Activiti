@@ -72,57 +72,53 @@ public class ShellActivityBehavior extends AbstractBpmnActivityBehavior {
     redirectErrorFlag = redirectErrorStr != null && redirectErrorStr.equals("true");
     cleanEnvBoolan = cleanEnvStr != null && cleanEnvStr.equals("true");
     directoryStr = getStringFromField(directory, execution);
-
   }
 
-    public void execute(ActivityExecution execution) {
+  public void execute(ActivityExecution execution) {
 
-        readFields(execution);
+    readFields(execution);
 
-        List<String> argList = new ArrayList<String>();
-        argList.add(commandStr);
+    List<String> argList = new ArrayList<String>();
+    argList.add(commandStr);
 
-        if (arg1Str != null)
-            argList.add(arg1Str);
-        if (arg2Str != null)
-            argList.add(arg2Str);
-        if (arg3Str != null)
-            argList.add(arg3Str);
-        if (arg4Str != null)
-            argList.add(arg4Str);
-        if (arg5Str != null)
-            argList.add(arg5Str);
+    if (arg1Str != null) argList.add(arg1Str);
+    if (arg2Str != null) argList.add(arg2Str);
+    if (arg3Str != null) argList.add(arg3Str);
+    if (arg4Str != null) argList.add(arg4Str);
+    if (arg5Str != null) argList.add(arg5Str);
 
-        ShellExecutorContext executorContext = new ShellExecutorContext(
-                waitFlag,
-                cleanEnvBoolan,
-                redirectErrorFlag,
-                directoryStr,
-                resultVariableStr,
-                errorCodeVariableStr,
-                argList);
+    ShellExecutorContext executorContext =
+        new ShellExecutorContext(
+            waitFlag,
+            cleanEnvBoolan,
+            redirectErrorFlag,
+            directoryStr,
+            resultVariableStr,
+            errorCodeVariableStr,
+            argList);
 
-        CommandExecutor commandExecutor =  null;
+    CommandExecutor commandExecutor = null;
 
-        CommandExecutorFactory shellCommandExecutorFactory = CommandExecutorContext.getShellCommandExecutorFactory();
+    CommandExecutorFactory shellCommandExecutorFactory =
+        CommandExecutorContext.getShellCommandExecutorFactory();
 
-        if (shellCommandExecutorFactory != null) {
-            // if there is a ShellExecutorFactoryProvided
-            // then it will be used to create a desired shell command executor.
-            commandExecutor = shellCommandExecutorFactory.createExecutor(executorContext);
-        } else {
-            // default Shell executor (if the shell security is OFF)
-            commandExecutor = new ShellCommandExecutor(executorContext);
-        }
-
-        try {
-            commandExecutor.executeCommand(execution);
-        } catch (Exception e) {
-            throw new ActivitiException("Could not execute shell command ", e);
-        }
-
-        leave(execution);
+    if (shellCommandExecutorFactory != null) {
+      // if there is a ShellExecutorFactoryProvided
+      // then it will be used to create a desired shell command executor.
+      commandExecutor = shellCommandExecutorFactory.createExecutor(executorContext);
+    } else {
+      // default Shell executor (if the shell security is OFF)
+      commandExecutor = new ShellCommandExecutor(executorContext);
     }
+
+    try {
+      commandExecutor.executeCommand(execution);
+    } catch (Exception e) {
+      throw new ActivitiException("Could not execute shell command ", e);
+    }
+
+    leave(execution);
+  }
 
   protected String getStringFromField(Expression expression, DelegateExecution execution) {
     if (expression != null) {
@@ -133,5 +129,4 @@ public class ShellActivityBehavior extends AbstractBpmnActivityBehavior {
     }
     return null;
   }
-
 }

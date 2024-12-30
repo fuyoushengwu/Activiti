@@ -25,7 +25,7 @@ public class NullType implements VariableType {
     return "null";
   }
 
-  public boolean isCachable() {
+  public boolean isCacheAble() {
     return true;
   }
 

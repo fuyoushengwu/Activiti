@@ -1,9 +1,9 @@
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,7 +18,6 @@ import org.activiti.engine.impl.cmd.GetNextIdBlockCmd;
 import org.activiti.engine.impl.interceptor.CommandConfig;
 import org.activiti.engine.impl.interceptor.CommandExecutor;
 
-
 /**
  * @author Tom Baeyens
  */
@@ -27,12 +26,12 @@ public class DbIdGenerator implements IdGenerator {
   protected int idBlockSize;
   protected long nextId = 0;
   protected long lastId = -1;
-  
+
   protected CommandExecutor commandExecutor;
   protected CommandConfig commandConfig;
-  
+
   public synchronized String getNextId() {
-    if (lastId<nextId) {
+    if (lastId < nextId) {
       getNewBlock();
     }
     long _nextId = nextId++;
@@ -52,7 +51,7 @@ public class DbIdGenerator implements IdGenerator {
   public void setIdBlockSize(int idBlockSize) {
     this.idBlockSize = idBlockSize;
   }
-  
+
   public CommandExecutor getCommandExecutor() {
     return commandExecutor;
   }
@@ -60,11 +59,11 @@ public class DbIdGenerator implements IdGenerator {
   public void setCommandExecutor(CommandExecutor commandExecutor) {
     this.commandExecutor = commandExecutor;
   }
-  
+
   public CommandConfig getCommandConfig() {
     return commandConfig;
   }
-  
+
   public void setCommandConfig(CommandConfig commandConfig) {
     this.commandConfig = commandConfig;
   }

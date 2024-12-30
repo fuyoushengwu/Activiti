@@ -1,0 +1,42 @@
+@startuml
+hide @unlinked
+package "org.activiti.engine.impl.context" {
+
+class Context {
+    # {static} commandContextThreadLocal:ThreadLocal<Stack<org.activiti.engine.impl.interceptor.CommandContext>>
+    # {static} processEngineConfigurationStackThreadLocal:ThreadLocal<Stack<org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl>>
+    # {static} executionContextStackThreadLocal:ThreadLocal<Stack<org.activiti.engine.impl.context.ExecutionContext>>
+    # {static} jobExecutorContextThreadLocal:ThreadLocal<org.activiti.engine.impl.jobexecutor.JobExecutorContext>
+    # {static} bpmnOverrideContextThreadLocal:ThreadLocal<Map<String,com.fasterxml.jackson.databind.node.ObjectNode>>
+    # {static} resourceBundleControl:ResourceBundle.Control
+    + {static} getCommandContext():org.activiti.engine.impl.interceptor.CommandContext
+    + {static} setCommandContext(org.activiti.engine.impl.interceptor.CommandContext):void
+    + {static} removeCommandContext():void
+    + {static} getProcessEngineConfiguration():org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl
+    + {static} setProcessEngineConfiguration(org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl):void
+    + {static} removeProcessEngineConfiguration():void
+    + {static} getExecutionContext():org.activiti.engine.impl.context.ExecutionContext
+    + {static} isExecutionContextActive():boolean
+    + {static} setExecutionContext(org.activiti.engine.impl.context.ExecutionContext):void
+    + {static} removeExecutionContext():void
+    # {static} getStack(ThreadLocal<Stack<T>>):Stack<T>
+    + {static} getJobExecutorContext():org.activiti.engine.impl.jobexecutor.JobExecutorContext
+    + {static} setJobExecutorContext(org.activiti.engine.impl.jobexecutor.JobExecutorContext):void
+    + {static} removeJobExecutorContext():void
+    + {static} getBpmnOverrideElementProperties(String id,String processDefinitionId):com.fasterxml.jackson.databind.node.ObjectNode
+    + {static} getLocalizationElementProperties(String language,String id,String processDefinitionId,boolean useFallback):com.fasterxml.jackson.databind.node.ObjectNode
+    + {static} removeBpmnOverrideContext():void
+    # {static} getProcessDefinitionInfoNode(String processDefinitionId):com.fasterxml.jackson.databind.node.ObjectNode
+    # {static} getBpmnOverrideContext():Map<String,com.fasterxml.jackson.databind.node.ObjectNode>
+    # {static} addBpmnOverrideElement(String id,ObjectNode infoNode):void
+}
+
+class ExecutionContext {
+    # execution:org.activiti.engine.impl.persistence.entity.ExecutionEntity
+    + ExecutionContext(org.activiti.engine.impl.pvm.runtime.InterpretableExecution)
+    + getExecution():org.activiti.engine.impl.persistence.entity.ExecutionEntity
+    + getProcessInstance():org.activiti.engine.impl.persistence.entity.ExecutionEntity
+    + getProcessDefinition():org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity
+    + getDeployment():org.activiti.engine.impl.persistence.entity.DeploymentEntity
+}
+@enduml

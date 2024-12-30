@@ -1,0 +1,20 @@
+@startuml
+hide @unlinked
+package "org.activiti.engine.impl.rules" {
+class RulesAgendaFilter implements org.drools.runtime.rule.AgendaFilter {
+    # suffixList:List<String>
+    # accept:boolean
+    + RulesAgendaFilter()
+    + accept(org.drools.runtime.rule.Activation activation):boolean
+    + addSuffix(String suffix):void
+    + setAccept(boolean accept):void
+}
+class RulesDeployer implements org.activiti.engine.impl.persistence.deploy.Deployer {
+    + deploy(DeploymentEntity entity,Map<String,Object> settings):void
+}
+class RulesHelper {
+    + {static} findKnowledgeBaseByDeploymentId(String deploymentId):org.drools.KnowledgeBase
+}
+/' package finished '/
+}
+@enduml

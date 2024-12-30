@@ -1,0 +1,238 @@
+@startuml
+hide @unlinked
+package "org.activiti.engine.impl.bpmn.parser.handler" {
+abstract class AbstractActivityBpmnParseHandler<T extends FlowNode> extends AbstractFlowNodeBpmnParseHandler<T> {
+    # parse(BpmnParse bpmnParse,BaseElement element):void
+    # createMultiInstanceLoopCharacteristics(BpmnParse bpmnParse,Activity modelActivity):void
+}
+
+abstract class AbstractBpmnParseHandler<T extends BaseElement> implements org.activiti.engine.parse.BpmnParseHandler {
+    + getHandledTypes():Set<Class<? extends BaseElement>
+    # {abstract} getHandledType():Class<? extends BaseElement>
+    + parse(BpmnParse bpmnParse,BaseElement element):void
+    # {abstract} executeParse(BpmnParse bpmnParse,T element):void
+    # findActivity(BpmnParse bpmnParse,String id):ActivityImpl
+    + createActivityOnCurrentScope(BpmnParse bpmnParse,FlowElement flowElement,String xmlLocalName):ActivityImpl
+    + createActivityOnScope(BpmnParse bpmnParse,FLowElement flowElement,String xmlLocalName,ScopeImpl scopeElement):ActivityImpl
+    # createExecutionListenersOnScope(BpmnParse bpmnParse,List<ActivitiListener> listeners,ScopeImpl scope):void
+    # createExecutionListenersOnTransition(BpmnParse bpmnParse,List<ActivitiListener> listeners,TransitionImpl transition):void
+    # createExecutionListener(BpmnParse bpmnParse,ActivitiListener listener):ExecutionListener
+    # addEventSubscriptionDeclaration（BpmnParse bpmnParse,EventSubscriptionDeclaration subscription,EventDefinition definition,ScopeImpl  scope):void
+    # getPrecedingEventBasedGateway(BpmnParse bpmnParse,IntermediateCatchEvent event):String
+    # createIOSpecification(BpmnParse bpmnParse,org.activiti.bpmn.model.IOSpecification specificationModel):IOSpecification
+    # processArtifacts(BpmnParse bpmnParse,Collection<Artifact> artifacts,ScopeImpl scope):void
+    # createAssociation(BpmnParse bpmnParse,Association association,ScopeImpl scope):void
+    # processDataObjects(BpmnParse bpmnParse,Collection<ValuedDataObject> dataObjects,ScopeImpl scope):Map<String,Object>
+}
+AbstractBpmnParseHandler ..> org.activiti.bpmn.model.BaseElement
+AbstractBpmnParseHandler ..> org.activiti.engine.impl.bpmn.parser.BpmnParse
+AbstractBpmnParseHandler ..> org.activiti.engine.impl.pvm.process.ActivityImpl
+AbstractBpmnParseHandler ..> org.activiti.bpmn.model.ActivitiListener
+AbstractBpmnParseHandler ..> org.activiti.engine.impl.pvm.process.ScopeImpl
+AbstractBpmnParseHandler ..> org.activiti.engine.impl.pvm.process.TransitionImpl
+AbstractBpmnParseHandler ..> org.activiti.engine.delegate.ExecutionListener
+AbstractBpmnParseHandler ..> org.activiti.engine.impl.bpmn.parser.EventSubscriptionDeclaration
+AbstractBpmnParseHandler ..> org.activiti.bpmn.model.EventDefinition
+AbstractBpmnParseHandler ..> org.activiti.bpmn.model.Artifact
+AbstractBpmnParseHandler ..> org.activiti.bpmn.model.Association
+AbstractBpmnParseHandler ..> org.activiti.bpmn.model.ValuedDataObject
+
+abstract class AbstractExternalInvocationBpmnParseHandler<T extends FlowNode> extends AbstractActivityBpmnParseHandler<T> {
+    + createDataInputAssociation(BpmnParse bpmnParse,org.activiti.bpmn.model.DataAssociation dataAssociationElement):org.activiti.engine.impl.bpmn.data.AbstractDataAssociation
+    + createDataOutputAssociation(BpmnParse bpmnParse,org.activiti.bpmn.model.DataAssociation dataAssociationElement):org.activiti.engine.impl.bpmn.data.AbstractDataAssociation
+}
+AbstractExternalInvocationBpmnParseHandler ..> org.activiti.bpmn.model.DataAssociation
+AbstractExternalInvocationBpmnParseHandler ..> org.activiti.engine.impl.bpmn.data.AbstractDataAssociation
+
+abstract class AbstractFlowNodeBpmnParseHandler<T extends org.activiti.bpmn.model.FlowNode> extends AbstractBpmnParseHandler<T> {
+    + parse(BpmnParse bpmnParse,BaseElement element):void
+}
+class BoundaryEventParseHandler extends AbstractFlowNodeBpmnParseHandler<BoundaryEvent> {
+    + executeParse(BpmnParse bpmnParse,BoundaryEvent boundaryEvent):void
+}
+BoundaryEventParseHandler ..> org.activiti.bpmn.model.BoundaryEvent
+class BusinessRuleParseHandler extends AbstractActivityBpmnParseHandler<BusinessRuleTask> {
+    # getHandledType():Class< ? extends BaseElement>
+    # executeParse(BpmnParse bpmnParse, BusinessRuleTask businessRuleTask):void
+}
+BusinessRuleParseHandler ..> org.activiti.bpmn.model.BusinessRuleTask
+class CallActivityParseHandler extends AbstractActivityBpmnParseHandler<CallActivity> {
+    # getHandledType():Class< ? extends BaseElement>
+    # executeParse(BpmnParse bpmnParse, CallActivity callActivity):void
+}
+CallActivityParseHandler ..> org.activiti.bpmn.model.CallActivity
+class CancelEventDefinitionParseHandler extends AbstractBpmnParseHandler<CancelEventDefinition> {
+    # getHandledType():Class< ? extends BaseElement>
+    # executeParse(BpmnParse bpmnParse,CancelEventDefinition cancelEventDefinition):void
+}
+CancelEventDefinitionParseHandler ..> org.activiti.bpmn.model.CancelEventDefinition
+class CompensateEventDefinitionParseHandler extends AbstractBpmnParseHandler<CompensateEventDefinition> {
+    # getHandledType():Class< ? extends BaseElement>
+    # executeParse(BpmnParse bpmnParse,CancelEventDefinition cancelEventDefinition):void
+}
+CompensateEventDefinitionParseHandler ..> org.activiti.bpmn.model.CompensateEventDefinition
+class EndEventParseHandler extends AbstractActivityBpmnParseHandler<EndEvent> {
+    # getHandledType():Class< ? extends BaseElement>
+    # executeParse(BpmnParse bpmnParse, EndEvent endEvent):void
+}
+EndEventParseHandler ..> org.activiti.bpmn.model.EndEvent
+class ErrorEventDefinitionParseHandler extends AbstractBpmnParseHandler<ErrorEventDefinition> {
+    # getHandledType():Class< ? extends BaseElement>
+    # executeParse(BpmnParse bpmnParse,ErrorEventDefinition eventDefinition):void
+    # createErrorStartEventDefinition(ErrorEventDefinition errorEventDefinition,ActivityImpl startEventActivity,ScopeImpl scope):void
+    # createBoundaryErrorEventDefinition(ErrorEventDefinition errorEventDefinition,boolean interrupting,ActivityImpl activity,ActivityImpl nestedErrorEventActivity):void
+    # addErrorEventDefinition(ErrorEventDefinition errorEventDefinition,ScopeImpl catchingScope):void
+}
+ErrorEventDefinitionParseHandler ..> org.activiti.bpmn.model.ErrorEventDefinition
+class EventBasedGatewayParseHandler extends AbstractActivityBpmnParseHandler<EventGateway> {
+    # getHandledType():Class< ? extends BaseElement>
+    # executeParse(BpmnParse bpmnParse,EventGateway gateway):void
+}
+EventBasedGatewayParseHandler ..> org.activiti.bpmn.model.EventGateway
+class EventSubProcessParseHandler extends SubProcessParseHandler {
+    # getHandledType():Class< ? extends BaseElement>
+}
+EventSubProcessParseHandler ..> org.activiti.bpmn.model.EventSubProcess
+
+class ExclusiveGatewayParseHandler extends AbstractActivityBpmnParseHandler<ExclusiveGateway> {
+    # getHandledType():Class< ? extends BaseElement>
+    # executeParse(BpmnParse bpmnParse, ExclusiveGateway gateway):void
+}
+ExclusiveGatewayParseHandler ..> org.activiti.bpmn.model.ExclusiveGateway
+
+class InclusiveGatewayParseHandler extends AbstractActivityBpmnParseHandler<InclusiveGateway> {
+    # getHandledType():Class< ? extends BaseElement>
+    # executeParse(BpmnParse bpmnParse, InclusiveGateway gateway):void
+}
+InclusiveGatewayParseHandler ..> org.activiti.bpmn.model.InclusiveGateway
+
+class IntermediateCatchEventParseHandler extends AbstractFlowNodeBpmnParseHandler<IntermediateCatchEvent> {
+    # getHandledType():Class<? extends BaseElement>
+    # executeParse(BpmnParse bpmnParse,IntermediateCatchEvent event):void
+}
+IntermediateCatchEventParseHandler ..> org.activiti.bpmn.model.IntermediateCatchEvent
+class IntermediateThrowEventParseHandler extends AbstractActivityBpmnParseHandler<ThrowEvent> {
+    # getHandledType():Class<? extends BaseElement>
+    # executeParse(BpmnParse bpmnParse, ThrowEvent intermediateEvent):void
+}
+IntermediateThrowEventParseHandler ..> org.activiti.bpmn.model.ThrowEvent
+
+class ManualTaskParseHandler extends AbstractActivityBpmnParseHandler<ManualTask> {
+    # getHandledType():Class<? extends BaseElement>
+    # executeParse(BpmnParse bpmnParse, ManualTask manualTask):void
+}
+ManualTaskParseHandler ..> org.activiti.bpmn.model.ManualTask
+
+class MessageEventDefinitionParseHandler extends AbstractBpmnParseHandler<MessageEventDefinition> {
+    # getHandledType():Class<? extends BaseElement>
+    # executeParse(BpmnParse bpmnParse,MessageEventDefinition messageDefinition):void
+}
+MessageEventDefinitionParseHandler ..> org.activiti.bpmn.model.MessageEventDefinition
+
+class ParallelGatewayParseHandler extends  AbstractActivityBpmnParseHandler<ParallelGateway> {
+    # getHandledType():Class<? extends BaseElement>
+    # executeParse(BpmnParse bpmnParse，ParallelGateway gateway):void
+}
+ParallelGatewayParseHandler ..> org.activiti.bpmn.model.ParallelGateway
+
+class ProcessParseHandler extends AbstractBpmnParseHandler<org.activiti.bpmn.model.Process> {
+    # {static} PROPERTYNAME_DOCUMENTATION:String
+    # getHandledType():Class<? extends BaseElement>
+    # executeParse(BpmnParse bpmnParse,Process process):void
+    # transformProcess(BpmnParse bpmnParse,Process process):void
+    # createEventListeners(BpmnParse bpmnParse,List<EventListener> eventListeners,ProcessDefinitionEntity entity):void
+}
+ProcessParseHandler ..> org.activiti.bpmn.model.Process
+ProcessParseHandler ..> org.activiti.bpmn.model.EventListener
+
+class ReceiveTaskParseHandler extends AbstractActivityBpmnParseHandler<ReceiveTask> {
+    # getHandledType():Class<? extends BaseElement>
+    # executeParse(BpmnParse bpmnParse,ReceiveTask receiveTask):void
+}
+ReceiveTaskParseHandler ..> org.activiti.bpmn.model.ReceiveTask
+
+class ScriptTaskParseHandler extends AbstractActivityBpmnParseHandler<ScriptTask> {
+    # getHandledType():Class<? extends BaseElement>
+    # executeParse(BpmnParse bpmnParse,ScriptTask scriptTask):void
+}
+ScriptTaskParseHandler ..> org.activiti.bpmn.model.ScriptTask
+
+class SendTaskParseHandler extends AbstractExternalInvocationBpmnParseHandler<SendTask> {
+    # getHandledType():Class<? extends BaseElement>
+    # executeParse(BpmnParse bpmnParse,ScriptTask scriptTask):void
+}
+SendTaskParseHandler ..> org.activiti.bpmn.model.SendTask
+
+class SequenceFlowParseHandler extends AbstractBpmnParseHandler<SequenceFlow> {
+    # getHandledType():Class<? extends BaseElement>
+    # executeParse(BpmnParse bpmnParse,SequenceFlow sequenceFlow):void
+}
+SequenceFlowParseHandler ..> org.activiti.bpmn.model.SequenceFlow
+
+class ServiceTaskParseHandler extends AbstractExternalInvocationBpmnParseHandler<ServiceTask> {
+    # getHandledType():Class<? extends BaseElement>
+    # executeParse(BpmnParse bpmnParse,ServiceTask serviceTask):void
+    # createActivityBehaviorForServiceTaskType(ActivityImpl activity,BpmnParse bpmnParse,ServiceTask serviceTask):void
+    # createMailActivityBehavior(ActivityImpl activity,BpmnParse bpmnParse,ServiceTask serviceTask):void
+    # createMuleActivityBehavior(ActivityImpl activity,BpmnParse bpmnParse,ServiceTask serviceTask):void
+    # createCamelActivityBehavior(ActivityImpl activity,BpmnParse bpmnParse,ServiceTask serviceTask):void
+    # createShellActivityBehavior(ActivityImpl activity,BpmnParse bpmnParse,ServiceTask serviceTask):void
+    # createActivityBehaviorForCustomServiceTaskType(ActivityImpl activity,BpmnParse bpmnParse,ServiceTask serviceTask):void
+    # createClassDelegateServiceTask(ActivityImpl activity,BpmnParse bpmnParse,ServiceTask serviceTask):void
+    # createServiceTaskDelegateExpressionActivityBehavior(ActivityImpl activity,BpmnParse bpmnParse,ServiceTask serviceTask):void
+    # createServiceTaskExpressionActivityBehavior(ActivityImpl activity,BpmnParse bpmnParse,ServiceTask serviceTask):void
+    # createWebServiceActivityBehavior(ActivityImpl activity,BpmnParse bpmnParse,ServiceTask serviceTask):void
+    # createDefaultServiceTaskActivityBehavior(ActivityImpl activity,BpmnParse bpmnParse,ServiceTask serviceTask):void
+}
+ServiceTaskParseHandler ..> org.activiti.bpmn.model.ServiceTask
+
+class SignalEventDefinitionParseHandler extends AbstractBpmnParseHandler<SignalEventDefinition> {
+    # getHandledType():Class<? extends BaseElement>
+    # executeParse(BpmnParse bpmnParse,SignalEventDefinition signalDefinition):void
+}
+SignalEventDefinitionParseHandler ..> org.activiti.bpmn.model.SignalEventDefinition
+
+class StartEventParseHandler extends AbstractActivityBpmnParseHandler<StartEvent> {
+    # getHandledType():Class<? extends BaseElement>
+    # executeParse(BpmnParse bpmnParse,StartEvent startEvent):void
+    # createProcessDefinitionStartEvent(BpmnParse bpmnParse,ActivityImpl startEventActivity,StartEvent startEvent,ProcessDefinitionEntity processDefinition):void
+    # setInitial(BpmnParse bpmnParse,ActivityImpl startEventActivity,StartEvent startEvent,ProcessDefinitionEntity processDefinition):void
+    # createStartFormHandlers(BpmnParse bpmnParse,StartEvent startEvent,ProcessDefinitionEntity processDefinition):void
+    # createScopeStartEvent(BpmnParse bpmnParse,ActivityImpl startEventActivity,StartEvent startEvent):void
+}
+StartEventParseHandler ..> org.activiti.bpmn.model.StartEvent
+
+class SubProcessParseHandler extends AbstractActivityBpmnParseHandler<SubProcess> {
+    # getHandledType():Class<? extends BaseElement>
+    # executeParse(BpmnParse bpmnParse,SubProcess subProcess):void
+}
+SubProcessParseHandler ..> org.activiti.bpmn.model.SubProcess
+
+class TaskParseHandler extends AbstractActivityBpmnParseHandler<Task> {
+    # getHandledType():Class<? extends BaseElement>
+    # executeParse(BpmnParse bpmnParse,Task task):void
+}
+TaskParseHandler ..> org.activiti.bpmn.model.Task
+
+class TimerEventDefinitionParseHandler extends AbstractBpmnParseHandler<TimerEventDefinition> {
+    # getHandledType():Class<? extends BaseElement>
+    # executeParse(BpmnParse bpmnParse,StartEvent startEvent):void
+    addTimerDeclaration(ScopeImpl scope, TimerDeclarationImpl timerDeclaration):void
+}
+TimerEventDefinitionParseHandler ..> org.activiti.bpmn.model.TimerEventDefinition
+TimerEventDefinitionParseHandler ..> org.activiti.engine.impl.jobexecutor.TimerDeclarationImpl
+
+class TransactionParseHandler extends AbstractActivityBpmnParseHandler<Transaction> {
+    # getHandledType():Class<? extends BaseElement>
+    # executeParse(BpmnParse bpmnParse, Transaction transaction):void
+}
+TransactionParseHandler ..> org.activiti.bpmn.model.Transaction
+
+class UserTaskParseHandler extends AbstractActivityBpmnParseHandler<UserTask> {
+    # getHandledType():Class<? extends BaseElement>
+    # executeParse(BpmnParse bpmnParse, UserTask userTask):void
+}
+UserTaskParseHandler ..> org.activiti.bpmn.model.UserTask
+}
+/' package finished '/
+@enduml

@@ -1,9 +1,9 @@
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,20 +24,19 @@ import org.activiti.engine.impl.pvm.PvmProcessInstance;
 import org.activiti.engine.impl.pvm.runtime.ExecutionImpl;
 import org.activiti.engine.impl.pvm.runtime.InterpretableExecution;
 
-
-
 /**
  * @author Tom Baeyens
  */
 public class ProcessDefinitionImpl extends ScopeImpl implements PvmProcessDefinition {
-  
+
   private static final long serialVersionUID = 1L;
-  
+
   protected String name;
   protected String key;
   protected String description;
   protected ActivityImpl initial;
-  protected Map<ActivityImpl, List<ActivityImpl>> initialActivityStacks = new HashMap<ActivityImpl, List<ActivityImpl>>();
+  protected Map<ActivityImpl, List<ActivityImpl>> initialActivityStacks =
+      new HashMap<ActivityImpl, List<ActivityImpl>>();
   protected List<LaneSet> laneSets;
   protected ParticipantProcess participantProcess;
 
@@ -47,29 +46,33 @@ public class ProcessDefinitionImpl extends ScopeImpl implements PvmProcessDefini
   }
 
   public PvmProcessInstance createProcessInstance() {
-    if(initial == null) {
-      throw new ActivitiException("Process '"+name+"' has no default start activity (e.g. none start event), hence you cannot use 'startProcessInstanceBy...' but have to start it using one of the modeled start events (e.g. message start events).");
+    if (initial == null) {
+      throw new ActivitiException(
+          "Process '"
+              + name
+              + "' has no default start activity (e.g. none start event), hence you cannot use 'startProcessInstanceBy...' but have to start it using one of the modeled start events (e.g. message start events).");
     }
     return createProcessInstanceForInitial(initial);
   }
-  
+
   /** creates a process instance using the provided activity as initial */
   public PvmProcessInstance createProcessInstanceForInitial(ActivityImpl initial) {
-    
-    if(initial == null) {
-      throw new ActivitiException("Cannot start process instance, initial activity where the process instance should start is null.");
+
+    if (initial == null) {
+      throw new ActivitiException(
+          "Cannot start process instance, initial activity where the process instance should start is null.");
     }
-    
+
     InterpretableExecution processInstance = newProcessInstance(initial);
     processInstance.setProcessDefinition(this);
     processInstance.setProcessInstance(processInstance);
     processInstance.initialize();
 
     InterpretableExecution scopeInstance = processInstance;
-    
+
     List<ActivityImpl> initialActivityStack = getInitialActivityStack(initial);
-    
-    for (ActivityImpl initialActivity: initialActivityStack) {
+
+    for (ActivityImpl initialActivity : initialActivityStack) {
       if (initialActivity.isScope()) {
         scopeInstance = (InterpretableExecution) scopeInstance.createExecution();
         scopeInstance.setActivity(initialActivity);
@@ -78,22 +81,22 @@ public class ProcessDefinitionImpl extends ScopeImpl implements PvmProcessDefini
         }
       }
     }
-    
+
     scopeInstance.setActivity(initial);
 
     return processInstance;
   }
 
   public List<ActivityImpl> getInitialActivityStack() {
-    return getInitialActivityStack(initial);    
+    return getInitialActivityStack(initial);
   }
-  
+
   public synchronized List<ActivityImpl> getInitialActivityStack(ActivityImpl startActivity) {
     List<ActivityImpl> initialActivityStack = initialActivityStacks.get(startActivity);
-    if(initialActivityStack == null) {
+    if (initialActivityStack == null) {
       initialActivityStack = new ArrayList<ActivityImpl>();
       ActivityImpl activity = startActivity;
-      while (activity!=null) {
+      while (activity != null) {
         initialActivityStack.add(0, activity);
         activity = activity.getParentActivity();
       }
@@ -113,26 +116,26 @@ public class ProcessDefinitionImpl extends ScopeImpl implements PvmProcessDefini
   public String getDeploymentId() {
     return null;
   }
-  
+
   public void addLaneSet(LaneSet newLaneSet) {
     getLaneSets().add(newLaneSet);
   }
-  
+
   public Lane getLaneForId(String id) {
-    if(laneSets != null && !laneSets.isEmpty()) {
+    if (laneSets != null && !laneSets.isEmpty()) {
       Lane lane;
-      for(LaneSet set : laneSets) {
+      for (LaneSet set : laneSets) {
         lane = set.getLaneForId(id);
-        if(lane != null) {
+        if (lane != null) {
           return lane;
         }
       }
     }
     return null;
   }
-  
+
   // getters and setters //////////////////////////////////////////////////////
-  
+
   public ActivityImpl getInitial() {
     return initial;
   }
@@ -140,9 +143,9 @@ public class ProcessDefinitionImpl extends ScopeImpl implements PvmProcessDefini
   public void setInitial(ActivityImpl initial) {
     this.initial = initial;
   }
-  
+
   public String toString() {
-    return "ProcessDefinition("+id+")";
+    return "ProcessDefinition(" + id + ")";
   }
 
   public String getName() {
@@ -152,7 +155,7 @@ public class ProcessDefinitionImpl extends ScopeImpl implements PvmProcessDefini
   public void setName(String name) {
     this.name = name;
   }
-  
+
   public String getKey() {
     return key;
   }
@@ -164,22 +167,22 @@ public class ProcessDefinitionImpl extends ScopeImpl implements PvmProcessDefini
   public String getDescription() {
     return (String) getProperty("documentation");
   }
-  
+
   /**
-   * @return all lane-sets defined on this process-instance. Returns an empty list if none are defined. 
+   * @return all lane-sets defined on this process-instance. Returns an empty list if none are
+   *     defined.
    */
   public List<LaneSet> getLaneSets() {
-    if(laneSets == null) {
+    if (laneSets == null) {
       laneSets = new ArrayList<LaneSet>();
     }
     return laneSets;
   }
-  
-  
+
   public void setParticipantProcess(ParticipantProcess participantProcess) {
     this.participantProcess = participantProcess;
   }
-  
+
   public ParticipantProcess getParticipantProcess() {
     return participantProcess;
   }

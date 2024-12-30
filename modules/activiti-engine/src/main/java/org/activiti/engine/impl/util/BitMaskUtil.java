@@ -71,11 +71,8 @@ public class BitMaskUtil {
    * @param number of bit to check (right first bit starting at 1)
    */
   public static boolean isBitOn(int value, int bitNumber) {
-    if(bitNumber <= 0 && bitNumber > 8) {
-      throw new IllegalArgumentException("Only bits 1 htrough 8 are supported");
-    }
-    
-    return ((value & MASKS[bitNumber - 1]) == MASKS[bitNumber - 1]);
+
+      return ((value & MASKS[bitNumber - 1]) == MASKS[bitNumber - 1]);
   }
   
   /**

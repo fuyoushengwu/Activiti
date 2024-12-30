@@ -1,9 +1,9 @@
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -50,9 +50,10 @@ public class MailActivityBehavior extends AbstractBpmnActivityBehavior {
 
   private static final Logger LOG = LoggerFactory.getLogger(MailActivityBehavior.class);
 
-  private static final Class<?>[] ALLOWED_ATT_TYPES = new Class<?>[]{
-      File.class, File[].class, String.class, String[].class, DataSource.class, DataSource[].class
-  };
+  private static final Class<?>[] ALLOWED_ATT_TYPES =
+      new Class<?>[] {
+        File.class, File[].class, String.class, String[].class, DataSource.class, DataSource[].class
+      };
 
   protected Expression to;
   protected Expression from;
@@ -71,7 +72,8 @@ public class MailActivityBehavior extends AbstractBpmnActivityBehavior {
   @Override
   public void execute(ActivityExecution execution) {
 
-    boolean doIgnoreException = Boolean.parseBoolean(getStringFromField(ignoreException, execution));
+    boolean doIgnoreException =
+        Boolean.parseBoolean(getStringFromField(ignoreException, execution));
     String exceptionVariable = getStringFromField(exceptionVariableName, execution);
     Email email = null;
     try {
@@ -80,10 +82,14 @@ public class MailActivityBehavior extends AbstractBpmnActivityBehavior {
       String ccStr = getStringFromField(cc, execution);
       String bccStr = getStringFromField(bcc, execution);
       String subjectStr = getStringFromField(subject, execution);
-      String textStr = textVar == null ? getStringFromField(text, execution)
-          : getStringFromField(getExpression(execution, textVar), execution);
-      String htmlStr = htmlVar == null ? getStringFromField(html, execution)
-          : getStringFromField(getExpression(execution, htmlVar), execution);
+      String textStr =
+          textVar == null
+              ? getStringFromField(text, execution)
+              : getStringFromField(getExpression(execution, textVar), execution);
+      String htmlStr =
+          htmlVar == null
+              ? getStringFromField(html, execution)
+              : getStringFromField(getExpression(execution, htmlVar), execution);
       String charSetStr = getStringFromField(charset, execution);
       List<File> files = new LinkedList<File>();
       List<DataSource> dataSources = new LinkedList<DataSource>();
@@ -104,7 +110,12 @@ public class MailActivityBehavior extends AbstractBpmnActivityBehavior {
     } catch (ActivitiException e) {
       handleException(execution, e.getMessage(), e, doIgnoreException, exceptionVariable);
     } catch (EmailException e) {
-      handleException(execution, "Could not send e-mail in execution " + execution.getId(), e, doIgnoreException, exceptionVariable);
+      handleException(
+          execution,
+          "Could not send e-mail in execution " + execution.getId(),
+          e,
+          doIgnoreException,
+          exceptionVariable);
     }
 
     leave(execution);
@@ -124,7 +135,8 @@ public class MailActivityBehavior extends AbstractBpmnActivityBehavior {
         return createMultiPartEmail(text);
       }
     } else {
-      throw new ActivitiIllegalArgumentException("'html' or 'text' is required to be defined when using the mail activity");
+      throw new ActivitiIllegalArgumentException(
+          "'html' or 'text' is required to be defined when using the mail activity");
     }
   }
 
@@ -182,8 +194,9 @@ public class MailActivityBehavior extends AbstractBpmnActivityBehavior {
     if (from != null) {
       fromAddress = from;
     } else { // use default configured from address in process engine config
-      if (tenantId != null && tenantId.length() > 0) {
-        Map<String, MailServerInfo> mailServers = Context.getProcessEngineConfiguration().getMailServers();
+      if (tenantId != null && !tenantId.isEmpty()) {
+        Map<String, MailServerInfo> mailServers =
+            Context.getProcessEngineConfiguration().getMailServers();
         if (mailServers != null && mailServers.containsKey(tenantId)) {
           MailServerInfo mailServerInfo = mailServers.get(tenantId);
           fromAddress = mailServerInfo.getMailServerDefaultFrom();
@@ -228,7 +241,8 @@ public class MailActivityBehavior extends AbstractBpmnActivityBehavior {
     }
   }
 
-  protected void attach(Email email, List<File> files, List<DataSource> dataSources) throws EmailException {
+  protected void attach(Email email, List<File> files, List<DataSource> dataSources)
+      throws EmailException {
     if (!(email instanceof MultiPartEmail && attachmentsExist(files, dataSources))) {
       return;
     }
@@ -248,7 +262,8 @@ public class MailActivityBehavior extends AbstractBpmnActivityBehavior {
   }
 
   protected void setMailServerProperties(Email email, String tenantId) {
-    ProcessEngineConfigurationImpl processEngineConfiguration = Context.getProcessEngineConfiguration();
+    ProcessEngineConfigurationImpl processEngineConfiguration =
+        Context.getProcessEngineConfiguration();
 
     boolean isMailServerSet = false;
     if (tenantId != null && tenantId.length() > 0) {
@@ -260,7 +275,8 @@ public class MailActivityBehavior extends AbstractBpmnActivityBehavior {
         MailServerInfo mailServerInfo = processEngineConfiguration.getMailServer(tenantId);
         String host = mailServerInfo.getMailServerHost();
         if (host == null) {
-          throw new ActivitiException("Could not send email: no SMTP host is configured for tenantId " + tenantId);
+          throw new ActivitiException(
+              "Could not send email: no SMTP host is configured for tenantId " + tenantId);
         }
         email.setHostName(host);
 
@@ -341,7 +357,11 @@ public class MailActivityBehavior extends AbstractBpmnActivityBehavior {
     return null;
   }
 
-  private void getFilesFromFields(Expression expression, DelegateExecution execution, List<File> files, List<DataSource> dataSources) {
+  private void getFilesFromFields(
+      Expression expression,
+      DelegateExecution execution,
+      List<File> files,
+      List<DataSource> dataSources) {
     Object value = checkAllowedTypes(expression, execution);
     if (value != null) {
       if (value instanceof File) {
@@ -395,13 +415,20 @@ public class MailActivityBehavior extends AbstractBpmnActivityBehavior {
 
   protected Expression getExpression(ActivityExecution execution, Expression var) {
     String variable = (String) execution.getVariable(var.getExpressionText());
-    return Context.getProcessEngineConfiguration().getExpressionManager().createExpression(variable);
+    return Context.getProcessEngineConfiguration()
+        .getExpressionManager()
+        .createExpression(variable);
   }
 
-  protected void handleException(ActivityExecution execution, String msg, Exception e, boolean doIgnoreException, String exceptionVariable) {
+  protected void handleException(
+      ActivityExecution execution,
+      String msg,
+      Exception e,
+      boolean doIgnoreException,
+      String exceptionVariable) {
     if (doIgnoreException) {
       LOG.info("Ignoring email send error: " + msg, e);
-      if (exceptionVariable != null && exceptionVariable.length() > 0) {
+      if (exceptionVariable != null && !exceptionVariable.isEmpty()) {
         execution.setVariable(exceptionVariable, msg);
       }
     } else {

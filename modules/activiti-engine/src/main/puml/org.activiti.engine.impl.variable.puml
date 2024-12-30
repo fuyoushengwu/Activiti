@@ -1,0 +1,312 @@
+@startuml
+!include org.activiti.engine.repository.puml
+!include org.activiti.engine.impl.db.puml
+hide @unlinked
+
+package "org.activiti.engine.impl.variable" {
+class BooleanType implements VariableType {
+    + getTypeName():String
+    + isCacheAble():boolean
+    + getValue(ValueFields valueFields):Object
+    + setValue(Object value,ValueFields valueFields):void
+    + isAbleToStore(Object value):boolean
+}
+
+class ByteArrayType implements VariableType {
+    + getTypeName():String
+    + isCacheAble():boolean
+    + getValue(ValueFields valueFields):Object
+    + setValue(Object value,ValueFields valueFields):void
+    + isAbleToStore(Object value):boolean
+}
+
+interface CacheableVariable {
+    + setForceCacheable(boolean forceCachedValue):void
+}
+
+class CustomObjectType implements VariableType {
+    # typeName:String
+    # theClass:Class<?>
+    + CustomObjectType(String typeName,Class<?> theClass)
+    + getTypeName():String
+    + getValue(ValueFields valueFields):Object
+    + isAbleToStore(Object value):boolean
+    + isCacheAble():boolean
+    + setValue(Object value,ValueFields valueFields):void
+}
+
+class DateType implements VariableType {
+    + getTypeName():String
+    + isCacheAble():boolean
+    + isAbleToStore(Object value):boolean
+    + getValue(ValueFields valueFields):Object
+    + setValue(Object value,ValueFields valueFields):void
+}
+
+class DefaultVariableTypes implements VariableTypes {
+    - typesList:List<VariableType>
+    - typesMap:Map<String,VariableType>
+    + addType(VariableType type):DefaultVariableTypes
+    + addType(VariableType type,int index):DefaultVariableTypes
+    + setTypesList(List<VariableType> typesList):void
+    + getVariableType(String typeName):VariableType
+    + findVariableType(Object value):VariableType
+    + getTypeIndex(VariableType type):int
+    + getTypeIndex(String typeName):int
+    + removeType(VariableType type):VariableTypes
+}
+
+class DeserializedObject {
+    ~ type:SerializableType
+    ~ deserializedObject:Object
+    ~ originalBytes:byte[]
+    ~ variableInstanceEntity:VariableInstanceEntity
+    + DeserializedObject(SerializableType type,Object deserializedObject,byte[] originalBytes,VariableInstanceEntity variableInstanceEntity)
+    + flush():void
+}
+
+class DoubleType implements VariableType {
+    + getTypeName():String
+    + isCacheAble():boolean
+    + isAbleToStore(Object value):boolean
+    + getValue(ValueFields valueFields):Object
+    + setValue(Object value,ValueFields valueFields):void
+}
+
+interface EntityManagerSession extends org.activiti.engine.impl.interceptor.Session {
+    + getEntityManager():javax.persistence.EntityManager
+}
+
+class EntityManagerSessionFactory implements org.activiti.engine.impl.interceptor.SessionFactory {
+    # entityManagerFactory:javax.persistence.EntityManagerFactory
+    # handleTransactions:boolean
+    # closeEntityManager:boolean
+    + EntityManagerSessionFactory(Object entityManagerFactory,boolean handleTransactions,boolean closeEntityManager)
+    + getSessionType():Class<?>
+    + openSession():org.activiti.engine.impl.interceptor.Session
+    + getEntityManagerFactory():javax.persistence.EntityManagerFactory
+}
+
+class EntityManagerSessionImpl implements EntityManagerSession {
+    - entityManagerFactory:javax.persistence.EntityManagerFactory
+    - entityManager:javax.persistence.EntityManager
+    - handleTransactions:boolean
+    - closeEntityManager:boolean
+    + EntityManagerSessionImpl(javax.persistence.EntityManagerFactory entityManagerFactory,javax.persistence.EntityManager entityManager,boolean handleTransactions,boolean closeEntityManager)
+    + EntityManagerSessionImpl(javax.persistence.EntityManagerFactory entityManagerFactory,boolean handleTransactions,boolean closeEntityManager)
+    + flush():void
+    # isTransactionActive():boolean
+    + close():void
+    + getEntityManager():javax.persistence.EntityManager
+    + getEntityManagerFactory():javax.persistence.EntityManagerFactory
+}
+
+class EntityMetaData {
+    - isJPAEntity:boolean
+    - entityClass:Class<?>
+    - idMethod:java.lang.reflect.Method
+    - idField:java.lang.reflect.Field
+    + isJPAEntity():boolean
+    + setJPAEntity(boolean isJPAEntity):void
+    + getEntityClass():Class<?>
+    + setEntityClass(Class<?> entityClass):void
+    + getIdMethod():java.lang.reflect.Method
+    + setIdMethod(java.lang.reflect.Method idMethod):void
+    + getIdField():java.lang.reflect.Field
+    + setIdField(java.lang.reflect.Field idField):void
+    + getIdType():Class<?>
+}
+
+class HistoricJPAEntityListVariableType extends JPAEntityListVariableType {
+    # {static} INSTANCE:HistoricJPAEntityListVariableType
+    + isCacheAble():boolean
+    + {static} getShardInstance():HistoricJPAEntityListVariableType
+}
+
+class HistoricJPAEntityVariableType extends JPAEntityVariableType {
+    - {static} INSTANCE:HistoricJPAEntityVariableType
+    + isCacheAble():boolean
+    + {static} getShardInstance():HistoricJPAEntityVariableType
+}
+
+class IntegerType implements VariableType {
+    + getTypeName():String
+    + isCacheAble():boolean
+    + getValue(ValueFields valueFields):Object
+    + setValue(Object value,ValueFields valueFields):void
+    + isAbleToStore(Object value):boolean
+}
+
+class JPAEntityListVariableType implements VariableType,CacheableVariable {
+    # mappings:JPAEntityMappings
+    # forceCachedValue:boolean
+    + JPAEntityListVariableType()
+    + setForceCacheable(boolean forceCachedValue):void
+    + isCacheAble():boolean
+    + getTypeName():String
+    + isAbleToStore(Object value):boolean
+    + setValue(Object value,ValueFields valueFields):void
+    + getValue(ValueFields valueFields):Object
+    # serializeIds(List<String> ids):byte[]
+    # deserializeIds(byte[] bytes):String[]
+}
+
+class JPAEntityMappings {
+    - classMetaDataMap:Map<String,EntityMetaData>
+    - entityScanner:JPAEntityScanner
+    + JPAEntityMappings()
+    + isJPAEntity(Object value):boolean
+    + getEntityMetaData(Class<?> clazz):EntityMetaData
+    - scanClass(Class<?> clazz):EntityMetaData
+    + getJPAClassString(Object value):String
+    + getJPAIdString(Object value):String
+    + getIdValue(Object value,EntityMetaData metaData):Object
+    + getIdString(Object value):String
+    + getJPAEntity(String className,String idString):Object
+    + createId(EntityMetaData metaData,String idString):Object
+    - findEntity(Class<?> entityClass,Object primaryKey):Object
+}
+
+class JPAEntityScanner {
+    + scanClass(Class<?> clazz):EntityMetaData
+    - isEntityAnnotationPresent(Class<?> clazz):boolean
+    - getIdField(Class<?> clazz):java.lang.reflect.Field
+    - getIdMethod(Class<?> clazz):java.lang.reflect.Method
+}
+
+class JPAEntityVariableType implements VariableType,CacheableVariable {
+    # mappings:JPAEntityMappings
+    # forceCachedValue:boolean
+    + JPAEntityVariableType()
+    + isCacheAble():boolean
+    + setForceCacheable(boolean forceCachedValue):void
+    + getTypeName():String
+    + isAbleToStore(Object value):boolean
+    + setValue(Object value,ValueFields valueFields):void
+    + getValue(ValueFields valueFields):Object
+}
+
+class JsonType implements VariableType {
+    # maxLength:int
+    # objectMapper:ObjectMapper
+    + JsonType(int maxLength,ObjectMapper objectMapper)
+    + getTypeName():String
+    + isCacheAble():boolean
+    + isAbleToStore(Object value):boolean
+    + setValue(Object value,ValueFields valueFields):void
+    + getValue(ValueFields valueFields):void
+}
+
+class LongJsonType extends SerializableType {
+    # minLength:int
+    # objectMapper:ObjectMapper
+    + LongJsonType(int minLength,ObjectMapper objectMapper)
+    + getTypeName():String
+    + isAbleToStore(Object value):boolean
+    + serialize(Object value,ValueFields valueFields):byte[]
+    + deserialize(byte[] bytes,ValueFields valueFields):Object
+}
+
+class LongStringType extends SerializableType {
+    - minLength:int
+    + LongStringType(int minLength)
+    + getTypeName():String
+    + isAbleToStore(Object value):boolean
+}
+
+class LongType implements VariableType {
+    + getTypeName():String
+    + isCacheAble():boolean
+    + isAbleToStore(Object value):boolean
+    + setValue(Object value,ValueFields valueFields):void
+    + getValue(ValueFields valueFields):Object
+}
+class NullType implements VariableType {
+    + getTypeName():String
+    + isCacheAble():boolean
+    + isAbleToStore(Object value):boolean
+    + setValue(Object value,ValueFields valueFields):void
+    + getValue(ValueFields valueFields):Object
+}
+
+class SerializableType extends ByteArrayType {
+    + getTypeName():String
+    + isAbleToStore(Object value):boolean
+    + setValue(Object value,ValueFields valueFields):void
+    + getValue(ValueFields valueFields):Object
+
+    + serialize(Object value,ValueFields valueFields):byte[]
+    + deserialize(byte[] bytes,ValueFields valueFields):Object
+
+    # createObjectInputStream(InputStream is):ObjectInputStream
+    # createObjectOutputStream(OutputStream os):ObjectOutputStream
+}
+
+class ShortType implements VariableType {
+    + getTypeName():String
+    + isCacheAble():boolean
+    + isAbleToStore(Object value):boolean
+    + setValue(Object value,ValueFields valueFields):void
+    + getValue(ValueFields valueFields):Object
+}
+class StringType implements VariableType {
+    + StringType(int maxLength)
+    + getTypeName():String
+    + isCacheAble():boolean
+    + isAbleToStore(Object value):boolean
+    + setValue(Object value,ValueFields valueFields):void
+    + getValue(ValueFields valueFields):Object
+}
+class UUIDType implements VariableType {
+    + getTypeName():String
+    + isCacheAble():boolean
+    + isAbleToStore(Object value):boolean
+    + setValue(Object value,ValueFields valueFields):void
+    + getValue(ValueFields valueFields):Object
+}
+interface ValueFields {
+    + getName():String
+    + getProcessInstanceId():String
+    + getExecutionId():String
+    + getTaskId():String
+    + getTextValue():String
+    + setTextValue(String)
+    + getTextValue2():String
+    + setTextValue2(String)
+    + getLongValue():Long
+    + setLongValue(Long)
+    + getDoubleValue():Double
+    + setDoubleValue(Double)
+    + getBytes():byte[]
+    + setBytes(byte[])
+    + getByteArrayValueId():String
+    + getByteArrayValue():ByteArrayEntity
+    + setByteArrayValue(byte[] bytes)
+    + getCachedValue():Object
+    + setCachedValue(Object)
+}
+
+interface VariableType {
+    + getTypeName():String
+    + isCacheAble():boolean
+    + isAbleToStore(Object value):boolean
+    + setValue(Object value,ValueFields valueFields)
+    + getValue(ValueFields valueFields):Object
+}
+VariableType o--> ValueFields:use
+
+interface VariableTypes {
+    + getVariableType(String typeName):VariableType
+    + findVariableType(Object value):VariableType
+    + addType(VariableType type):VariableTypes
+    + addType(VariableType type,int index):VariableTypes
+    + getTypeIndex(VariableType type):int
+    + getTypeIndex(String typeName):int
+    + removeType(VariableType type):VariableTypes
+}
+VariableTypes ..> VariableType
+
+}
+/' package finished '/
+
+@enduml

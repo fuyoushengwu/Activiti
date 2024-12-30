@@ -1,9 +1,9 @@
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,13 +15,11 @@ package org.activiti.engine.impl.form;
 
 import org.activiti.engine.form.AbstractFormType;
 
-
-
 /**
  * @author Tom Baeyens
  */
 public class DoubleFormType extends AbstractFormType {
-	
+
   private static final long serialVersionUID = 1L;
 
   public String getName() {
@@ -33,14 +31,14 @@ public class DoubleFormType extends AbstractFormType {
   }
 
   public Object convertFormValueToModelValue(String propertyValue) {
-    if (propertyValue==null || "".equals(propertyValue)) {
+    if (propertyValue == null || propertyValue.isEmpty()) {
       return null;
     }
     return new Double(propertyValue);
   }
 
   public String convertModelValueToFormValue(Object modelValue) {
-    if (modelValue==null) {
+    if (modelValue == null) {
       return null;
     }
     return modelValue.toString();

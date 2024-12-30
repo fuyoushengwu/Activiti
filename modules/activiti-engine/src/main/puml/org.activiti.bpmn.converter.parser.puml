@@ -1,0 +1,11 @@
+@startuml
+hide @unlinked
+package "org.activiti.bpmn.converter.parser" {
+class SignalParser implements org.activiti.bpmn.constants.BpmnXMLConstants {
+    + parse(XMLStreamReader xtr, BpmnModel model):void
+}
+SignalParser ..> javax.xml.stream.XMLStreamReader
+SignalParser ..> org.activiti.bpmn.model.BpmnModel
+}
+
+@enduml

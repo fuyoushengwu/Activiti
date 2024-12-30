@@ -1,0 +1,44 @@
+@startuml
+hide @unlinked
+package "org.activiti.engine.impl.history.parse" {
+class FlowNodeHistoryParseHandler implements org.activiti.engine.parse.BpmnParseHandler {
+    # {static} ACTIVITI_INSTANCE_END_LISTENER:ActivityInstanceEndHandler
+    # {static} ACTIVITY_INSTANCE_START_LISTENER:ActivityInstanceStartHandler
+    # {static} supportedElementClasses:Set<Class<? extends BaseElement>>
+    + getHandledTypes():Set<Class< ? extends BaseElement>>
+    + parse(BpmnParse bpmnParse,BaseElement element):void
+
+}
+FlowNodeHistoryParseHandler ..> org.activiti.engine.impl.history.handler.ActivityInstanceStartHandler
+FlowNodeHistoryParseHandler ..> org.activiti.engine.impl.history.handler.ActivityInstanceEndHandler
+
+class ProcessHistoryParseHandler extends org.activiti.engine.impl.bpmn.parser.handler.AbstractBpmnParseHandler<Process> {
+    # {static} PROCESS_INSTANCE_END_HANDLER:org.activiti.engine.impl.history.handler.ProcessInstanceEndHandler
+    # getHandledType():Class<? extends BaseElement>
+    # executeParse(BpmnParse bpmnParse,Process element):void
+}
+ProcessHistoryParseHandler ..> org.activiti.bpmn.model.Process
+ProcessHistoryParseHandler ..> org.activiti.engine.impl.history.handler.ProcessInstanceEndHandler
+
+class StartEventHistoryParseHandler extends org.activiti.engine.impl.bpmn.parser.handler.AbstractBpmnParseHandler<StartEvent> {
+    # {static} START_EVENT_END_HANDLER:StartEventEndHandler
+    # getHandledType():Class<? extends BaseElement>
+    # executeParse(BpmnParse bpmnParse,StartEvent element):void
+}
+StartEventHistoryParseHandler ..> org.activiti.bpmn.model.StartEvent
+StartEventHistoryParseHandler ..> org.activiti.engine.impl.history.handler.StartEventEndHandler
+
+class UserTaskHistoryParseHandler extends org.activiti.engine.impl.bpmn.parser.handler.AbstractBpmnParseHandler<UserTask> {
+    # {static} USER_TASK_ASSIGNMENT_HANDLER:UserTaskAssignmentHandler
+    # {static} USER_TASK_ID_HANDLER:UserTaskIdHandler
+    # getHandledType():Class<? extends BaseElement>
+    # executeParse(BpmnParse bpmnParse,UserTask element):void
+}
+UserTaskHistoryParseHandler ..> org.activiti.bpmn.model.UserTask
+UserTaskHistoryParseHandler ..> org.activiti.engine.impl.history.handler.UserTaskAssignmentHandler
+UserTaskHistoryParseHandler ..> org.activiti.engine.impl.history.handler.UserTaskIdHandler
+
+}
+/' package finished'/
+
+@enduml

@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
  */
 public class AtomicOperationActivityExecute implements AtomicOperation {
   
-  private static Logger log = LoggerFactory.getLogger(AtomicOperationActivityExecute.class);
+  private static final Logger log = LoggerFactory.getLogger(AtomicOperationActivityExecute.class);
 
   public boolean isAsync(InterpretableExecution execution) {
     return false;

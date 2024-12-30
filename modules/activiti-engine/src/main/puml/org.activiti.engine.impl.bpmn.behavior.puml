@@ -1,0 +1,336 @@
+@startuml
+hide @unlinked
+package "org.activiti.engine.impl.bpmn.behavior" {
+class AbstractBpmnActivityBehavior extends FlowNodeActivityBehavior {
+    # multiInstanceActivityBehavior:MultiInstanceActivityBehavior
+    # leave(org.activiti.engine.impl.pvm.delegate.ActivityExecution execution):void
+    # hasCompensationHandler(org.activiti.engine.impl.pvm.delegate.ActivityExecution execution):boolean
+    # createCompensateEventSubscription(org.activiti.engine.impl.pvm.delegate.ActivityExecution execution):void
+    # hasLoopCharacteristics():boolean
+    # hasMultiInstanceCharacteristics():boolean
+    + getMultiInstanceActivityBehavior():MultiInstanceActivityBehavior
+    + setMultiInstanceActivityBehavior(MultiInstanceActivityBehavior):void
+    + signal(org.activiti.engine.impl.pvm.delegate.ActivityExecution execution,String signalName,Object signalData):void
+    # signalCompensationDone(org.activiti.engine.impl.pvm.delegate.ActivityExecution execution,Object signalData):void
+}
+class BoundaryEventActivityBehavior extends FlowNodeActivityBehavior {
+    # interrupting:boolean
+    # activityId:String
+    + BoundaryEventActivityBehavior(boolean interrupting,String activityId)
+    + execute(org.activiti.engine.impl.pvm.delegate.ActivityExecution extends):void
+    + isInterrupting():boolean
+    + setInterrupting(boolean interrupting):void
+}
+class BpmnActivityBehavior {
+    + performDefaultOutgoingBehavior(org.activiti.engine.impl.pvm.delegate.ActivityExecution execution):void
+    + performIgnoreConditionsOutgoingBehavior(org.activiti.engine.impl.pvm.delegate.ActivityExecution execution):void
+    # dispatchJobCanceledEvents(org.activiti.engine.impl.pvm.delegate.ActivityExecution execution):void
+    # performOutgoingBehavior(ActivityExecution execution,boolean checkCondition,boolean throwExceptionIfExecutionStuck,List<ActivityExecution> reusableExecutions):void
+}
+class BusinessRuleTaskActivityBehavior extends TaskActivityBehavior implements org.activiti.engine.delegate.BusinessRuleTaskDelegate {
+    # variablesInputExpressions:List<Expression>
+    # rulesExpressions:List<Expression>
+    # exclude:boolean
+    # resultVariable:String
+
+    + BusinessRuleTaskActivityBehavior()
+    + execute(org.activiti.engine.impl.pvm.delegate.ActivityExecution execution):void
+
+    + addRuleVariableInputIdExpression(Expression):void
+    + addRuleIdExpression(Expression):void
+    + setExclude(boolean):void
+    + setResultVariable(String):void
+}
+class CallActivityBehavior extends AbstractBpmnActivityBehavior implements SubProcessActivityBehavior {
+    # processDefinitionKey:String
+    - dataInputAssociations:List<org.activiti.engine.impl.bpmn.data.AbstractDataAssociation>
+    - dataOutputAssociations:List<org.activiti.engine.impl.bpmn.data.AbstractDataAssociation>
+    - processDefinitionExpression:Expression
+    # mapExceptions:List<org.activiti.bpmn.model.MapExceptionEntry>
+    # businessKey:String
+    # inheritBusinessKey:boolean
+    # inheritVariables:boolean
+
+    + CallActivityBehavior(String processDefinitionKey,List<org.activiti.bpmn.model.MapExceptionEntry> mapExceptions)
+    + CallActivityBehavior(Expression processDefinitionExpression,List<org.activiti.bpmn.model.MapExceptionEntry> mapExceptions)
+    + addDataInputAssociation(org.activiti.engine.impl.bpmn.data.AbstractDataAssociation):void
+    + addDataOutputAssociation(org.activiti.engine.impl.bpmn.data.AbstractDataAssociation):void
+    + setBusinessKey(String businessKey):void
+    + setInheritBusinessKey(boolean):void
+    + setInheritVariables(boolean):void
+    + execute(org.activiti.engine.impl.pvm.delegate.ActivityExecution execution):void
+    + completing(org.activiti.engine.delegate.DelegateExecution execution,org.activiti.engine.delegate.DelegateExecution subProcessInstance):void
+    + completed(org.activiti.engine.delegate.DelegateExecution execution):void
+}
+class CancelBoundaryEventActivityBehavior extends FlowNodeActivityBehavior {
+    + execute(ActivityExecution execution):void
+    + signal(ActivityExecution execution,String signalName,Object signalData):void
+}
+class CancelEndEventActivityBehavior extends FlowNodeActivityBehavior {
+    + execute(ActivityExecution execution):void
+}
+class ErrorEndEventActivityBehavior extends FlowNodeActivityBehavior {
+    # errorCode:String
+    + ErrorEndEventActivityBehavior(String errorCode)
+    + execute(ActivityExecution execution):void
+    + getErrorCode():String
+    + setErrorCode(String errorCoe):void
+}
+class EventBasedGatewayActivityBehavior extends FlowNodeActivityBehavior {
+    + execute(ActivityExecution execution):void
+}
+class EventSubProcessStartEventActivityBehavior extends NoneStartEventActivityBehavior {
+    # isInterrupting:boolean
+    # activityId:String
+    + EventSubProcessStartEventActivityBehavior(String activity)
+    + execute(ActivityExecution execution):void
+    + setInterrupting(boolean):void
+    + isInterrupting():void
+}
+class ExclusiveGatewayActivityBehavior extends GatewayActivityBehavior {
+    # leave(ActivityExecution execution):void
+}
+
+abstract class FlowNodeActivityBehavior implements org.activiti.engine.impl.pvm.delegate.SignallableActivityBehavior {
+    # bpmnActivityBehavior:org.activiti.engine.impl.bpmn.behavior.BpmnActivityBehavior
+    + execute(org.activiti.engine.impl.pvm.delegate.ActivityExecution execution):void
+    # leave(org.activiti.engine.impl.pvm.delegate.ActivityExecution execution):void
+    # leaveIgnoreConditions(org.activiti.engine.impl.pvm.delegate.ActivityExecution execution):void
+    + signal(org.activiti.engine.impl.pvm.delegate.ActivityExecution execution,String signalName,Object signalData):void
+    # registerFiredSignalEvent(org.activiti.engine.impl.pvm.delegate.ActivityExecution execution,Signal signal):void
+    # isSignalEventAlreadyFired(org.activiti.engine.impl.pvm.delegate.ActivityExecution execution,EventSubscriptionEntity subscription):boolean
+    # isSignalEventType(EventSubscriptionEntity subscription):boolean
+    # getEventSubscriptionScope(org.activiti.engine.impl.pvm.delegate.ActivityExecution execution,EventSubscriptionEntity entity):String
+    # getSignalScope(org.activiti.engine.impl.pvm.delegate.ActivityExecution execution,Signal signal):String
+    # getSignalExecutionScope(org.activiti.engine.impl.pvm.delegate.ActivityExecution execution,String signalName,String signalScope):String
+}
+abstract class GatewayActivityBehavior extends FlowNodeActivityBehavior {
+    # lockConcurrentRoot(ActivityExecution execution):void
+}
+class InclusiveGatewayActivityBehavior extends GatewayActivityBehavior {
+    + execute(ActivityExecution execution):void
+}
+class IntermediateCatchEventActivityBehavior extends AbstractBpmnActivityBehavior {
+    + execute(ActivityExecution execution):void
+    + signal(ActivityExecution execution,String signalName,Object signalData):void
+}
+class IntermediateThrowCompensationEventActivityBehavior extends FlowNodeActivityBehavior {
+    # compensateEventDefinition:CompensateEventDefinition
+    + IntermediateCatchEventActivityBehavior(CompensateEventDefinition definition)
+    + execute(ActivityExecution execution):void
+    + signal(ActivityExecution execution,String signalName,Object signalData):void
+}
+class IntermediateThrowNoneEventActivityBehavior extends FlowNodeActivityBehavior {
+}
+class IntermediateThrowSignalEventActivityBehavior extends AbstractBpmnActivityBehavior {
+    # processInstanceScope:boolean
+    # signalDefinition:EventSubscriptionDeclaration
+    # signal:Signal
+    + IntermediateThrowSignalEventActivityBehavior(org.activiti.bpmn.model.ThrowEvent event,Signal signal,EventSubscriptionDeclaration definition)
+    + execute(ActivityExecution execution):void
+}
+class MailActivityBehavior extends AbstractBpmnActivityBehavior {
+    - {static} ALLOWED_ATT_TYPES:Class<?>[]
+    + execute(ActivityExecution execution):void
+}
+class ManualTaskActivityBehavior extends TaskActivityBehavior {
+}
+abstract class MultiInstanceActivityBehavior extends FlowNodeActivityBehavior implements org.activiti.engine.impl.pvm.delegate.CompositeActivityBehavior,org.activiti.engine.impl.pvm.delegate.SubProcessActivityBehavior {
+    # NUMBER_OF_INSTANCES:String
+    # NUMBER_OF_ACTIVE_INSTANCES:String
+    # NUMBER_OF_COMPLETED_INSTANCES:String
+`
+    # activity:org.activiti.engine.impl.pvm.process.ActivityImpl
+    # innerActivityBehavior:AbstractBpmnActivityBehavior
+    # loopCardinalityExpression:Expression
+    # completionConditionExpression:Expression
+    # collectionExpression:Expression
+    # collectionVariable:String
+    # collectionElementVariable:String
+    # collectionElementIndexVariable:String
+
+    + MultiInstanceActivityBehavior(org.activiti.engine.impl.pvm.process.ActivityImpl activity,AbstractBpmnActivityBehavior innerActivityBehavior)
+    + execute(org.activiti.engine.impl.pvm.delegate.ActivityExecution execution):void
+    # {abstract} createInstances(org.activiti.engine.impl.pvm.delegate.ActivityExecution execution):void
+    + signal(org.activiti.engine.impl.pvm.delegate.ActivityExecution execution,String signalName,Object signalData):void
+    + lastExecutionEnded(org.activiti.engine.impl.pvm.delegate.ActivityExecution execution):void
+    + completing(DelegateExecution execution.DelegateExecution subProcessInstance):void
+    + completed(org.activiti.engine.impl.pvm.delegate.ActivityExecution execution):void
+    # resolveNrOfInstances(org.activiti.engine.impl.pvm.delegate.ActivityExecution execution):int
+    # executeOriginalBehavior(org.activiti.engine.impl.pvm.delegate.ActivityExecution execution,int loopCounter):void
+    # usesCollection():boolean
+    # isExtractScopeNeeded():boolean
+    # resolveLoopCardinality(org.activiti.engine.impl.pvm.delegate.ActivityExecution execution):int
+    # completionConditionSatisfied(org.activiti.engine.impl.pvm.delegate.ActivityExecution execution):void
+    # setLoopVariable(org.activiti.engine.impl.pvm.delegate.ActivityExecution execution,String variableName,Object value):void
+    # getLoopVariable(org.activiti.engine.impl.pvm.delegate.ActivityExecution execution,String variableName):Integer
+    # getLocalLoopVariable(org.activiti.engine.impl.pvm.delegate.ActivityExecution execution,String variableName):Integer
+    # callCustomActivityStartListeners(org.activiti.engine.impl.pvm.delegate.ActivityExecution execution):void
+    # callActivityEndListeners(org.activiti.engine.impl.pvm.delegate.ActivityExecution execution):void
+    == Getters and Setters  ==
+    + getLoopCardinalityExpression():Expression
+    + setLoopCardinalityExpression(Expression):void
+    + getCompletionConditionExpression():Expression
+    + setCompletionConditionExpression(Expression):void
+    + getCollectionExpression():Expression
+    + setCollectionExpression(Expression):void
+    + getCollectionVariable():String
+    + setCollectionVariable(String):void
+    + getCollectionElementVariable():String
+    + setCollectionElementVariable(String):void
+    + getCollectionElementIndexVariable():String
+    + setCollectionElementIndexVariable(String):void
+    + setInnerActivityBehavior(org.activiti.engine.impl.bpmn.behavior.AbstractBpmnActivityBehavior):void
+    + getInnerActivityBehavior():org.activiti.engine.impl.bpmn.behavior.AbstractBpmnActivityBehavior
+
+}
+class MultiInstanceActivityBehavior$CallActivityListenersOperation implements org.activiti.engine.impl.pvm.runtime.AtomicOperation {
+    - listeners:List<org.activiti.engine.delegate.ExecutionListener>
+    + MultiInstanceActivityBehavior$CallActivityListenersOperation(List<org.activiti.engine.delegate.ExecutionListener>)
+    + execute(org.activiti.engine.impl.pvm.runtime.InterpretableExecution execution):void
+    + isAsync(org.activiti.engine.impl.pvm.runtime.InterpretableExecution execution):boolean
+}
+
+class NoneEndEventActivityBehavior extends FlowNodeActivityBehavior {
+    + execute(ActivityExecution execution):void
+}
+class NoneStartEventActivityBehavior extends FlowNodeActivityBehavior {
+}
+class ParallelGatewayActivityBehavior extends GatewayActivityBehavior {
+    + execute(ActivityExecution execution):void
+}
+class ParallelMultiInstanceBehavior extends MultiInstanceActivityBehavior {
+    # createInstances(ActivityExecution execution):void
+    + leave(ActivityExecution execution):void
+}
+class ReceiveTaskActivityBehavior extends TaskActivityBehavior {
+    + execute(ActivityExecution execution):void
+    + signal(ActivityExecution execution,String signalName,Object signalData):void
+}
+class ScriptTaskActivityBehavior extends TaskActivityBehavior {
+    # scriptTaskId:String
+    # script:String
+    # language:String
+    # resultVariable:String
+    # storeScriptVariables:boolean
+    + ScriptTaskActivityBehavior(String script,String language,String resultVariable)
+    + ScriptTaskActivityBehavior(String scriptTaskId,String script,String language,String resultVariable,boolean storeScriptVariables)
+    + execute(ActivityExecution execution):void
+}
+class SequentialMultiInstanceBehavior extends MultiInstanceActivityBehavior {
+    + SequentialMultiInstanceBehavior(ActivityImpl activity,AbstractBpmnActivityBehavior innerActivityBehavior):v
+    # createInstances(ActivityExecution execution):void
+    + leave(ActivityExecution execution):void
+    + execute(ActivityExecution execution):void
+}
+class ServiceTaskDelegateExpressionActivityBehavior extends TaskActivityBehavior {
+    # serviceTaskId:String
+    # expression:Expression
+    # skipExpression:Expression
+    - fieldDeclarations:List<FieldDeclaration>
+    + ServiceTaskDelegateExpressionActivityBehavior(String serviceTaskId,Expression expression,Expression skipExpression,List<FieldDeclaration> fieldDeclarations)
+    + execute(ActivityExecution execution):void
+    + signal(ActivityExecution execution,String signalName,Object signalData):void
+}
+class ServiceTaskExpressionActivityBehavior extends TaskActivityBehavior {
+    # serviceTaskId:String
+    # expression:Expression
+    # skipExpression:Expression
+    # resultVariable:String
+    + ServiceTaskExpressionActivityBehavior(String serviceTaskId,Expression expression,Expression skipExpression,String resultVariable)
+    + execute(ActivityExecution execution):void
+}
+class ServiceTaskJavaDelegateActivityBehavior extends TaskActivityBehavior implements ActivityBehavior,org.activiti.engine.delegate.ExecutionListener {
+    # javaDelegate:org.activiti.engine.delegate.JavaDelegate
+    + ServiceTaskJavaDelegateActivityBehavior(JavaDelegate javaDelegate)
+    + execute(ActivityExecution execution):void
+    + notify(org.activiti.engine.delegate.DelegateExecution execution):void
+    + execute(org.activiti.engine.delegate.DelegateExecution execution):void
+}
+class ShellActivityBehavior extends AbstractBpmnActivityBehavior {
+    # command:Expression
+    # wait:Expression
+    # arg1:Expression
+    # arg2:Expression
+    # arg3:Expression
+    # arg4:Expression
+    # arg5:Expression
+    # outputVariable:Expression
+    # errorCodeVariable:Expression
+    # redirectError:Expression
+    # cleanEnv:Expression
+    # directory:Expression
+    ~ commandStr:String
+    ~ arg1Str:String
+    ~ arg2Str:String
+    ~ arg3Str:String
+    ~ arg4Str:String
+    ~ arg5Str:String
+    ~ waitStr:String
+    ~ resultVariableStr:String
+    ~ errorCodeVariableStr:String
+    ~ waitFFlag:Boolean
+    ~ redirectErrorFlag:Boolean
+    ~ cleanEnvBoolean:Boolean
+    ~ directoryStr:Boolean
+    + execute(ActivityExecution execution):void
+}
+class SubProcessActivityBehavior extends AbstractBpmnActivityBehavior {
+    + execute(ActivityExecution execution):void
+    + lastExecutionEnded(ActivityExecution execution):void
+    # initializeDataObjects(ActivityExecution execution,PvmActivity activity):void
+}
+
+class TaskActivityBehavior extends AbstractBpmnActivityBehavior
+
+class TerminateEndEventActivityBehavior extends FlowNodeActivityBehavior {
+    # endEvent:EndEvent
+    # terminateAll:boolean
+    + TerminateEndEventActivityBehavior(EndEvent endEvent)
+    + execute((ActivityExecution execution):void
+    # findProcessInstanceExecution(ActivityExecution execution):ActivityExecution
+    # findRootProcessInstanceExecution(ActivityExecution execution):ActivityExecution
+    # terminateExecution(ActivityExecution execution,ActivityImpl terminateEndEventActivity,ActivityExecution scopeExecution):void
+    # terminateProcessInstanceExecution((ActivityExecution execution,ActivityImpl terminateEndEventActivity,ActivityExecution processInstanceExecution)
+    # deleteProcessInstance(ExecutionEntity processInstanceExecution,ActivityExecution execute,String deleteReason):void
+    # orderExecutionsRootToLeaf(ExecutionEntity execution):List<ExecutionEntity>
+    # orderExecutionsRootToLeaf(ExecutionEntity rootExecution,List<ExecutionEntity> orderedExecutions):List<ExecutionEntity>
+    # endAllHistoricActivities(String processInstanceId):void
+    # sendCancelledEvent(ActivityExecution execution,ActivityImpl terminateEndEventActivity,ActivityExecution scopeExecution):void
+    - dispatchExecutionCancelled((ActivityExecution execution,ActivityImpl causeActivity):void
+    # dispatchActivityCancelled(ActivityExecution execution,ActivityImpl activity,ActivityImpl causeActivity):void
+    + getEndEvent():EndEvent
+
+}
+class TransactionActivityBehavior extends SubProcessActivityBehavior {
+}
+class UserTaskActivityBehavior extends TaskActivityBehavior {
+    # userTaskId:String
+    # taskDefinition:org.activiti.engine.impl.task.TaskDefinition
+    + UserTaskActivityBehavior(String userTaskId,TaskDefinition taskDefinition)
+    + execute((ActivityExecution execution):void
+    + signal(ActivityExecution execution,String signalName,Obq signalData):void
+    # handleAssignments(Expression assigneeExpression,Expression ownerExpression,Set<Expression> candidateUserExpressions, Set<Expression> candidateGroupExpressions, TaskEntity task, ActivityExecution execution
+    # extractCandidates(String str):List<String>
+    # getActiveValue(Expression originalValue,String propertyName,ObjectNode taskElementProperties):Expression
+    # getActiveValueSet(Set<Expression> originalValues,String propertyName,ObjectNode taskElementProperties):Set<Expression>
+    + getTaskDefinition():TaskDefinition
+
+}
+class WebServiceActivityBehavior extends AbstractBpmnActivityBehavior {
+    # operation:Operation
+    # ioSpecification:IOSpecification
+    # dataInputAssociations:List<AbstractDataAssociation>
+    # dataOutputAssociations:List<AbstractDataAssociation>
+    + WebServiceActivityBehavior()
+    + addDataInputAssociation(AbstractDataAssociation)
+    + addDataOutputAssociation(AbstractDataAssociation)
+    + execute(ActivityExecution execution):void
+    + setIoSpecification(IOSpecification ioSpecification):void
+    + setOperation(Operation operation):void
+}
+}
+
+/' package finished '/
+
+@enduml

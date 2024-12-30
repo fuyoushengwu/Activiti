@@ -1,9 +1,9 @@
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -26,20 +26,19 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-
 /**
  * activity implementation of the BPMN 2.0 script task.
- * 
+ *
  * @author Joram Barrez
  * @author Christian Stettler
  * @author Falko Menge
  */
 public class ScriptTaskActivityBehavior extends TaskActivityBehavior {
-  
+
   private static final long serialVersionUID = 1L;
-  
+
   private static final Logger LOGGER = LoggerFactory.getLogger(ScriptTaskActivityBehavior.class);
-  
+
   protected String scriptTaskId;
   protected String script;
   protected String language;
@@ -51,23 +50,31 @@ public class ScriptTaskActivityBehavior extends TaskActivityBehavior {
     this.language = language;
     this.resultVariable = resultVariable;
   }
-  
-  public ScriptTaskActivityBehavior(String scriptTaskId, String script, String language, String resultVariable, boolean storeScriptVariables) {
+
+  public ScriptTaskActivityBehavior(
+      String scriptTaskId,
+      String script,
+      String language,
+      String resultVariable,
+      boolean storeScriptVariables) {
     this(script, language, resultVariable);
     this.scriptTaskId = scriptTaskId;
     this.storeScriptVariables = storeScriptVariables;
   }
-  
+
   public void execute(ActivityExecution execution) throws Exception {
-    ScriptingEngines scriptingEngines = Context
-      .getProcessEngineConfiguration()
-      .getScriptingEngines();
-    
+    ScriptingEngines scriptingEngines =
+        Context.getProcessEngineConfiguration().getScriptingEngines();
+
     if (Context.getProcessEngineConfiguration().isEnableProcessDefinitionInfoCache()) {
-      ObjectNode taskElementProperties = Context.getBpmnOverrideElementProperties(scriptTaskId, execution.getProcessDefinitionId());
-      if (taskElementProperties != null && taskElementProperties.has(DynamicBpmnConstants.SCRIPT_TASK_SCRIPT)) {
-        String overrideScript = taskElementProperties.get(DynamicBpmnConstants.SCRIPT_TASK_SCRIPT).asText();
-        if (StringUtils.isNotEmpty(overrideScript) && overrideScript.equals(script) == false) {
+      ObjectNode taskElementProperties =
+          Context.getBpmnOverrideElementProperties(
+              scriptTaskId, execution.getProcessDefinitionId());
+      if (taskElementProperties != null
+          && taskElementProperties.has(DynamicBpmnConstants.SCRIPT_TASK_SCRIPT)) {
+        String overrideScript =
+            taskElementProperties.get(DynamicBpmnConstants.SCRIPT_TASK_SCRIPT).asText();
+        if (StringUtils.isNotEmpty(overrideScript) && !overrideScript.equals(script)) {
           script = overrideScript;
         }
       }
@@ -76,15 +83,16 @@ public class ScriptTaskActivityBehavior extends TaskActivityBehavior {
     boolean noErrors = true;
     try {
       Object result = scriptingEngines.evaluate(script, language, execution, storeScriptVariables);
-      
+
       if (resultVariable != null) {
         execution.setVariable(resultVariable, result);
       }
 
     } catch (ActivitiException e) {
-      
-      LOGGER.warn("Exception while executing " + execution.getActivity().getId() + " : " + e.getMessage());
-      
+
+      LOGGER.warn(
+          "Exception while executing " + execution.getActivity().getId() + " : " + e.getMessage());
+
       noErrors = false;
       Throwable rootCause = ExceptionUtils.getRootCause(e);
       if (rootCause instanceof BpmnError) {
@@ -93,10 +101,9 @@ public class ScriptTaskActivityBehavior extends TaskActivityBehavior {
         throw e;
       }
     }
-     
+
     if (noErrors) {
       leave(execution);
     }
   }
-  
 }

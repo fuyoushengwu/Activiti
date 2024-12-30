@@ -133,7 +133,7 @@ public class HistoricProcessInstanceEntity extends HistoricScopeInstanceEntity i
 	}
 	
 	public String getName() {
-    if (localizedName != null && localizedName.length() > 0) {
+    if (localizedName != null && !localizedName.isEmpty()) {
       return localizedName;
     } else {
       return name;

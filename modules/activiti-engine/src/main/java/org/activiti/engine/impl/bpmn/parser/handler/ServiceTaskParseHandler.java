@@ -1,9 +1,9 @@
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,16 +29,18 @@ import org.slf4j.LoggerFactory;
 /**
  * @author Joram Barrez
  */
-public class ServiceTaskParseHandler extends AbstractExternalInvocationBpmnParseHandler<ServiceTask> {
-	
-	private static Logger logger = LoggerFactory.getLogger(ServiceTaskParseHandler.class);
-  
-  public Class< ? extends BaseElement> getHandledType() {
+public class ServiceTaskParseHandler
+    extends AbstractExternalInvocationBpmnParseHandler<ServiceTask> {
+
+  private static Logger logger = LoggerFactory.getLogger(ServiceTaskParseHandler.class);
+
+  public Class<? extends BaseElement> getHandledType() {
     return ServiceTask.class;
   }
-  
+
   protected void executeParse(BpmnParse bpmnParse, ServiceTask serviceTask) {
-    ActivityImpl activity = createActivityOnCurrentScope(bpmnParse, serviceTask, BpmnXMLConstants.ELEMENT_TASK_SERVICE);
+    ActivityImpl activity =
+        createActivityOnCurrentScope(bpmnParse, serviceTask, BpmnXMLConstants.ELEMENT_TASK_SERVICE);
     activity.setAsync(serviceTask.isAsynchronous());
     activity.setFailedJobRetryTimeCycleValue(serviceTask.getFailedJobRetryTimeCycleValue());
     activity.setExclusive(!serviceTask.isNotExclusive());
@@ -47,24 +49,29 @@ public class ServiceTaskParseHandler extends AbstractExternalInvocationBpmnParse
     if (StringUtils.isNotEmpty(serviceTask.getType())) {
       createActivityBehaviorForServiceTaskType(activity, bpmnParse, serviceTask);
       // activiti:class
-    } else if (ImplementationType.IMPLEMENTATION_TYPE_CLASS.equalsIgnoreCase(serviceTask.getImplementationType())) {
+    } else if (ImplementationType.IMPLEMENTATION_TYPE_CLASS.equalsIgnoreCase(
+        serviceTask.getImplementationType())) {
       createClassDelegateServiceTask(activity, bpmnParse, serviceTask);
       // activiti:delegateExpression
-    } else if (ImplementationType.IMPLEMENTATION_TYPE_DELEGATEEXPRESSION.equalsIgnoreCase(serviceTask.getImplementationType())) {
+    } else if (ImplementationType.IMPLEMENTATION_TYPE_DELEGATEEXPRESSION.equalsIgnoreCase(
+        serviceTask.getImplementationType())) {
       createServiceTaskDelegateExpressionActivityBehavior(activity, bpmnParse, serviceTask);
-      // activiti:expression      
-    } else if (ImplementationType.IMPLEMENTATION_TYPE_EXPRESSION.equalsIgnoreCase(serviceTask.getImplementationType())) {
+      // activiti:expression
+    } else if (ImplementationType.IMPLEMENTATION_TYPE_EXPRESSION.equalsIgnoreCase(
+        serviceTask.getImplementationType())) {
       createServiceTaskExpressionActivityBehavior(activity, bpmnParse, serviceTask);
-      // Webservice   
-    } else if (ImplementationType.IMPLEMENTATION_TYPE_WEBSERVICE.equalsIgnoreCase(serviceTask.getImplementationType()) && 
-            StringUtils.isNotEmpty(serviceTask.getOperationRef())) {
+      // Webservice
+    } else if (ImplementationType.IMPLEMENTATION_TYPE_WEBSERVICE.equalsIgnoreCase(
+            serviceTask.getImplementationType())
+        && StringUtils.isNotEmpty(serviceTask.getOperationRef())) {
       createWebServiceActivityBehavior(activity, bpmnParse, serviceTask);
     } else {
       createDefaultServiceTaskActivityBehavior(activity, bpmnParse, serviceTask);
     }
   }
 
-  protected void createActivityBehaviorForServiceTaskType(ActivityImpl activity, BpmnParse bpmnParse, ServiceTask serviceTask) {
+  protected void createActivityBehaviorForServiceTaskType(
+      ActivityImpl activity, BpmnParse bpmnParse, ServiceTask serviceTask) {
     if (serviceTask.getType().equalsIgnoreCase("mail")) {
       createMailActivityBehavior(activity, bpmnParse, serviceTask);
     } else if (serviceTask.getType().equalsIgnoreCase("mule")) {
@@ -78,58 +85,95 @@ public class ServiceTaskParseHandler extends AbstractExternalInvocationBpmnParse
     }
   }
 
-  protected void createMailActivityBehavior(ActivityImpl activity, BpmnParse bpmnParse, ServiceTask serviceTask) {
-    activity.setActivityBehavior(bpmnParse.getActivityBehaviorFactory().createMailActivityBehavior(serviceTask));
+  protected void createMailActivityBehavior(
+      ActivityImpl activity, BpmnParse bpmnParse, ServiceTask serviceTask) {
+    activity.setActivityBehavior(
+        bpmnParse.getActivityBehaviorFactory().createMailActivityBehavior(serviceTask));
   }
 
-  protected void createMuleActivityBehavior(ActivityImpl activity, BpmnParse bpmnParse, ServiceTask serviceTask) {
-    activity.setActivityBehavior(bpmnParse.getActivityBehaviorFactory().createMuleActivityBehavior(serviceTask, bpmnParse.getBpmnModel()));
+  protected void createMuleActivityBehavior(
+      ActivityImpl activity, BpmnParse bpmnParse, ServiceTask serviceTask) {
+    activity.setActivityBehavior(
+        bpmnParse
+            .getActivityBehaviorFactory()
+            .createMuleActivityBehavior(serviceTask, bpmnParse.getBpmnModel()));
   }
 
-  protected void createCamelActivityBehavior(ActivityImpl activity, BpmnParse bpmnParse, ServiceTask serviceTask) {
-    activity.setActivityBehavior(bpmnParse.getActivityBehaviorFactory().createCamelActivityBehavior(serviceTask, bpmnParse.getBpmnModel()));
+  protected void createCamelActivityBehavior(
+      ActivityImpl activity, BpmnParse bpmnParse, ServiceTask serviceTask) {
+    activity.setActivityBehavior(
+        bpmnParse
+            .getActivityBehaviorFactory()
+            .createCamelActivityBehavior(serviceTask, bpmnParse.getBpmnModel()));
   }
 
-  protected void createShellActivityBehavior(ActivityImpl activity, BpmnParse bpmnParse, ServiceTask serviceTask) {
-    activity.setActivityBehavior(bpmnParse.getActivityBehaviorFactory().createShellActivityBehavior(serviceTask));
-  }
-  
-  protected void createActivityBehaviorForCustomServiceTaskType(ActivityImpl activity, BpmnParse bpmnParse, ServiceTask serviceTask) {
-    logger.warn("Invalid service task type: '" + serviceTask.getType() + "' " + " for service task " + serviceTask.getId());
+  protected void createShellActivityBehavior(
+      ActivityImpl activity, BpmnParse bpmnParse, ServiceTask serviceTask) {
+    activity.setActivityBehavior(
+        bpmnParse.getActivityBehaviorFactory().createShellActivityBehavior(serviceTask));
   }
 
-  protected void createClassDelegateServiceTask(ActivityImpl activity, BpmnParse bpmnParse, ServiceTask serviceTask) {
-    activity.setActivityBehavior(bpmnParse.getActivityBehaviorFactory().createClassDelegateServiceTask(serviceTask));
+  protected void createActivityBehaviorForCustomServiceTaskType(
+      ActivityImpl activity, BpmnParse bpmnParse, ServiceTask serviceTask) {
+    logger.warn(
+        "Invalid service task type: '"
+            + serviceTask.getType()
+            + "' "
+            + " for service task "
+            + serviceTask.getId());
   }
 
-  protected void createServiceTaskDelegateExpressionActivityBehavior(ActivityImpl activity, BpmnParse bpmnParse, ServiceTask serviceTask) {
-    activity.setActivityBehavior(bpmnParse.getActivityBehaviorFactory().createServiceTaskDelegateExpressionActivityBehavior(serviceTask));
+  protected void createClassDelegateServiceTask(
+      ActivityImpl activity, BpmnParse bpmnParse, ServiceTask serviceTask) {
+    activity.setActivityBehavior(
+        bpmnParse.getActivityBehaviorFactory().createClassDelegateServiceTask(serviceTask));
   }
 
-  protected void createServiceTaskExpressionActivityBehavior(ActivityImpl activity, BpmnParse bpmnParse, ServiceTask serviceTask) {
-    activity.setActivityBehavior(bpmnParse.getActivityBehaviorFactory().createServiceTaskExpressionActivityBehavior(serviceTask));
+  protected void createServiceTaskDelegateExpressionActivityBehavior(
+      ActivityImpl activity, BpmnParse bpmnParse, ServiceTask serviceTask) {
+    activity.setActivityBehavior(
+        bpmnParse
+            .getActivityBehaviorFactory()
+            .createServiceTaskDelegateExpressionActivityBehavior(serviceTask));
   }
 
-  protected void createWebServiceActivityBehavior(ActivityImpl activity, BpmnParse bpmnParse, ServiceTask serviceTask) {
+  protected void createServiceTaskExpressionActivityBehavior(
+      ActivityImpl activity, BpmnParse bpmnParse, ServiceTask serviceTask) {
+    activity.setActivityBehavior(
+        bpmnParse
+            .getActivityBehaviorFactory()
+            .createServiceTaskExpressionActivityBehavior(serviceTask));
+  }
+
+  protected void createWebServiceActivityBehavior(
+      ActivityImpl activity, BpmnParse bpmnParse, ServiceTask serviceTask) {
     if (!bpmnParse.getOperations().containsKey(serviceTask.getOperationRef())) {
-      logger.warn(serviceTask.getOperationRef() + " does not exist for service task " + serviceTask.getId());
+      logger.warn(
+          serviceTask.getOperationRef()
+              + " does not exist for service task "
+              + serviceTask.getId());
     } else {
 
-      WebServiceActivityBehavior webServiceActivityBehavior = bpmnParse.getActivityBehaviorFactory().createWebServiceActivityBehavior(serviceTask);
-      webServiceActivityBehavior.setOperation(bpmnParse.getOperations().get(serviceTask.getOperationRef()));
+      WebServiceActivityBehavior webServiceActivityBehavior =
+          bpmnParse.getActivityBehaviorFactory().createWebServiceActivityBehavior(serviceTask);
+      webServiceActivityBehavior.setOperation(
+          bpmnParse.getOperations().get(serviceTask.getOperationRef()));
 
       if (serviceTask.getIoSpecification() != null) {
-        IOSpecification ioSpecification = createIOSpecification(bpmnParse, serviceTask.getIoSpecification());
+        IOSpecification ioSpecification =
+            createIOSpecification(bpmnParse, serviceTask.getIoSpecification());
         webServiceActivityBehavior.setIoSpecification(ioSpecification);
       }
 
       for (DataAssociation dataAssociationElement : serviceTask.getDataInputAssociations()) {
-        AbstractDataAssociation dataAssociation = createDataInputAssociation(bpmnParse, dataAssociationElement);
+        AbstractDataAssociation dataAssociation =
+            createDataInputAssociation(bpmnParse, dataAssociationElement);
         webServiceActivityBehavior.addDataInputAssociation(dataAssociation);
       }
 
       for (DataAssociation dataAssociationElement : serviceTask.getDataOutputAssociations()) {
-        AbstractDataAssociation dataAssociation = createDataOutputAssociation(bpmnParse, dataAssociationElement);
+        AbstractDataAssociation dataAssociation =
+            createDataOutputAssociation(bpmnParse, dataAssociationElement);
         webServiceActivityBehavior.addDataOutputAssociation(dataAssociation);
       }
 
@@ -137,8 +181,10 @@ public class ServiceTaskParseHandler extends AbstractExternalInvocationBpmnParse
     }
   }
 
-  protected void createDefaultServiceTaskActivityBehavior(ActivityImpl activity, BpmnParse bpmnParse, ServiceTask serviceTask) {
-    logger.warn("One of the attributes 'class', 'delegateExpression', 'type', 'operation', or 'expression' is mandatory on serviceTask " + serviceTask.getId());
+  protected void createDefaultServiceTaskActivityBehavior(
+      ActivityImpl activity, BpmnParse bpmnParse, ServiceTask serviceTask) {
+    logger.warn(
+        "One of the attributes 'class', 'delegateExpression', 'type', 'operation', or 'expression' is mandatory on serviceTask "
+            + serviceTask.getId());
   }
-
 }

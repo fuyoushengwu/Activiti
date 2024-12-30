@@ -20,7 +20,7 @@ public class SkipExpressionUtil {
       return false;
       
     } else if (isSkipExpressionEnabled instanceof Boolean) {
-      return ((Boolean) isSkipExpressionEnabled).booleanValue();
+      return (Boolean) isSkipExpressionEnabled;
       
     } else {
       throw new ActivitiIllegalArgumentException(skipExpressionEnabledVariable + " variable does not resolve to a boolean. " + isSkipExpressionEnabled);

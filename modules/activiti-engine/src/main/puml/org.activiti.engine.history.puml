@@ -1,0 +1,267 @@
+@startuml
+package "org.activiti.engine.history" {
+interface HistoricActivityInstance extends HistoricData {
+    + getId():String
+    + getActivityId():String
+    + getActivityName():String
+    + getActivityType():String
+    + getProcessDefinitionId():String
+    + getProcessInstanceId():String
+    + getExecutionId():String
+    + getTaskId():String
+    + getCalledProcessInstanceId():String
+    + getAssignee():String
+    + getStartTime():Date
+    + getEndTime():Date
+    + getDurationInMillis():Long
+    + getTenantId():String
+}
+
+interface HistoricActivityInstanceQuery extends org.activiti.engine.query.Query<HistoricActivityInstanceQuery, HistoricActivityInstance> {
+    + activityInstanceId(String activityInstanceId):HistoricActivityInstanceQuery
+    + processInstanceId(String processInstanceId):HistoricActivityInstanceQuery
+    + processDefinitionId(String processDefinitionId):HistoricActivityInstanceQuery
+    + executionId(String executionId):HistoricActivityInstanceQuery
+    + activityId(String activityId):HistoricActivityInstanceQuery
+    + activityName(String activityName):HistoricActivityInstanceQuery
+    + activityType(String activityType):HistoricActivityInstanceQuery
+    + taskAssignee(String userId):HistoricActivityInstanceQuery
+    + finished():HistoricActivityInstanceQuery
+    + unfinished():HistoricActivityInstanceQuery
+    + activityTenantId(String tenantId):HistoricActivityInstanceQuery
+    + activityTenantIdLike(String tenantIdLike):HistoricActivityInstanceQuery
+    + activityWithoutTenantId():HistoricActivityInstanceQuery
+    + orderByHistoricActivityInstanceId():HistoricActivityInstanceQuery
+    + orderByProcessInstanceId():HistoricActivityInstanceQuery
+    + orderByExecutionId():HistoricActivityInstanceQuery
+    + orderByActivityId():HistoricActivityInstanceQuery
+    + orderByActivityName():HistoricActivityInstanceQuery
+    + orderByActivityType():HistoricActivityInstanceQuery
+    + orderByHistoricActivityInstanceStartTime():HistoricActivityInstanceQuery
+    + orderByHistoricActivityInstanceEndTime():HistoricActivityInstanceQuery
+    + orderByHistoricActivityInstanceDuration():HistoricActivityInstanceQuery
+    + orderByProcessDefinitionId():HistoricActivityInstanceQuery
+    + orderByTenantId():HistoricActivityInstanceQuery
+}
+
+interface HistoricData {
+    + getTime():Date
+}
+
+interface HistoricDetail extends HistoricData {
+    + getId():String
+    + getProcessInstanceId():String
+    + getActivityInstanceId():String
+    + getExecutionId():String
+    + getTaskId():String
+    + getTime():Date
+}
+
+interface HistoricDetailQuery extends org.activiti.engine.query.Query<HistoricDetailQuery,HistoricDetail> {
+    + id(String id):HistoricDetailQuery
+    + processInstanceId(String processInstanceId):HistoricDetailQuery
+    + executionId(String executionId):HistoricDetailQuery
+    + activityInstanceId(String activityInstanceId):HistoricDetailQuery
+    + taskId(String taskId):HistoricDetailQuery
+    + formProperties():HistoricDetailQuery
+    + variableUpdates():HistoricDetailQuery
+    + excludeTaskDetails():HistoricDetailQuery
+    + orderByProcessInstanceId():HistoricDetailQuery
+    + orderByVariableName():HistoricDetailQuery
+    + orderByFormPropertyId():HistoricDetailQuery
+    + orderByVariableType():HistoricDetailQuery
+    + orderByVariableRevision():HistoricDetailQuery
+    + orderByTime():HistoricDetailQuery
+}
+interface HistoricFormProperty extends HistoricDetail {
+    + getPropertyId():String
+    + getPropertyValue():String
+}
+interface HistoricIdentityLink {
+    + getType():String
+    + getUserId():String
+    + getGroupId():String
+    + getTaskId():String
+    + getProcessInstanceId():String
+}
+interface HistoricProcessInstance {
+    + getId():String
+    + getBusinessKey():String
+    + getProcessDefinitionId():String
+    + getProcessDefinitionName():String
+    + getProcessDefinitionKey():String
+    + getProcessDefinitionVersion():Integer
+    + getDeploymentId():String
+    + getStartTime():Date
+    + getEndTime():Date
+    + getDurationInMillis():Long
+    + getEndActivityId():String
+    + getStartUserId():String
+    + getStartActivityId():String
+    + getDeleteReason():String
+    + getSuperProcessInstanceId():String
+    + getTenantId():String
+    + getName():String
+    + getDescription():String
+    + setLocalizedName(String name):void
+    + setLocalizedDescription(String description):void
+    + getProcessVariables():Map<String,Object>
+}
+
+interface HistoricProcessInstanceQuery extends org.activiti.engine.query.Query<HistoricProcessInstanceQuery,HistoricProcessInstance> {
+    + processInstanceId(String processInstanceId):HistoricProcessInstanceQuery
+    + processInstanceIds(Set<String> processInstanceIds):HistoricProcessInstanceQuery
+    + processDefinitionId(String processDefinitionId):HistoricProcessInstanceQuery
+    + processDefinitionKey(String processDefinitionKey):HistoricProcessInstanceQuery
+    + processDefinitionKeyIn(Set<String> processDefinitionKeys):HistoricProcessInstanceQuery
+    + processDefinitionKeyNotIn(Set<String> processDefinitionKeys):HistoricProcessInstanceQuery
+    + processDefinitionCategory(String processDefinitionCategory):HistoricProcessInstanceQuery
+    + processDefinitionName(String processDefinitionName):HistoricProcessInstanceQuery
+    + processDefinitionVersion(Integer processDefinitionVersion):HistoricProcessInstanceQuery
+    + processInstanceBusinessKey(String processInstanceBusinessKey):HistoricProcessInstanceQuery
+    + deploymentId(String deploymentId):HistoricProcessInstanceQuery
+    + deploymentIdIn(List<String> deploymentIds):HistoricProcessInstanceQuery
+    + finished():HistoricProcessInstanceQuery
+    + unfinished():HistoricProcessInstanceQuery
+    + deleted():HistoricProcessInstanceQuery
+    + notDeleted():HistoricProcessInstanceQuery
+    + involvedUser(String userId):HistoricProcessInstanceQuery
+    + involvedGroupsIn(List<String> involvedGroups):HistoricProcessInstanceQuery
+    + variableValueEquals(String name,Object value):HistoricProcessInstanceQuery
+    + variableValueEquals(Object value):HistoricProcessInstanceQuery
+    + variableValueEqualsIgnoreCase(String name,String value):HistoricProcessInstanceQuery
+    + variableValueNotEquals(String name,Object value):HistoricProcessInstanceQuery
+    + variableValueGreaterThan(String name,Object value):HistoricProcessInstanceQuery
+    + variableValueGreaterThanOrEqual(String name,Object value):HistoricProcessInstanceQuery
+    + variableValueLessThan(String name,Object value):HistoricProcessInstanceQuery
+    + variableValueLessThanOrEqual(String name,Object value):HistoricProcessInstanceQuery
+    + variableValueLike(String name,String value):HistoricProcessInstanceQuery
+    + variableValueLikeIgnoreCase(String name,String value):HistoricProcessInstanceQuery
+    + startedBefore(Date date):HistoricProcessInstanceQuery
+    + startedAfter(Date date):HistoricProcessInstanceQuery
+    + finishedBefore(Date date):HistoricProcessInstanceQuery
+    + finishedAfter(Date date):HistoricProcessInstanceQuery
+    + startedBy(String userId):HistoricProcessInstanceQuery
+    + processInstanceTenantId(String tenantId):HistoricProcessInstanceQuery
+    + processInstanceTenantIdLike(String tenantIdLike):HistoricProcessInstanceQuery
+    + processInstanceWithoutTenantId():HistoricProcessInstanceQuery
+    + or():HistoricProcessInstanceQuery
+    + endOr():HistoricProcessInstanceQuery
+    + orderByProcessInstanceId():HistoricProcessInstanceQuery
+    + orderByProcessDefinitionId():HistoricProcessInstanceQuery
+    + orderByProcessInstanceBusinessKey():HistoricProcessInstanceQuery
+    + orderByProcessInstanceStartTime():HistoricProcessInstanceQuery
+    + orderByProcessInstanceEndTime():HistoricProcessInstanceQuery
+    + orderByProcessInstanceDuration():HistoricProcessInstanceQuery
+    + orderByTenantId():HistoricProcessInstanceQuery
+    + superProcessInstanceId(String superProcessInstanceId):HistoricProcessInstanceQuery
+    + excludeSubprocesses(boolean excludeSubprocess):HistoricProcessInstanceQuery
+    + includeProcessVariables():HistoricProcessInstanceQuery
+    + limitProcessInstanceVariables(Integer processInstanceVariablesLimit):HistoricProcessInstanceQuery
+    + withJobException():HistoricProcessInstanceQuery
+    + processInstanceName(String name):HistoricProcessInstanceQuery
+    + processInstanceNameLike(String nameLike):HistoricProcessInstanceQuery
+    + processInstanceNameLikeIgnoreCase(String nameLikeIgnoreCase):HistoricProcessInstanceQuery
+    + locale(String locale):HistoricProcessInstanceQuery
+    + withLocalizationFallback():HistoricProcessInstanceQuery
+}
+
+interface HistoricTaskInstance extends org.activiti.engine.task.TaskInfo,HistoricData {
+    + getDeleteReason():String
+    + getStartTime():Date
+    + getClaimTime():Date
+    + getEndTime():Date
+    + getDurationInMillis():Long
+    + getWorkTimeInMillis():Long
+    + setLocalizedName(String name):void
+    + setLocalizedDescription(String description):void
+
+}
+interface HistoricTaskInstanceQuery extends org.activiti.engine.task.TaskInfoQuery<HistoricTaskInstanceQuery,HistoricTaskInstance> {
+    + taskDeleteReason(String taskDeleteReason):HistoricTaskInstanceQuery
+    + taskDeleteReasonLike(String taskDeleteReasonLike):HistoricTaskInstanceQuery
+    + finished():HistoricTaskInstanceQuery
+    + unfinished():HistoricTaskInstanceQuery
+    + processFinished():HistoricTaskInstanceQuery
+    + processUnFinished():HistoricTaskInstanceQuery
+    + taskParentTaskId(String parentTaskId):HistoricTaskInstanceQuery
+    + taskCompletedOn(Date endDate):HistoricTaskInstanceQuery
+    + taskCompletedBefore(Date endDate):HistoricTaskInstanceQuery
+    + taskCompletedAfter(Date endDate):HistoricTaskInstanceQuery
+    + orderByHistoricActivityInstanceId():HistoricTaskInstanceQuery
+    + orderByHistoricTaskInstanceDuration():HistoricTaskInstanceQuery
+    + orderByHistoricTaskInstanceEndTime():HistoricTaskInstanceQuery
+    + orderByHistoricActivityInstanceStartTime():HistoricTaskInstanceQuery
+    + orderByHistoricTaskInstanceStartTime():HistoricTaskInstanceQuery
+    + orderByDeleteReason():HistoricTaskInstanceQuery
+}
+interface HistoricVariableInstance extends HistoricData {
+    + getId():String
+    + getVariableName():String
+    + getVariableTypeName():String
+    + getValue():Object
+    + getProcessInstanceId():String
+    + getTaskId():String
+    + getCreateTime():Date
+    + getLastUpdatedTIme():Date
+}
+interface HistoricVariableInstanceQuery extends org.activiti.engine.query.Query<HistoricVariableInstanceQuery,HistoricVariableInstance> {
+    + id(String id):HistoricVariableInstanceQuery
+    + processInstanceId(String processInstanceId):HistoricVariableInstanceQuery
+    + executionId(String executionId):HistoricVariableInstanceQuery
+    + executionIds(List<String> executionIds):HistoricVariableInstanceQuery
+    + taskId(String taskId):HistoricVariableInstanceQuery
+    + taskIds(List<String> taskIds):HistoricVariableInstanceQuery
+    + variableName(String variableName):HistoricVariableInstanceQuery
+    + variableNameLike(String variableNameLike):HistoricVariableInstanceQuery
+    + excludeTaskVariables():HistoricVariableInstanceQuery
+    + excludeVariableInitialization():HistoricVariableInstanceQuery
+    + variableValueEquals(String variableName,Object variableValue):HistoricVariableInstanceQuery
+    + variableValueNotEquals(String variableName,Object variableValue):HistoricVariableInstanceQuery
+    + variableValueLike(String variableName,String variableValue):HistoricVariableInstanceQuery
+    + variableValueLikeIgnoreCase(String variableName,String variableValue):HistoricVariableInstanceQuery
+    + orderByProcessInstanceId():HistoricVariableInstanceQuery
+    + orderByVariableName():HistoricVariableInstanceQuery
+}
+interface HistoricVariableUpdate extends HistoricDetail {
+    + getVariableName():String
+    + getVariableTypeName():String
+    + getValue():Object
+    + getRevision():int
+}
+interface NativeHistoricActivityInstanceQuery extends org.activiti.engine.query.NativeQuery<NativeHistoricActivityInstanceQuery,HistoricActivityInstance> {
+}
+interface NativeHistoricDetailQuery extends org.activiti.engine.query.NativeQuery<NativeHistoricDetailQuery,HistoricDetail> {
+}
+interface NativeHistoricProcessInstanceQuery extends org.activiti.engine.query.NativeQuery<NativeHistoricProcessInstanceQuery,HistoricProcessInstance> {
+}
+interface NativeHistoricTaskInstanceQuery extends org.activiti.engine.query.NativeQuery<NativeHistoricTaskInstanceQuery,HistoricTaskInstance> {
+}
+interface NativeHistoricVariableInstanceQuery extends org.activiti.engine.query.NativeQuery<NativeHistoricVariableInstanceQuery,HistoricVariableInstance> {
+}
+interface ProcessInstanceHistoryLog {
+    + getId():String
+    + getBusinessKey():String
+    + getProcessDefinitionId():String
+    + getStartTime():Date
+    + getEndTime():Date
+    + getDurationInMillis():Long
+    + getStartUserId():String
+    + getStartActivityId():String
+    + getDeleteReason():String
+    + getSuperProcessInstanceId():String
+    + getTenantId():String
+    + getHistoricData():List<HistoricData>
+}
+interface ProcessInstanceHistoryLogQuery {
+    + includeTasks():ProcessInstanceHistoryLogQuery
+    + includeActivities():ProcessInstanceHistoryLog
+    + includeVariables():ProcessInstanceHistoryLogQuery
+    + includeComments():ProcessInstanceHistoryLog
+    + includeVariableUpdates():ProcessInstanceHistoryLogQuery
+    + includeFormProperties():ProcessInstanceHistoryLog
+    + singleResult():ProcessInstanceHistoryLogQuery
+}
+}
+/' package finished '/
+@enduml

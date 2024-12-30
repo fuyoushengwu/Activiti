@@ -1,0 +1,186 @@
+@startuml
+hide @unlinked
+package "org.activiti.engine.impl.bpmn.parser.factory" {
+abstract class AbstractBehaviorFactory {
+    # expressionManager:ExpressionManager
+    + createFieldDeclarations(List<FieldExtension> fieldList):List<FieldDeclaration>
+    + getExpressionManager():ExpressionManager
+    + setExpressionManager(ExpressionManager):void
+}
+AbstractBehaviorFactory ..> org.activiti.engine.impl.el.ExpressionManager
+AbstractBehaviorFactory ..> org.activiti.bpmn.model.FieldExtension
+AbstractBehaviorFactory ..> org.activiti.engine.impl.bpmn.parser.FieldDeclaration
+interface ActivityBehaviorFactory {
+  + createNoneStartEventActivityBehavior(StartEvent): NoneStartEventActivityBehavior
+  + createEventSubProcessStartEventActivityBehavior(StartEvent, String): EventSubProcessStartEventActivityBehavior
+  + createTaskActivityBehavior(Task): TaskActivityBehavior
+  + createManualTaskActivityBehavior(ManualTask): ManualTaskActivityBehavior
+  + createReceiveTaskActivityBehavior(ReceiveTask): ReceiveTaskActivityBehavior
+  + createUserTaskActivityBehavior(UserTask, TaskDefinition): UserTaskActivityBehavior
+  + createClassDelegateServiceTask(ServiceTask): ClassDelegate
+  + createServiceTaskDelegateExpressionActivityBehavior(ServiceTask): ServiceTaskDelegateExpressionActivityBehavior
+  + createServiceTaskExpressionActivityBehavior(ServiceTask): ServiceTaskExpressionActivityBehavior
+  + createWebServiceActivityBehavior(ServiceTask): WebServiceActivityBehavior
+  + createWebServiceActivityBehavior(SendTask): WebServiceActivityBehavior
+  + createMailActivityBehavior(ServiceTask): MailActivityBehavior
+  + createMailActivityBehavior(SendTask): MailActivityBehavior
+  + createMuleActivityBehavior(ServiceTask, BpmnModel): ActivityBehavior
+  + createMuleActivityBehavior(SendTask, BpmnModel): ActivityBehavior
+  + createCamelActivityBehavior(ServiceTask, BpmnModel): ActivityBehavior
+  + createCamelActivityBehavior(SendTask, BpmnModel): ActivityBehavior
+  + createShellActivityBehavior(ServiceTask): ShellActivityBehavior
+  + createBusinessRuleTaskActivityBehavior(BusinessRuleTask): BusinessRuleTaskActivityBehavior
+  + createScriptTaskActivityBehavior(ScriptTask): ScriptTaskActivityBehavior
+  + createExclusiveGatewayActivityBehavior(ExclusiveGateway): ExclusiveGatewayActivityBehavior
+  + createParallelGatewayActivityBehavior(ParallelGateway): ParallelGatewayActivityBehavior
+  + createInclusiveGatewayActivityBehavior(InclusiveGateway): InclusiveGatewayActivityBehavior
+  + createEventBasedGatewayActivityBehavior(EventGateway): EventBasedGatewayActivityBehavior
+  + createSequentialMultiInstanceBehavior(ActivityImpl, AbstractBpmnActivityBehavior): SequentialMultiInstanceBehavior
+  + createParallelMultiInstanceBehavior(ActivityImpl, AbstractBpmnActivityBehavior): ParallelMultiInstanceBehavior
+  + createSubprocessActivityBehavior(SubProcess): SubProcessActivityBehavior
+  + createCallActivityBehavior(CallActivity): CallActivityBehavior
+  + createTransactionActivityBehavior(Transaction): TransactionActivityBehavior
+  + createIntermediateCatchEventActivityBehavior(IntermediateCatchEvent): IntermediateCatchEventActivityBehavior
+  + createIntermediateThrowNoneEventActivityBehavior(ThrowEvent): IntermediateThrowNoneEventActivityBehavior
+  + createIntermediateThrowSignalEventActivityBehavior(ThrowEvent, Signal, EventSubscriptionDeclaration): IntermediateThrowSignalEventActivityBehavior
+  + createIntermediateThrowCompensationEventActivityBehavior(ThrowEvent, CompensateEventDefinition): IntermediateThrowCompensationEventActivityBehavior
+  + createNoneEndEventActivityBehavior(EndEvent): NoneEndEventActivityBehavior
+  + createErrorEndEventActivityBehavior(EndEvent, ErrorEventDefinition): ErrorEndEventActivityBehavior
+  + createCancelEndEventActivityBehavior(EndEvent): CancelEndEventActivityBehavior
+  + createTerminateEndEventActivityBehavior(EndEvent): TerminateEndEventActivityBehavior
+  + createBoundaryEventActivityBehavior(BoundaryEvent, boolean, ActivityImpl): BoundaryEventActivityBehavior
+  + createCancelBoundaryEventActivityBehavior(CancelEventDefinition): CancelBoundaryEventActivityBehavior
+}
+ActivityBehaviorFactory ..> org.activiti.bpmn.model.StartEvent
+ActivityBehaviorFactory ..> org.activiti.engine.impl.bpmn.behavior.NoneStartEventActivityBehavior
+ActivityBehaviorFactory ..> org.activiti.engine.impl.bpmn.behavior.EventSubProcessStartEventActivityBehavior
+ActivityBehaviorFactory ..> org.activiti.bpmn.model.Task
+ActivityBehaviorFactory ..> org.activiti.engine.impl.bpmn.behavior.TaskActivityBehavior
+ActivityBehaviorFactory ..> org.activiti.bpmn.model.ManualTask
+ActivityBehaviorFactory ..> org.activiti.engine.impl.bpmn.behavior.ManualTaskActivityBehavior
+ActivityBehaviorFactory ..> org.activiti.bpmn.model.ReceiveTask
+ActivityBehaviorFactory ..> org.activiti.engine.impl.bpmn.behavior.ReceiveTaskActivityBehavior
+ActivityBehaviorFactory ..> org.activiti.bpmn.model.UserTask
+ActivityBehaviorFactory ..> org.activiti.engine.impl.task.TaskDefinition
+ActivityBehaviorFactory ..> org.activiti.engine.impl.bpmn.behavior.UserTaskActivityBehavior
+ActivityBehaviorFactory ..> org.activiti.bpmn.model.ServiceTask
+ActivityBehaviorFactory ..> org.activiti.engine.impl.bpmn.helper.ClassDelegate
+ActivityBehaviorFactory ..> org.activiti.engine.impl.bpmn.behavior.ServiceTaskDelegateExpressionActivityBehavior
+ActivityBehaviorFactory ..> org.activiti.engine.impl.bpmn.behavior.ServiceTaskExpressionActivityBehavior
+ActivityBehaviorFactory ..> org.activiti.engine.impl.bpmn.behavior.WebServiceActivityBehavior
+ActivityBehaviorFactory ..> org.activiti.engine.impl.bpmn.behavior.MailActivityBehavior
+ActivityBehaviorFactory ..> org.activiti.bpmn.model.SendTask
+ActivityBehaviorFactory ..> org.activiti.engine.impl.pvm.delegate.ActivityBehavior
+ActivityBehaviorFactory ..> org.activiti.engine.impl.bpmn.behavior.ShellActivityBehavior
+ActivityBehaviorFactory ..> org.activiti.bpmn.model.BusinessRuleTask
+ActivityBehaviorFactory ..> org.activiti.bpmn.model.ScriptTask
+ActivityBehaviorFactory ..> org.activiti.engine.impl.bpmn.behavior.ScriptTaskActivityBehavior
+ActivityBehaviorFactory ..> org.activiti.bpmn.model.ExclusiveGateway
+ActivityBehaviorFactory ..> org.activiti.engine.impl.bpmn.behavior.ExclusiveGatewayActivityBehavior
+ActivityBehaviorFactory ..> org.activiti.bpmn.model.ParallelGateway
+ActivityBehaviorFactory ..> org.activiti.engine.impl.bpmn.behavior.ParallelGatewayActivityBehavior
+ActivityBehaviorFactory ..> org.activiti.bpmn.model.InclusiveGateway
+ActivityBehaviorFactory ..> org.activiti.engine.impl.bpmn.behavior.InclusiveGatewayActivityBehavior
+ActivityBehaviorFactory ..> org.activiti.bpmn.model.EventGateway
+ActivityBehaviorFactory ..> org.activiti.engine.impl.bpmn.behavior.EventBasedGatewayActivityBehavior
+ActivityBehaviorFactory ..> org.activiti.engine.impl.bpmn.behavior.SequentialMultiInstanceBehavior
+ActivityBehaviorFactory ..> org.activiti.engine.impl.bpmn.behavior.ParallelMultiInstanceBehavior
+ActivityBehaviorFactory ..> org.activiti.engine.impl.bpmn.behavior.AbstractBpmnActivityBehavior
+ActivityBehaviorFactory ..> org.activiti.engine.impl.bpmn.behavior.SubProcessActivityBehavior
+ActivityBehaviorFactory ..> org.activiti.bpmn.model.SubProcess
+ActivityBehaviorFactory ..> org.activiti.bpmn.model.CallActivity
+ActivityBehaviorFactory ..> org.activiti.engine.impl.bpmn.behavior.CallActivityBehavior
+ActivityBehaviorFactory ..> org.activiti.bpmn.model.Transaction
+ActivityBehaviorFactory ..> org.activiti.engine.impl.bpmn.behavior.TransactionActivityBehavior
+ActivityBehaviorFactory ..> org.activiti.bpmn.model.IntermediateCatchEvent
+ActivityBehaviorFactory ..> org.activiti.engine.impl.bpmn.behavior.IntermediateCatchEventActivityBehavior
+ActivityBehaviorFactory ..> org.activiti.bpmn.model.ThrowEvent
+ActivityBehaviorFactory ..> org.activiti.engine.impl.bpmn.behavior.IntermediateThrowNoneEventActivityBehavior
+ActivityBehaviorFactory ..> org.activiti.bpmn.model.Signal
+ActivityBehaviorFactory ..> org.activiti.engine.impl.bpmn.parser.EventSubscriptionDeclaration
+ActivityBehaviorFactory ..> org.activiti.engine.impl.bpmn.behavior.IntermediateThrowSignalEventActivityBehavior
+ActivityBehaviorFactory ..> org.activiti.engine.impl.bpmn.parser.CompensateEventDefinition
+ActivityBehaviorFactory ..> org.activiti.engine.impl.bpmn.behavior.IntermediateThrowCompensationEventActivityBehavior
+ActivityBehaviorFactory ..> org.activiti.bpmn.model.EndEvent
+ActivityBehaviorFactory ..> org.activiti.engine.impl.bpmn.behavior.NoneEndEventActivityBehavior
+ActivityBehaviorFactory ..> org.activiti.bpmn.model.ErrorEventDefinition
+ActivityBehaviorFactory ..> org.activiti.engine.impl.bpmn.behavior.ErrorEndEventActivityBehavior
+ActivityBehaviorFactory ..> org.activiti.engine.impl.bpmn.behavior.CancelEndEventActivityBehavior
+ActivityBehaviorFactory ..> org.activiti.engine.impl.bpmn.behavior.TerminateEndEventActivityBehavior
+ActivityBehaviorFactory ..> org.activiti.bpmn.model.BoundaryEvent
+ActivityBehaviorFactory ..> org.activiti.engine.impl.bpmn.behavior.BoundaryEventActivityBehavior
+ActivityBehaviorFactory ..> org.activiti.bpmn.model.CancelEventDefinition
+ActivityBehaviorFactory ..> org.activiti.engine.impl.bpmn.behavior.CancelBoundaryEventActivityBehavior
+class DefaultActivityBehaviorFactory extends AbstractBehaviorFactory implements ActivityBehaviorFactory {
+  + createNoneStartEventActivityBehavior(StartEvent): NoneStartEventActivityBehavior
+  + createEventSubProcessStartEventActivityBehavior(StartEvent, String): EventSubProcessStartEventActivityBehavior
+  + createTaskActivityBehavior(Task): TaskActivityBehavior
+  + createManualTaskActivityBehavior(ManualTask): ManualTaskActivityBehavior
+  + createReceiveTaskActivityBehavior(ReceiveTask): ReceiveTaskActivityBehavior
+  + createUserTaskActivityBehavior(UserTask, TaskDefinition): UserTaskActivityBehavior
+  + createClassDelegateServiceTask(ServiceTask): ClassDelegate
+  + createServiceTaskDelegateExpressionActivityBehavior(ServiceTask): ServiceTaskDelegateExpressionActivityBehavior
+  + createServiceTaskExpressionActivityBehavior(ServiceTask): ServiceTaskExpressionActivityBehavior
+  + createWebServiceActivityBehavior(ServiceTask): WebServiceActivityBehavior
+  + createWebServiceActivityBehavior(SendTask): WebServiceActivityBehavior
+  + createMailActivityBehavior(ServiceTask): MailActivityBehavior
+  + createMailActivityBehavior(SendTask): MailActivityBehavior
+  + createMuleActivityBehavior(ServiceTask, BpmnModel): ActivityBehavior
+  + createMuleActivityBehavior(SendTask, BpmnModel): ActivityBehavior
+  + createCamelActivityBehavior(ServiceTask, BpmnModel): ActivityBehavior
+  + createCamelActivityBehavior(SendTask, BpmnModel): ActivityBehavior
+  + createShellActivityBehavior(ServiceTask): ShellActivityBehavior
+  + createBusinessRuleTaskActivityBehavior(BusinessRuleTask): BusinessRuleTaskActivityBehavior
+  + createScriptTaskActivityBehavior(ScriptTask): ScriptTaskActivityBehavior
+  + createExclusiveGatewayActivityBehavior(ExclusiveGateway): ExclusiveGatewayActivityBehavior
+  + createParallelGatewayActivityBehavior(ParallelGateway): ParallelGatewayActivityBehavior
+  + createInclusiveGatewayActivityBehavior(InclusiveGateway): InclusiveGatewayActivityBehavior
+  + createEventBasedGatewayActivityBehavior(EventGateway): EventBasedGatewayActivityBehavior
+  + createSequentialMultiInstanceBehavior(ActivityImpl, AbstractBpmnActivityBehavior): SequentialMultiInstanceBehavior
+  + createParallelMultiInstanceBehavior(ActivityImpl, AbstractBpmnActivityBehavior): ParallelMultiInstanceBehavior
+  + createSubprocessActivityBehavior(SubProcess): SubProcessActivityBehavior
+  + createCallActivityBehavior(CallActivity): CallActivityBehavior
+  + createTransactionActivityBehavior(Transaction): TransactionActivityBehavior
+  + createIntermediateCatchEventActivityBehavior(IntermediateCatchEvent): IntermediateCatchEventActivityBehavior
+  + createIntermediateThrowNoneEventActivityBehavior(ThrowEvent): IntermediateThrowNoneEventActivityBehavior
+  + createIntermediateThrowSignalEventActivityBehavior(ThrowEvent, Signal, EventSubscriptionDeclaration): IntermediateThrowSignalEventActivityBehavior
+  + createIntermediateThrowCompensationEventActivityBehavior(ThrowEvent, CompensateEventDefinition): IntermediateThrowCompensationEventActivityBehavior
+  + createNoneEndEventActivityBehavior(EndEvent): NoneEndEventActivityBehavior
+  + createErrorEndEventActivityBehavior(EndEvent, ErrorEventDefinition): ErrorEndEventActivityBehavior
+  + createCancelEndEventActivityBehavior(EndEvent): CancelEndEventActivityBehavior
+  + createTerminateEndEventActivityBehavior(EndEvent): TerminateEndEventActivityBehavior
+  + createBoundaryEventActivityBehavior(BoundaryEvent, boolean, ActivityImpl): BoundaryEventActivityBehavior
+  + createCancelBoundaryEventActivityBehavior(CancelEventDefinition): CancelBoundaryEventActivityBehavior
+}
+class DefaultListenerFactory extends AbstractBehaviorFactory implements ListenerFactory {
+    + createClassDelegateTaskListener(ActivitiListener):TaskListener
+    + createExpressionTaskListener(ActivitiListener):TaskListener
+    + createDelegateExpressionTaskListener(ActivitiListener):TaskListener
+    + createClassDelegateExecutionListener(ActivitiListener):ExecutionListener
+    + createExpressionExecutionListener(ActivitiListener):ExecutionListener
+    + createDelegateExpressionExecutionListener(ActivitiListener):ExecutionListener
+    + createClassDelegateEventListener(EventListener):ActivitiEventListener
+    + createDelegateExpressionEventListener(EventListener):ActivitiEventListener
+    + createEventThrowingEventListener(EventListener):ActivitiEventListener
+}
+interface ListenerFactory {
+    + createClassDelegateTaskListener(ActivitiListener):TaskListener
+    + createExpressionTaskListener(ActivitiListener):TaskListener
+    + createDelegateExpressionTaskListener(ActivitiListener):TaskListener
+    + createClassDelegateExecutionListener(ActivitiListener):ExecutionListener
+    + createExpressionExecutionListener(ActivitiListener):ExecutionListener
+    + createDelegateExpressionExecutionListener(ActivitiListener):ExecutionListener
+    + createClassDelegateEventListener(EventListener):ActivitiEventListener
+    + createDelegateExpressionEventListener(EventListener):ActivitiEventListener
+    + createEventThrowingEventListener(EventListener):ActivitiEventListener
+}
+ListenerFactory ..> org.activiti.bpmn.model.ActivitiListener
+ListenerFactory ..> org.activiti.bpmn.model.EventListener
+ListenerFactory ..> org.activiti.engine.delegate.TaskListener
+ListenerFactory ..> org.activiti.engine.delegate.ExecutionListener
+ListenerFactory ..> org.activiti.engine.delegate.event.ActivitiEventListener
+
+}
+/' package finished '/
+
+@enduml

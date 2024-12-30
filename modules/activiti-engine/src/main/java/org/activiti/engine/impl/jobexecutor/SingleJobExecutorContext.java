@@ -30,7 +30,7 @@ public class SingleJobExecutorContext implements JobExecutorContext {
   }
 
   public boolean isExecutingExclusiveJob() {
-    return currentJob == null ? false : currentJob.isExclusive();
+    return currentJob != null && currentJob.isExclusive();
   }
      
   public void setCurrentJob(JobEntity currentJob) {

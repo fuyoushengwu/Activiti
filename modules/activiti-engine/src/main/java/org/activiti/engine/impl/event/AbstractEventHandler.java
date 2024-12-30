@@ -1,9 +1,9 @@
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -31,13 +31,17 @@ import org.activiti.engine.impl.pvm.process.ActivityImpl;
  */
 public abstract class AbstractEventHandler implements EventHandler {
 
-  public void handleEvent(EventSubscriptionEntity eventSubscription, Object payload, CommandContext commandContext) {
+  public void handleEvent(
+      EventSubscriptionEntity eventSubscription, Object payload, CommandContext commandContext) {
 
     ExecutionEntity execution = eventSubscription.getExecution();
     ActivityImpl activity = eventSubscription.getActivity();
 
     if (activity == null) {
-      throw new ActivitiException("Error while sending signal for event subscription '" + eventSubscription.getId() + "': "
+      throw new ActivitiException(
+          "Error while sending signal for event subscription '"
+              + eventSubscription.getId()
+              + "': "
               + "no activity associated with event subscription");
     }
 
@@ -49,7 +53,7 @@ public abstract class AbstractEventHandler implements EventHandler {
 
     ActivityBehavior activityBehavior = activity.getActivityBehavior();
     if (activityBehavior instanceof BoundaryEventActivityBehavior
-            || activityBehavior instanceof EventSubProcessStartEventActivityBehavior) {
+        || activityBehavior instanceof EventSubProcessStartEventActivityBehavior) {
 
       try {
 
@@ -60,35 +64,51 @@ public abstract class AbstractEventHandler implements EventHandler {
       } catch (RuntimeException e) {
         throw e;
       } catch (Exception e) {
-        throw new ActivitiException("exception while sending signal for event subscription '" + eventSubscription + "':" + e.getMessage(), e);
+        throw new ActivitiException(
+            "exception while sending signal for event subscription '"
+                + eventSubscription
+                + "':"
+                + e.getMessage(),
+            e);
       }
 
     } else { // not boundary
-      if (!activity.equals( execution.getActivity() )) {
+      if (!activity.equals(execution.getActivity())) {
         execution.setActivity(activity);
       }
       execution.signal(eventSubscription.getEventName(), payload);
     }
   }
 
-  protected void dispatchActivitiesCanceledIfNeeded(EventSubscriptionEntity eventSubscription, ExecutionEntity execution, ActivityImpl boundaryEventActivity, CommandContext commandContext) {
+  protected void dispatchActivitiesCanceledIfNeeded(
+      EventSubscriptionEntity eventSubscription,
+      ExecutionEntity execution,
+      ActivityImpl boundaryEventActivity,
+      CommandContext commandContext) {
     ActivityBehavior boundaryActivityBehavior = boundaryEventActivity.getActivityBehavior();
     if (boundaryActivityBehavior instanceof BoundaryEventActivityBehavior) {
-      BoundaryEventActivityBehavior boundaryEventActivityBehavior = (BoundaryEventActivityBehavior) boundaryActivityBehavior;
+      BoundaryEventActivityBehavior boundaryEventActivityBehavior =
+          (BoundaryEventActivityBehavior) boundaryActivityBehavior;
       if (boundaryEventActivityBehavior.isInterrupting()) {
         dispatchExecutionCancelled(eventSubscription, execution, commandContext);
       }
     }
   }
 
-  protected void dispatchExecutionCancelled(EventSubscriptionEntity eventSubscription, ExecutionEntity execution, CommandContext commandContext) {
+  protected void dispatchExecutionCancelled(
+      EventSubscriptionEntity eventSubscription,
+      ExecutionEntity execution,
+      CommandContext commandContext) {
     // subprocesses
     for (ExecutionEntity subExecution : execution.getExecutions()) {
       dispatchExecutionCancelled(eventSubscription, subExecution, commandContext);
     }
 
     // call activities
-    ExecutionEntity subProcessInstance = commandContext.getExecutionEntityManager().findSubProcessInstanceBySuperExecutionId(execution.getId());
+    ExecutionEntity subProcessInstance =
+        commandContext
+            .getExecutionEntityManager()
+            .findSubProcessInstanceBySuperExecutionId(execution.getId());
     if (subProcessInstance != null) {
       dispatchExecutionCancelled(eventSubscription, subProcessInstance, commandContext);
     }
@@ -100,16 +120,22 @@ public abstract class AbstractEventHandler implements EventHandler {
     }
   }
 
-  protected void dispatchActivityCancelled(EventSubscriptionEntity eventSubscription, ExecutionEntity execution, ActivityImpl activity, CommandContext commandContext) {
-    commandContext.getEventDispatcher().dispatchEvent(
-      ActivitiEventBuilder.createActivityCancelledEvent(activity.getId(),
-        (String) activity.getProperties().get("name"),
-        execution.getId(),
-        execution.getProcessInstanceId(), execution.getProcessDefinitionId(),
-        (String) activity.getProperties().get("type"),
-        activity.getActivityBehavior().getClass().getCanonicalName(),
-        eventSubscription)
-    );
+  protected void dispatchActivityCancelled(
+      EventSubscriptionEntity eventSubscription,
+      ExecutionEntity execution,
+      ActivityImpl activity,
+      CommandContext commandContext) {
+    commandContext
+        .getEventDispatcher()
+        .dispatchEvent(
+            ActivitiEventBuilder.createActivityCancelledEvent(
+                activity.getId(),
+                (String) activity.getProperties().get("name"),
+                execution.getId(),
+                execution.getProcessInstanceId(),
+                execution.getProcessDefinitionId(),
+                (String) activity.getProperties().get("type"),
+                activity.getActivityBehavior().getClass().getCanonicalName(),
+                eventSubscription));
   }
-
 }

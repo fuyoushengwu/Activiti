@@ -1,0 +1,19 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+interface ProcessDefinition {
+    + getId():String
+    + getCategory():String
+    + getName():String
+    + getKey():String
+    + getDescription():String
+    + getVersion():int
+    + getResourceName():String
+    + getDeploymentId():String
+    + getDiagramResourceName():String
+    + hasStartFormKey():boolean
+    + isSuspended():boolean
+    + getTenantId():String
+}
+
+@enduml

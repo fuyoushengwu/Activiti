@@ -1,0 +1,113 @@
+@startuml
+hide @unlinked
+package "org.activiti.engine.impl.asyncexecutor.multitenant" {
+
+class ExecutorPerTenantAsyncExecutor implements TenantAwareAsyncExecutor {
+    # tenantInfoHolder:TenantInfoHolder
+    # tenantAwareAsyncExecutorFactory:TenantAwareAsyncExecutorFactory
+    # tenantExecutors:Map<String,org.activiti.engine.impl.asyncexecutor.AsyncExecutor>
+    # commandExecutor:org.activiti.engine.impl.interceptor.CommandExecutor
+    # active:boolean
+    # autoActive:boolean
+
+    + ExecutorPerTenantAsyncExecutor(org.activiti.engine.impl.asyncexecutor.multitenant.TenantInfoHolder)
+    + ExecutorPerTenantAsyncExecutor(org.activiti.engine.impl.asyncexecutor.multitenant.TenantInfoHolder,org.activiti.engine.impl.asyncexecutor.multitenant.TenantAwareAsyncExecutorFactory)
+    + getTenantIds():Set<String>
+    + addTenantAsyncExecutor(String tenantId,boolean startExecutor):void
+    + removeTenantAsyncExecutor(String tenantId):void
+    + determineAsyncExecutor():org.activiti.engine.impl.asyncexecutor.AsyncExecutor
+    + executeAsyncJob(JobEntity):void
+    + setCommandExecutor(org.activiti.engine.impl.interceptor.CommandExecutor):void
+    + getCommandExecutor():org.activiti.engine.impl.interceptor.CommandExecutor
+    + isAutoActivate():boolean
+    + setAutoActivate(boolean autoActivate):void
+    + isActive():boolean
+    + start():void
+    + shutdown():void
+    # shutdownTenantExecutor(String tenantId):void
+    + getLockOwner():String
+    + getTimerLockTimeInMillis():int
+    + setTimerLockTimeInMillis(int ms):void
+    + getAsyncJobLockTimeInMillis():int
+    + setAsyncJobLockTimeInMillis(int ms):void
+    + getDefaultTimerJobAcquireWaitTimeInMillis():int
+    + setDefaultTimerJobAcquireWaitTimeInMillis(int ms):void
+    + getDefaultAsyncJobAcquireWaitTimeInMillis():int
+    + setDefaultAsyncJobAcquireWaitTimeInMillis(int ms):void
+    + getDefaultQueueSizeFullWaitTimeInMillis():int
+    + setDefaultQueueSizeFullWaitTimeInMillis(int ms):void
+    + getMaxAsyncJobsDuePerAcquisition():int
+    + setMaxAsyncJobsDuePerAcquisition(int max):void
+    + getMaxTimerJobsPerAcquisition():int
+    + setMaxTimerJobsPerAcquisition(int):void
+    + getRetryWaitTimeInMillis():int
+    + setRetryWaitTimeInMillis(int):void
+}
+
+ExecutorPerTenantAsyncExecutor *--> TenantAwareAcquireAsyncJobsDueRunnable
+ExecutorPerTenantAsyncExecutor *--> TenantAwareAcquireTimerJobsRunnable
+ExecutorPerTenantAsyncExecutor *--> TenantAwareExecuteAsyncRunnableFactory
+
+class SharedExecutorServiceAsyncExecutor extends org.activiti.engine.impl.asyncexecutor.DefaultAsyncJobExecutor implements TenantAwareAsyncExecutor {
+    # tenantInfoHolder:TenantInfoHolder
+    # timerJobAcquisitionThreads:Map<String,Thread>
+    # timerJobAcquisitionRunnables:Map<String,org.activiti.engine.impl.asyncexecutor.AcquireTimerJobsRunnable>
+    # asyncJobAcquisitionThreads:Map<String,Thread>
+    # asyncJobAcquisitionRunnables:Map<String,org.activiti.engine.impl.asyncexecutor.AcquireAsyncJobsDueRunnable>
+    + SharedExecutorServiceAsyncExecutor(org.activiti.engine.impl.asyncexecutor.multitenant.TenantInfoHolder)
+    + getTenantIds():Set<String>
+    + addTenantAsyncExecutor(String tenantId,boolean startExecutor):void
+    + removeTenantAsyncExecutor(String tenantId):void
+    + executeAsyncJob(JobEntity):void
+    + startJobAcquisitionThread():void
+    + startTimerJobAcquisitionForTenant(String tenantId):void
+    + startAsyncJobAcquisitionForTenant(String tenantId):void
+    + stopJobAcquisitionThread():void
+    + stopThreadsForTenant(String tenantId):void
+
+
+}
+class TenantAwareAcquireAsyncJobsDueRunnable extends org.activiti.engine.impl.asyncexecutor.AcquireAsyncJobsDueRunnable {
+    # tenantInfoHolder:TenantInfoHolder
+    # tenantId:String
+    + TenantAwareAcquireAsyncJobsDueRunnable(TenantInfoHolder tenantInfoHolder,String tenantId)
+    + getTenantAwareAsyncExecutor():TenantAwareAsyncExecutor
+    + run():void
+}
+
+class TenantAwareAcquireTimerJobsRunnable extends org.activiti.engine.impl.asyncexecutor.AcquireTimerJobsRunnable {
+    # tenantInfoHolder:TenantInfoHolder
+    # tenantId:String
+    + TenantAwareAcquireTimerJobsRunnable(TenantInfoHolder tenantInfoHolder,String tenantId)
+    + getTenantAwareAsyncExecutor():TenantAwareAsyncExecutor
+    + run():void
+}
+
+interface TenantAwareAsyncExecutor extends org.activiti.engine.impl.asyncexecutor.AsyncExecutor {
+    + getTenantIds():Set<String>
+    + addTenantAsyncExecutor(String tenantId,boolean startExecutor):void
+    + removeTenantAsyncExecutor(String tenantId):void
+}
+
+interface TenantAwareAsyncExecutorFactory {
+    + createAsyncExecutor(String tenantId):AsyncExecutor
+}
+class TenantAwareExecuteAsyncRunnable extends org.activiti.engine.impl.asyncexecutor.ExecuteAsyncRunnable {
+    # tenantInfoHolder:TenantInfoHolder
+    # tenantId:String
+    + TenantAwareExecuteAsyncRunnable(TenantInfoHolder tenantInfoHolder,String tenantId)
+    + run():void
+}
+class TenantAwareExecuteAsyncRunnableFactory implements org.activiti.engine.impl.asyncexecutor.ExecuteAsyncRunnableFactory {
+    # tenantInfoHolder:TenantInfoHolder
+    # tenantId:String
+    + TenantAwareExecuteAsyncRunnableFactory(TenantInfoHolder tenantInfoHolder,String tenantId)
+    + createExecuteAsyncRunnable(JobEntity,CommandExecutor):Runnable
+}
+TenantAwareExecuteAsyncRunnableFactory o--> TenantAwareExecuteAsyncRunnable
+
+
+/' package finished '/
+}
+
+@enduml

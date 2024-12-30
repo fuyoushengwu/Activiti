@@ -1,0 +1,25 @@
+@startuml
+hide @unlinked
+package "org.activiti.bpmn.converter" {
+abstract class BaseBpmnXMLConverter implements org.activiti.bpmn.constants.BpmnXMLConstants {
+
+}
+class BpmnXMLConverter implements org.activiti.bpmn.constants.BpmnXMLConstants {
+    + convertToBpmnModel(InputStreamProvider inputStreamProvider, boolean validateSchema, boolean enableSafeBpmnXml):BpmnModel
+    + convertToBpmnModel(InputStreamProvider inputStreamProvider, boolean validateSchema, boolean enableSafeBpmnXml,String encoding):BpmnModel
+    + convertToBpmnModel(XMLStreamReader xtr):BpmnModel
+}
+class CatchEventXMLConverter extends BaseBpmnXMLConverter {
+    + getXMLElementName():String
+    # convertXMLToElement(XMLStreamReader xtr, BpmnModel model):BaseElement
+    # writeAdditionalAttributes(BaseElement element, BpmnModel model, XMLStreamWriter xtw):void
+    # writeAAdditionalChildElements(BaseElement element, BpmnModel model, XMLStreamWriter xtw):void
+}
+class ThrowEventXMLConverter extends BaseBpmnXMLConverter {
+    + getXMLElementName():String
+    # convertXMLToElement(XMLStreamReader xtr, BpmnModel model):BaseElement
+    # writeAdditionalAttributes(BaseElement element, BpmnModel model, XMLStreamWriter xtw):void
+    # writeAAdditionalChildElements(BaseElement element, BpmnModel model, XMLStreamWriter xtw):void
+}
+}
+@enduml

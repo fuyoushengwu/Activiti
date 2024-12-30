@@ -1,0 +1,98 @@
+@startuml
+hide @unlinked
+package "org.activiti.engine.impl.bpmn.webservice" {
+class BpmnInterface {
+    # id:String
+    # name:String
+    # implementation:BpmnInterfaceImplementation
+    # operations:Map<String,Operation>
+    + BpmnInterface()
+    + BpmnInterface(String id,String name)
+    + getId():String
+    + setId(String):void
+    + getName():String
+    + setName(String):void
+    + addOperation(Operation):void
+    + getOperation(String operationId):Operation
+    + getOperations():Collection<Operation>
+    + getImplementation():BpmnInterfaceImplementation
+    + setImplementation(BpmnInterfaceImplementation):void
+}
+BpmnInterface o--> BpmnInterfaceImplementation
+BpmnInterface o--> Operation
+
+interface BpmnInterfaceImplementation {
+    + getName():String
+}
+class MessageDefinition {
+    # id:String
+    # name:String
+    # itemDefinition:org.activiti.engine.impl.bpmn.data.ItemDefinition
+    + MessageDefinition(String id,String name)
+    + createInstance():MessageInstance
+    + getItemDefinition():ItemDefinition
+    + setItemDefinition(ItemDefinition itemDefinition):void
+    + getStructureDefinition():org.activiti.engine.impl.bpmn.data.StructureDefinition
+    + getId():String
+    + getName():String
+    + setName(String name):void
+}
+MessageDefinition ..> MessageInstance
+MessageDefinition ..> org.activiti.engine.impl.bpmn.data.ItemDefinition
+
+class MessageImplicitDataInputAssociation extends org.activiti.engine.impl.bpmn.data.AbstractDataAssociation {
+    + MessageImplicitDataInputAssociation(String source,String target)
+    + evaluate(ActivityExecution execution):void
+}
+class MessageImplicitDataOutputAssociation extends org.activiti.engine.impl.bpmn.data.AbstractDataAssociation {
+    + MessageImplicitDataOutputAssociation(String targetRef,Expression sourceExpression)
+    + MessageImplicitDataOutputAssociation(String targetRef,String sourceRef)
+    + evaluate(ActivityExecution execution):void
+}
+class MessageInstance {
+    # message:MessageDefinition
+    # item:org.activiti.engine.impl.bpmn.data.ItemInstance
+    + MessageInstance(MessageDefinition message,ItemInstance item)
+    + getStructureInstance():org.activiti.engine.impl.bpmn.data.StructureInstance
+    + getMessage():MessageDefinition
+}
+MessageInstance *--> MessageDefinition
+MessageInstance *--> org.activiti.engine.impl.bpmn.data.ItemInstance
+class Operation {
+    # id:String
+    # name:String
+    # inMessage:MessageDefinition
+    # outMessage:MessageDefinition
+    # implementation:OperationImplementation
+    # bpmnInterface:BpmnInterface
+    + Operation()
+    + Operation(String id,String name,BpmnInterface bpmnInterface,MessageDefinition inMessage)
+    + sendMessage(MessageInstance message,ConcurrentMap<QName,URL> overridenEndpointAddresses):MessageInstance
+    + getId():String
+    + setId(String):void
+    + getName():String
+    + setName(String):void
+    + getInterface():BpmnInterface
+    + setInterface(BpmnInterface):void
+    + getInMessage():MessageDefinition
+    + setInMessage(MessageDefinition inMessage):void
+    + getOutMessage():MessageDefinition
+    + setOutMessage(MessageDefinition outMessage):void
+    + getImplementation():OperationImplementation
+    + setImplementation(OperationImplementation implementation):void
+}
+Operation *--> BpmnInterface
+Operation o--> MessageDefinition
+Operation o--> OperationImplementation
+
+interface OperationImplementation {
+    # getId():String
+    # getName():String
+    # sendFor(MessageInstance message,Operation operation,ConcurrentMap<QName, URL> overridenEndpointAddresses):MessageInstance
+}
+OperationImplementation ..> MessageInstance
+OperationImplementation ..> Operation
+
+}
+/' package finished '/
+@enduml

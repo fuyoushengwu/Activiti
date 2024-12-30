@@ -1,9 +1,9 @@
 /* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -45,13 +45,13 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
  * activity implementation for the user task.
- * 
+ *
  * @author Joram Barrez
  */
 public class UserTaskActivityBehavior extends TaskActivityBehavior {
-  
+
   private static final long serialVersionUID = 1L;
-  
+
   private static final Logger LOGGER = LoggerFactory.getLogger(UserTaskActivityBehavior.class);
 
   protected String userTaskId;
@@ -65,7 +65,7 @@ public class UserTaskActivityBehavior extends TaskActivityBehavior {
   public void execute(ActivityExecution execution) throws Exception {
     TaskEntity task = TaskEntity.createAndInsert(execution);
     task.setExecution(execution);
-    
+
     Expression activeNameExpression = null;
     Expression activeDescriptionExpression = null;
     Expression activeDueDateExpression = null;
@@ -77,32 +77,77 @@ public class UserTaskActivityBehavior extends TaskActivityBehavior {
     Expression activeOwnerExpression = null;
     Set<Expression> activeCandidateUserExpressions = null;
     Set<Expression> activeCandidateGroupExpressions = null;
-    
+
     if (Context.getProcessEngineConfiguration().isEnableProcessDefinitionInfoCache()) {
-      ObjectNode taskElementProperties = Context.getBpmnOverrideElementProperties(userTaskId, execution.getProcessDefinitionId());
-      activeNameExpression = getActiveValue(taskDefinition.getNameExpression(), DynamicBpmnConstants.USER_TASK_NAME, taskElementProperties);
+      ObjectNode taskElementProperties =
+          Context.getBpmnOverrideElementProperties(userTaskId, execution.getProcessDefinitionId());
+      activeNameExpression =
+          getActiveValue(
+              taskDefinition.getNameExpression(),
+              DynamicBpmnConstants.USER_TASK_NAME,
+              taskElementProperties);
       taskDefinition.setNameExpression(activeNameExpression);
-      activeDescriptionExpression = getActiveValue(taskDefinition.getDescriptionExpression(), DynamicBpmnConstants.USER_TASK_DESCRIPTION, taskElementProperties);
+      activeDescriptionExpression =
+          getActiveValue(
+              taskDefinition.getDescriptionExpression(),
+              DynamicBpmnConstants.USER_TASK_DESCRIPTION,
+              taskElementProperties);
       taskDefinition.setDescriptionExpression(activeDescriptionExpression);
-      activeDueDateExpression = getActiveValue(taskDefinition.getDueDateExpression(), DynamicBpmnConstants.USER_TASK_DUEDATE, taskElementProperties);
+      activeDueDateExpression =
+          getActiveValue(
+              taskDefinition.getDueDateExpression(),
+              DynamicBpmnConstants.USER_TASK_DUEDATE,
+              taskElementProperties);
       taskDefinition.setDueDateExpression(activeDueDateExpression);
-      activePriorityExpression = getActiveValue(taskDefinition.getPriorityExpression(), DynamicBpmnConstants.USER_TASK_PRIORITY, taskElementProperties);
+      activePriorityExpression =
+          getActiveValue(
+              taskDefinition.getPriorityExpression(),
+              DynamicBpmnConstants.USER_TASK_PRIORITY,
+              taskElementProperties);
       taskDefinition.setPriorityExpression(activePriorityExpression);
-      activeCategoryExpression = getActiveValue(taskDefinition.getCategoryExpression(), DynamicBpmnConstants.USER_TASK_CATEGORY, taskElementProperties);
+      activeCategoryExpression =
+          getActiveValue(
+              taskDefinition.getCategoryExpression(),
+              DynamicBpmnConstants.USER_TASK_CATEGORY,
+              taskElementProperties);
       taskDefinition.setCategoryExpression(activeCategoryExpression);
-      activeFormKeyExpression = getActiveValue(taskDefinition.getFormKeyExpression(), DynamicBpmnConstants.USER_TASK_FORM_KEY, taskElementProperties);
+      activeFormKeyExpression =
+          getActiveValue(
+              taskDefinition.getFormKeyExpression(),
+              DynamicBpmnConstants.USER_TASK_FORM_KEY,
+              taskElementProperties);
       taskDefinition.setFormKeyExpression(activeFormKeyExpression);
-      activeSkipExpression = getActiveValue(taskDefinition.getSkipExpression(), DynamicBpmnConstants.TASK_SKIP_EXPRESSION, taskElementProperties);
+      activeSkipExpression =
+          getActiveValue(
+              taskDefinition.getSkipExpression(),
+              DynamicBpmnConstants.TASK_SKIP_EXPRESSION,
+              taskElementProperties);
       taskDefinition.setSkipExpression(activeSkipExpression);
-      activeAssigneeExpression = getActiveValue(taskDefinition.getAssigneeExpression(), DynamicBpmnConstants.USER_TASK_ASSIGNEE, taskElementProperties);
+      activeAssigneeExpression =
+          getActiveValue(
+              taskDefinition.getAssigneeExpression(),
+              DynamicBpmnConstants.USER_TASK_ASSIGNEE,
+              taskElementProperties);
       taskDefinition.setAssigneeExpression(activeAssigneeExpression);
-      activeOwnerExpression = getActiveValue(taskDefinition.getOwnerExpression(), DynamicBpmnConstants.USER_TASK_OWNER, taskElementProperties);
+      activeOwnerExpression =
+          getActiveValue(
+              taskDefinition.getOwnerExpression(),
+              DynamicBpmnConstants.USER_TASK_OWNER,
+              taskElementProperties);
       taskDefinition.setOwnerExpression(activeOwnerExpression);
-      activeCandidateUserExpressions = getActiveValueSet(taskDefinition.getCandidateUserIdExpressions(), DynamicBpmnConstants.USER_TASK_CANDIDATE_USERS, taskElementProperties);
+      activeCandidateUserExpressions =
+          getActiveValueSet(
+              taskDefinition.getCandidateUserIdExpressions(),
+              DynamicBpmnConstants.USER_TASK_CANDIDATE_USERS,
+              taskElementProperties);
       taskDefinition.setCandidateUserIdExpressions(activeCandidateUserExpressions);
-      activeCandidateGroupExpressions = getActiveValueSet(taskDefinition.getCandidateGroupIdExpressions(), DynamicBpmnConstants.USER_TASK_CANDIDATE_GROUPS, taskElementProperties);
+      activeCandidateGroupExpressions =
+          getActiveValueSet(
+              taskDefinition.getCandidateGroupIdExpressions(),
+              DynamicBpmnConstants.USER_TASK_CANDIDATE_GROUPS,
+              taskElementProperties);
       taskDefinition.setCandidateGroupIdExpressions(activeCandidateGroupExpressions);
-      
+
     } else {
       activeNameExpression = taskDefinition.getNameExpression();
       activeDescriptionExpression = taskDefinition.getDescriptionExpression();
@@ -116,7 +161,7 @@ public class UserTaskActivityBehavior extends TaskActivityBehavior {
       activeCandidateUserExpressions = taskDefinition.getCandidateUserIdExpressions();
       activeCandidateGroupExpressions = taskDefinition.getCandidateGroupIdExpressions();
     }
-    
+
     task.setTaskDefinition(taskDefinition);
 
     if (activeNameExpression != null) {
@@ -140,21 +185,26 @@ public class UserTaskActivityBehavior extends TaskActivityBehavior {
       }
       task.setDescription(description);
     }
-    
+
     if (activeDueDateExpression != null) {
       Object dueDate = activeDueDateExpression.getValue(execution);
       if (dueDate != null) {
         if (dueDate instanceof Date) {
           task.setDueDate((Date) dueDate);
         } else if (dueDate instanceof String) {
-          BusinessCalendar businessCalendar = Context
-            .getProcessEngineConfiguration()
-            .getBusinessCalendarManager()
-            .getBusinessCalendar(taskDefinition.getBusinessCalendarNameExpression().getValue(execution).toString());
+          BusinessCalendar businessCalendar =
+              Context.getProcessEngineConfiguration()
+                  .getBusinessCalendarManager()
+                  .getBusinessCalendar(
+                      taskDefinition
+                          .getBusinessCalendarNameExpression()
+                          .getValue(execution)
+                          .toString());
           task.setDueDate(businessCalendar.resolveDuedate((String) dueDate));
         } else {
-          throw new ActivitiIllegalArgumentException("Due date expression does not resolve to a Date or Date string: " + 
-              activeDueDateExpression.getExpressionText());
+          throw new ActivitiIllegalArgumentException(
+              "Due date expression does not resolve to a Date or Date string: "
+                  + activeDueDateExpression.getExpressionText());
         }
       }
     }
@@ -164,57 +214,69 @@ public class UserTaskActivityBehavior extends TaskActivityBehavior {
       if (priority != null) {
         if (priority instanceof String) {
           try {
-            task.setPriority(Integer.valueOf((String) priority));
+            task.setPriority(Integer.parseInt((String) priority));
           } catch (NumberFormatException e) {
-            throw new ActivitiIllegalArgumentException("Priority does not resolve to a number: " + priority, e);
+            throw new ActivitiIllegalArgumentException(
+                "Priority does not resolve to a number: " + priority, e);
           }
         } else if (priority instanceof Number) {
           task.setPriority(((Number) priority).intValue());
         } else {
-          throw new ActivitiIllegalArgumentException("Priority expression does not resolve to a number: " + 
-              activePriorityExpression.getExpressionText());
+          throw new ActivitiIllegalArgumentException(
+              "Priority expression does not resolve to a number: "
+                  + activePriorityExpression.getExpressionText());
         }
       }
     }
-    
+
     if (activeCategoryExpression != null) {
-    	final Object category = activeCategoryExpression.getValue(execution);
-    	if (category != null) {
-    		if (category instanceof String) {
-    			task.setCategory((String) category);
-    		} else {
-    			 throw new ActivitiIllegalArgumentException("Category expression does not resolve to a string: " + 
-    			     activeCategoryExpression.getExpressionText());
-    		}
-    	}
+      final Object category = activeCategoryExpression.getValue(execution);
+      if (category != null) {
+        if (category instanceof String) {
+          task.setCategory((String) category);
+        } else {
+          throw new ActivitiIllegalArgumentException(
+              "Category expression does not resolve to a string: "
+                  + activeCategoryExpression.getExpressionText());
+        }
+      }
     }
-    
+
     if (activeFormKeyExpression != null) {
-    	final Object formKey = activeFormKeyExpression.getValue(execution);
-    	if (formKey != null) {
-    		if (formKey instanceof String) {
-    			task.setFormKey((String) formKey);
-    		} else {
-    		  throw new ActivitiIllegalArgumentException("FormKey expression does not resolve to a string: " + 
-    		      activeFormKeyExpression.getExpressionText());
-    		}
-    	}
+      final Object formKey = activeFormKeyExpression.getValue(execution);
+      if (formKey != null) {
+        if (formKey instanceof String) {
+          task.setFormKey((String) formKey);
+        } else {
+          throw new ActivitiIllegalArgumentException(
+              "FormKey expression does not resolve to a string: "
+                  + activeFormKeyExpression.getExpressionText());
+        }
+      }
     }
-    
-    boolean skipUserTask = SkipExpressionUtil.isSkipExpressionEnabled(execution, activeSkipExpression) &&
-        SkipExpressionUtil.shouldSkipFlowElement(execution, activeSkipExpression);
-    
+
+    boolean skipUserTask =
+        SkipExpressionUtil.isSkipExpressionEnabled(execution, activeSkipExpression)
+            && SkipExpressionUtil.shouldSkipFlowElement(execution, activeSkipExpression);
+
     if (!skipUserTask) {
-      handleAssignments(activeAssigneeExpression, activeOwnerExpression, activeCandidateUserExpressions, 
-        activeCandidateGroupExpressions, task, execution);
+      handleAssignments(
+          activeAssigneeExpression,
+          activeOwnerExpression,
+          activeCandidateUserExpressions,
+          activeCandidateGroupExpressions,
+          task,
+          execution);
     }
 
     task.fireEvent(TaskListener.EVENTNAME_CREATE);
 
     // All properties set, now firing 'create' events
     if (Context.getProcessEngineConfiguration().getEventDispatcher().isEnabled()) {
-      Context.getProcessEngineConfiguration().getEventDispatcher().dispatchEvent(
-        ActivitiEventBuilder.createEntityEvent(ActivitiEventType.TASK_CREATED, task));
+      Context.getProcessEngineConfiguration()
+          .getEventDispatcher()
+          .dispatchEvent(
+              ActivitiEventBuilder.createEntityEvent(ActivitiEventType.TASK_CREATED, task));
     }
 
     if (skipUserTask) {
@@ -222,16 +284,22 @@ public class UserTaskActivityBehavior extends TaskActivityBehavior {
     }
   }
 
-  public void signal(ActivityExecution execution, String signalName, Object signalData) throws Exception {
+  public void signal(ActivityExecution execution, String signalName, Object signalData)
+      throws Exception {
     if (!((ExecutionEntity) execution).getTasks().isEmpty())
       throw new ActivitiException("UserTask should not be signalled before complete");
     leave(execution);
   }
 
-  @SuppressWarnings({ "unchecked", "rawtypes" })
-  protected void handleAssignments(Expression assigneeExpression, Expression ownerExpression, Set<Expression> candidateUserExpressions,
-      Set<Expression> candidateGroupExpressions, TaskEntity task, ActivityExecution execution) {
-    
+  @SuppressWarnings({"unchecked", "rawtypes"})
+  protected void handleAssignments(
+      Expression assigneeExpression,
+      Expression ownerExpression,
+      Set<Expression> candidateUserExpressions,
+      Set<Expression> candidateGroupExpressions,
+      TaskEntity task,
+      ActivityExecution execution) {
+
     if (assigneeExpression != null) {
       Object assigneeExpressionValue = assigneeExpression.getValue(execution);
       String assigneeValue = null;
@@ -240,7 +308,7 @@ public class UserTaskActivityBehavior extends TaskActivityBehavior {
       }
       task.setAssignee(assigneeValue, true, false);
     }
-    
+
     if (ownerExpression != null) {
       Object ownerExpressionValue = ownerExpression.getValue(execution);
       String ownerValue = null;
@@ -259,7 +327,8 @@ public class UserTaskActivityBehavior extends TaskActivityBehavior {
         } else if (value instanceof Collection) {
           task.addCandidateGroups((Collection) value);
         } else {
-          throw new ActivitiIllegalArgumentException("Expression did not resolve to a string or collection of strings");
+          throw new ActivitiIllegalArgumentException(
+              "Expression did not resolve to a string or collection of strings");
         }
       }
     }
@@ -268,20 +337,22 @@ public class UserTaskActivityBehavior extends TaskActivityBehavior {
       for (Expression userIdExpr : candidateUserExpressions) {
         Object value = userIdExpr.getValue(execution);
         if (value instanceof String) {
-          List<String> candiates = extractCandidates((String) value);
-          task.addCandidateUsers(candiates);
+          List<String> candidates = extractCandidates((String) value);
+          task.addCandidateUsers(candidates);
         } else if (value instanceof Collection) {
           task.addCandidateUsers((Collection) value);
         } else {
-          throw new ActivitiException("Expression did not resolve to a string or collection of strings");
+          throw new ActivitiException(
+              "Expression did not resolve to a string or collection of strings");
         }
       }
     }
 
     if (!taskDefinition.getCustomUserIdentityLinkExpressions().isEmpty()) {
-      Map<String, Set<Expression>> identityLinks = taskDefinition.getCustomUserIdentityLinkExpressions();
+      Map<String, Set<Expression>> identityLinks =
+          taskDefinition.getCustomUserIdentityLinkExpressions();
       for (String identityLinkType : identityLinks.keySet()) {
-        for (Expression idExpression : identityLinks.get(identityLinkType) ) {
+        for (Expression idExpression : identityLinks.get(identityLinkType)) {
           Object value = idExpression.getValue(execution);
           if (value instanceof String) {
             List<String> userIds = extractCandidates((String) value);
@@ -289,21 +360,22 @@ public class UserTaskActivityBehavior extends TaskActivityBehavior {
               task.addUserIdentityLink(userId, identityLinkType);
             }
           } else if (value instanceof Collection) {
-            Iterator userIdSet = ((Collection) value).iterator();
-            while (userIdSet.hasNext()) {
-              task.addUserIdentityLink((String)userIdSet.next(), identityLinkType);
+            for (Object o : (Collection) value) {
+              task.addUserIdentityLink((String) o, identityLinkType);
             }
           } else {
-            throw new ActivitiException("Expression did not resolve to a string or collection of strings");
+            throw new ActivitiException(
+                "Expression did not resolve to a string or collection of strings");
           }
         }
       }
     }
 
     if (!taskDefinition.getCustomGroupIdentityLinkExpressions().isEmpty()) {
-      Map<String, Set<Expression>> identityLinks = taskDefinition.getCustomGroupIdentityLinkExpressions();
+      Map<String, Set<Expression>> identityLinks =
+          taskDefinition.getCustomGroupIdentityLinkExpressions();
       for (String identityLinkType : identityLinks.keySet()) {
-        for (Expression idExpression : identityLinks.get(identityLinkType) ) {
+        for (Expression idExpression : identityLinks.get(identityLinkType)) {
           Object value = idExpression.getValue(execution);
           if (value instanceof String) {
             List<String> groupIds = extractCandidates((String) value);
@@ -311,29 +383,30 @@ public class UserTaskActivityBehavior extends TaskActivityBehavior {
               task.addGroupIdentityLink(groupId, identityLinkType);
             }
           } else if (value instanceof Collection) {
-            Iterator groupIdSet = ((Collection) value).iterator();
-            while (groupIdSet.hasNext()) {
-              task.addGroupIdentityLink((String)groupIdSet.next(), identityLinkType);
+            for (Object o : (Collection) value) {
+              task.addGroupIdentityLink((String) o, identityLinkType);
             }
           } else {
-            throw new ActivitiException("Expression did not resolve to a string or collection of strings");
+            throw new ActivitiException(
+                "Expression did not resolve to a string or collection of strings");
           }
         }
       }
     }
-}
+  }
 
   /**
-   * Extract a candidate list from a string. 
-   * 
+   * Extract a candidate list from a string.
+   *
    * @param str
-   * @return 
+   * @return
    */
   protected List<String> extractCandidates(String str) {
     return Arrays.asList(str.split("[\\s]*,[\\s]*"));
   }
-  
-  protected Expression getActiveValue(Expression originalValue, String propertyName, ObjectNode taskElementProperties) {
+
+  protected Expression getActiveValue(
+      Expression originalValue, String propertyName, ObjectNode taskElementProperties) {
     Expression activeValue = originalValue;
     if (taskElementProperties != null) {
       JsonNode overrideValueNode = taskElementProperties.get(propertyName);
@@ -341,22 +414,29 @@ public class UserTaskActivityBehavior extends TaskActivityBehavior {
         if (overrideValueNode.isNull()) {
           activeValue = null;
         } else {
-          activeValue = Context.getProcessEngineConfiguration().getExpressionManager().createExpression(overrideValueNode.asText());
+          activeValue =
+              Context.getProcessEngineConfiguration()
+                  .getExpressionManager()
+                  .createExpression(overrideValueNode.asText());
         }
       }
     }
     return activeValue;
   }
-  
-  protected Set<Expression> getActiveValueSet(Set<Expression> originalValues, String propertyName, ObjectNode taskElementProperties) {
+
+  protected Set<Expression> getActiveValueSet(
+      Set<Expression> originalValues, String propertyName, ObjectNode taskElementProperties) {
     Set<Expression> activeValues = originalValues;
     if (taskElementProperties != null) {
       JsonNode overrideValuesNode = taskElementProperties.get(propertyName);
       if (overrideValuesNode != null) {
-        if (overrideValuesNode.isNull() || overrideValuesNode.isArray() == false || overrideValuesNode.size() == 0) {
+        if (overrideValuesNode.isNull()
+            || !overrideValuesNode.isArray()
+            || overrideValuesNode.size() == 0) {
           activeValues = null;
         } else {
-          ExpressionManager expressionManager = Context.getProcessEngineConfiguration().getExpressionManager();
+          ExpressionManager expressionManager =
+              Context.getProcessEngineConfiguration().getExpressionManager();
           activeValues = new HashSet<Expression>();
           for (JsonNode valueNode : overrideValuesNode) {
             activeValues.add(expressionManager.createExpression(valueNode.asText()));
@@ -366,11 +446,10 @@ public class UserTaskActivityBehavior extends TaskActivityBehavior {
     }
     return activeValues;
   }
-  
+
   // getters and setters //////////////////////////////////////////////////////
-  
+
   public TaskDefinition getTaskDefinition() {
     return taskDefinition;
   }
-  
 }

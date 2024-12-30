@@ -36,7 +36,7 @@ public class ExecutorPerTenantAsyncExecutor implements TenantAwareAsyncExecutor 
   private static final Logger logger = LoggerFactory.getLogger(ExecutorPerTenantAsyncExecutor.class);
   
   protected TenantInfoHolder tenantInfoHolder;
-  protected TenantAwareAsyncExecutorFactory tenantAwareAyncExecutorFactory;
+  protected TenantAwareAsyncExecutorFactory tenantAwareAsyncExecutorFactory;
   
   protected Map<String, AsyncExecutor> tenantExecutors = new HashMap<String, AsyncExecutor>();
   
@@ -48,9 +48,9 @@ public class ExecutorPerTenantAsyncExecutor implements TenantAwareAsyncExecutor 
     this(tenantInfoHolder, null);
   }
   
-  public ExecutorPerTenantAsyncExecutor(TenantInfoHolder tenantInfoHolder, TenantAwareAsyncExecutorFactory tenantAwareAyncExecutorFactory) {
+  public ExecutorPerTenantAsyncExecutor(TenantInfoHolder tenantInfoHolder, TenantAwareAsyncExecutorFactory tenantAwareAsyncExecutorFactory) {
     this.tenantInfoHolder = tenantInfoHolder;
-    this.tenantAwareAyncExecutorFactory = tenantAwareAyncExecutorFactory;
+    this.tenantAwareAsyncExecutorFactory = tenantAwareAsyncExecutorFactory;
   }
   
   @Override
@@ -61,10 +61,10 @@ public class ExecutorPerTenantAsyncExecutor implements TenantAwareAsyncExecutor 
   public void addTenantAsyncExecutor(String tenantId, boolean startExecutor) {
     AsyncExecutor tenantExecutor = null;
     
-    if (tenantAwareAyncExecutorFactory == null) {
+    if (tenantAwareAsyncExecutorFactory == null) {
       tenantExecutor = new DefaultAsyncJobExecutor();
     } else {
-      tenantExecutor = tenantAwareAyncExecutorFactory.createAsyncExecutor(tenantId);
+      tenantExecutor = tenantAwareAsyncExecutorFactory.createAsyncExecutor(tenantId);
     }
     
     if (tenantExecutor instanceof DefaultAsyncJobExecutor) {

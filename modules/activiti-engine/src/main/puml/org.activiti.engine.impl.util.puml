@@ -1,0 +1,49 @@
+@startuml
+hide @unlinked
+package "org.activiti.engine.impl.util" {
+interface CommandExecutor {
+    + executeCommand(org.activiti.engine.impl.pvm.delegate.ActivityExecution execution):void
+}
+class ShellCommandExecutor implements CommandExecutor {
+    - waitFlag:Boolean
+    - {final} cleanEnvBoolean:Boolean
+    - {final} redirectErrorFlag:Boolean
+    - {final} directoryStr:String
+    - {final} resultVariableStr:String
+    - {final} errorCodeVariableStr:String
+    - argList:List<String>
+    + ShellCommandExecutor(Boolean waitFlag,Boolean cleanEnvBoolean,Boolean redirectErrorFlag,String directoryStr,String resultVariableStr,String errorCodeVariableStr,List<String> argList)
+    + ShellCommandExecutor(ShellExecutorContext context)
+    + executeCommand(ActivityExecution execution):void
+    + getWaitFlag():Boolean
+    + setWaitFlag(Boolean waitFlag):void
+    + getCleanEnvBoolean():Boolean
+    + getRedirectErrorFlag():Boolean
+    + getDirectoryStr():Boolean
+    + getResultVariableStr():Boolean
+    + getErrorCodeVariableStr():Boolean
+    + getArgList():List<String>
+    + setArgList(List<String> argList):void
+}
+class ShellExecutorContext implements ExecutorContext {
+    - waitFlag:Boolean
+    - {final} cleanEnvBoolean:Boolean
+    - {final} redirectErrorFlag:Boolean
+    - {final} directoryStr:String
+    - {final} resultVariableStr:String
+    - {final} errorCodeVariableStr:String
+    - argList:List<String>
+    + shellExecutorContext(Boolean waitFlag,Boolean cleanEnvBoolean,Boolean redirectErrorFlag,String directoryStr,String resultVariableStr,String errorCodeVariableStr,List<String> argList)
+    + getWaitFlag():Boolean
+    + setWaitFlag(Boolean waitFlag):void
+    + getCleanEnvBoolean():Boolean
+    + getRedirectErrorFlag():Boolean
+    + getDirectoryStr():Boolean
+    + getResultVariableStr():Boolean
+    + getErrorCodeVariableStr():Boolean
+    + getArgList():List<String>
+    + setArgList(List<String> argList):void
+}
+}
+/' package finished '/
+@enduml

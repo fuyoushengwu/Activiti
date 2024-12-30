@@ -1,0 +1,174 @@
+@startuml
+/' !include org.activiti.engine.delegate.puml '/
+/' !include org.activiti.engine.impl.javax.el.puml '/
+/' !include org.activiti.engine.impl.persistence.entity.puml '/
+/' !include org.activiti.engine.impl '/
+
+hide @unlinked
+
+package "org.activiti.engine.impl.el" {
+
+class ActivitiElContext extends org.activiti.engine.impl.javax.el.ELContext {
+    # elResolver:ELResolver
+    + ActivitiElContext(ELResolver elResolver)
+    + getELResolver():ELResolver
+    + getFunctionMapper():FunctionMapper
+    + getVariableMapper():VariableMapper
+}
+ActivitiElContext ..> org.activiti.engine.impl.javax.el.ELResolver
+ActivitiElContext ..> org.activiti.engine.impl.javax.el.FunctionMapper
+ActivitiElContext ..> org.activiti.engine.impl.javax.el.VariableMapper
+
+class ActivitiFunctionMapper extends org.activiti.engine.impl.javax.el.FunctionMapper {
+    + resolveFunction(String prefix,String localName):java.lang.reflect.Method
+}
+
+interface Expression extends org.activiti.engine.delegate.Expression {
+    + getValue(VariableScope variableScope):Object
+    + setValue(Object value,oVariableScope variableScope)
+    + getExpressionText():String
+}
+
+abstract class ExpressionFactoryResolver {
+    + {static} resolveExpressionFactory():ExpressionFactory
+}
+org.activiti.engine.impl.javax.el.ExpressionFactory <.. ExpressionFactoryResolver
+ExpressionFactoryResolver ..> org.activiti.engine.impl.juel.ExpressionFactoryImpl
+
+class ExpressionManager {
+    # expressionFactory:org.activiti.engine.impl.javax.el.ExpressionFactory
+    # parsingElContext:org.activiti.engine.impl.javax.el.ELContext
+    # beans:Map<Object,Object>
+    == constructor ==
+    + ExpressionManager()
+    + ExpressionManager(boolean initFactory)
+    + ExpressionManager(Map<Object,Object> beans)
+    + ExpressionManager(Map<Object,Object> beans,boolean initFactory)
+    == method ==
+    + createExpression(String expression):org.activiti.engine.delegate.Expression
+    + setExpressionFactory(org.activiti.engine.impl.javax.el.ExpressionFactory factory):void
+    + getElContext(VariableScope variableScope):ELContext
+    # createElContext(VariableScope variableScope):ActivitiElContext
+    + createElResolver():org.activiti.engine.impl.javax.el.ELResolver
+    + createElResolver(VariableScope variableScope):org.activiti.engine.impl.javax.el.ELResolver
+    + getBeans():Map<Object,Object>
+    + setBeans(Map<Object,Object> beans)
+}
+
+ExpressionManager .> org.activiti.engine.impl.juel.ExpressionFactoryImpl
+org.activiti.engine.impl.javax.el.ExpressionFactory <--o  ExpressionManager
+org.activiti.engine.impl.javax.el.ELContext <--o  ExpressionManager
+
+class FixedValue implements org.activiti.engine.impl.el.Expression {
+    - value:Object
+    + FixedValue(Object value)
+    + getValue(VariableScope variableScope):Object
+    + setValue(Object value,VariableScope variableScope):void
+    + getExpressionText():String
+}
+
+class JuelExpression implements org.activiti.engine.impl.el.Expression {
+    # expressionText:String
+    # valueExpression:org.activiti.engine.impl.javax.el.ValueExpression
+
+    + JuelExpression(ValueExpression valueExpression,String expressionText)
+    + getValue(VariableScope variableScope):Object
+    + setValue(Object value,VariableScope variableScope)
+    + getExpressionText():String
+}
+JuelExpression *--> org.activiti.engine.impl.javax.el.ValueExpression
+
+class NoExecutionVariableScope implements org.activiti.engine.delegate.VariableScope {
+    - {static} INSTANCE:NoExecutionVariableScope
+    + {static} getSharedInstance():NoExecutionVariableScope
+    + getVariables():Map<String,Object>
+    + getVariablesLocal():Map<String,Object>
+    + getVariables(Collection<String> variableNames):Map<String,Object>
+    + getVariables(Collection<String> variableNames,boolean fetchAllVariables):Map<String,Object>
+    + getVariablesLocal(Collection<String> variableNames):Map<String,Object>
+    + getVariablesLocal(Collection<String> variableNames,boolean fetchAllVariables):Map<String,Object>
+    + getVariable(String variableName):Object
+    + getVariable(String variableName,boolean fetchAllVariables):Object
+    + getVariableLocal(String variableName):Object
+    + getVariableLocal(String variableName,boolean fetchAllVariables):Object
+    + getVariable(String variableName,Class<T> variableClass):T
+    + getVariableLocal(String variableName,Class<T> variableClass):T
+    + getVariableNames():Set<String>
+    + getVariableNamesLocal():Set<String>
+    + getVariableInstances():Map<String,org.activiti.engine.impl.persistence.entity.VariableInstance>
+    + getVariableInstances(Collection<String> variableNames):Map<String,org.activiti.engine.impl.persistence.entity.VariableInstance>
+    + getVariableInstances(Collection<String> variableNames,boolean fetchAllVariables):Map<String,org.activiti.engine.impl.persistence.entity.VariableInstance>
+    + getVariableInstancesLocal():Map<String,org.activiti.engine.impl.persistence.entity.VariableInstance>
+    + getVariableInstancesLocal(Collection<String> variableNames):Map<String,org.activiti.engine.impl.persistence.entity.VariableInstance>
+    + getVariableInstancesLocal(Collection<String> variableNames,boolean fetchAllVariables):Map<String,org.activiti.engine.impl.persistence.entity.VariableInstance>
+    + getVariableInstance(String variableName):org.activiti.engine.impl.persistence.entity.VariableInstance
+    + getVariableInstance(String variableName,boolean fetchAllVariables):org.activiti.engine.impl.persistence.entity.VariableInstance
+    + getVariableInstanceLocal(String variableName):org.activiti.engine.impl.persistence.entity.VariableInstance
+    + getVariableInstanceLocal(String variableName,boolean fetchAllVariables):org.activiti.engine.impl.persistence.entity.VariableInstance
+    + setVariable(String variableName,Object value):void
+    + setVariable(String variableName,Object value,boolean fetchAllVariables):void
+    + setVariableLocal(String variableName,Object value):void
+    + setVariableLocal(String variableName,Object value,boolean fetchAllVariables):void
+    + setVariables(Map<String,? extends Object> variables):void
+    + setVariablesLocal(Map<String,? extends Object> variables):void
+    + hasVariables():boolean
+    + hasVariablesLocal():boolean
+    + hasVariable(String variableName):boolean
+    + hasVariableLocal(String variableName):boolean
+    + createVariableLocal(String variableName,Object value):void
+    + createVariableLocal(Map<String,? extends Object> variables):void
+    + removeVariable(String variableName):void
+    + removeVariableLocal(String variableName):void
+    + removeVariables():void
+    + removeVariablesLocal():void
+    + removeVariables(Collection<String> variableNames):void
+    + removeVariablesLocal(Collection<String> variableNames):void
+}
+
+class ParsingElContext extends org.activiti.engine.impl.javax.el.ELContext {
+    + getELResolver():org.activiti.engine.impl.javax.el.ELResolver
+    + getFunctionMapper():org.activiti.engine.impl.javax.el.FunctionMapper
+    + getVariableMapper():org.activiti.engine.impl.javax.el.VariableMapper
+}
+
+class ReadOnlyMapELResolver  {
+    # wrappedMap:Map<Object,Object>
+    + ReadOnlyMapELResolver(Map<Object,Object> map)
+    + getValue(ELContext context,Object base,Object property):Object
+    + isReadOnly(ELContext context,Object base,Object property):boolean
+    + setValue(ELContext context,Object base,Object property,Object value):void
+    + getCommonPropertyType(ELContext context,Object arg):Class<?>
+    + getFeatureDescriptors(ELContext context,Object arg):Iterator<java.beans.FeatureDescriptor>
+    + getType(ELContext context,Object arg1,Object arg2):Class<?>
+}
+org.activiti.engine.impl.javax.el.ELResolver <|- ReadOnlyMapELResolver
+ReadOnlyMapELResolver ..> org.activiti.engine.impl.javax.el.ELContext
+
+class UelExpressionCondition implements org.activiti.engine.impl.Condition {
+    # initialConditionExpression:String
+    + UelExpressionCondition(String conditionExpression)
+    + evaluate(String sequenceFlowId,org.activiti.engine.delegate.DelegateExecution execution):boolean
+    # getActiveValue(String originalValue,String propertyName,com.fasterxml.jackson.databind.node.ObjectNode elementProperties):String
+}
+
+class VariableScopeElResolver extends org.activiti.engine.impl.javax.el.ELResolver{
+    + {static} EXECUTION_KEY:String
+    + {static} TASK_KEY:String
+    + {static} LOGGED_IN_USER_KEY:String
+    # variableScope:org.activiti.engine.delegate.VariableScope
+    + VariableScopeElResolver(VariableScope scope)
+    + getValue(ELContext context,Object base,Object property):Object
+    + isReadOnly(ELContext context,Object base,Object property):boolean
+    + setValue(ELContext context,Object base,Object property,Object value):void
+    + getCommonPropertyType(ELContext context,Object arg1):Class<?>
+    + getFeatureDescriptors(ELContext context,Object arg):Iterator<java.beans.FeatureDescriptor>
+    + getType(ELContext context,Object arg1,Object arg2):Class<?>
+}
+VariableScopeElResolver ..> org.activiti.engine.impl.javax.el.ELContext
+VariableScopeElResolver *--> org.activiti.engine.delegate.VariableScope
+
+}
+
+/' package finished '/
+
+@enduml

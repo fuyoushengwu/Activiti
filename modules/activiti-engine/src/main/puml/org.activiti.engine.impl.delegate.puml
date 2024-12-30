@@ -1,0 +1,62 @@
+@startuml
+hide @unlinked
+package "org.activiti.engine.impl.delegate" {
+class ActivityBehaviorInvocation extends DelegateInvocation {
+    # behaviorInstance:org.activiti.engine.impl.pvm.delegate.ActivityBehavior
+    # execution:org.activiti.engine.impl.pvm.delegate.ActivityExecution
+    + ActivityBehaviorInvocation(ActivityBehavior,ActivityExecution)
+    # invoke():void
+    # getTarget():Object
+}
+class DefaultDelegateInterceptor implements org.activiti.engine.impl.interceptor.DelegateInterceptor {
+    + handleInvocation(DelegateInvocation invocation):void
+}
+abstract class DelegateInvocation {
+    # invocationResult:Object
+    # invocationParameters:Object[]
+
+    + proceed():void
+    # {abstract} invoke():void
+    + getInvocationResult():Object
+    + getInvocationParameters():Object[]
+    + {abstract} getTarget():Object
+}
+class ExecutionListenerInvocation extends DelegateInvocation {
+    # executionListenerInstance:org.activiti.engine.delegate.ExecutionListener
+    # execution:org.activiti.engine.delegate.DelegateExecution
+    + ExecutionListenerInvocation(ExecutionListener,DelegateExecution)
+    # invoke():void
+    + getTarget():Object
+}
+class ExpressionGetInvocation extends ExpressionInvocation {
+    # elContext:org.activiti.engine.impl.javax.el.ELContext
+    + ExpressionGetInvocation(ValueExpression valueExpression,ELContext elContext)
+    # invoke():void
+}
+abstract class ExpressionInvocation extends DelegateInvocation {
+    # valueExpression:org.activiti.engine.impl.javax.el.ValueExpression
+    + ExpressionInvocation(ValueExpression valueExpression)
+    + getTarget():Object
+}
+class ExpressionSetInvocation extends ExpressionInvocation {
+    # value:Object
+    # elContext:org.activiti.engine.impl.javax.el.ELContext
+    + ExpressionSetInvocation(ValueExpression valueExpression,ELContext elContext,Object value)
+    # invoke():void
+}
+class JavaDelegateInvocation extends DelegateInvocation {
+    # delegateInstance:org.activiti.engine.delegate.JavaDelegate
+    # execution:org.activiti.engine.delegate.DelegateExecution
+    + JavaDelegateInvocation(JavaDelegate,DelegateExecution)
+    # invoke():void
+    + getTarget():Object
+}
+class TaskListenerInvocation extends DelegateInvocation {
+    # executionListenerInstance:org.activiti.engine.delegate.TaskListener
+    # delegateTask:org.activiti.engine.delegate.DelegateTask
+    + TaskListenerInvocation(TaskListener,DelegateTask)
+    # invoke():void
+    + getTarget():Object
+}
+}
+@enduml

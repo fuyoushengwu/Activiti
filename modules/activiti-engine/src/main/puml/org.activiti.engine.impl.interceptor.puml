@@ -1,0 +1,185 @@
+@startuml
+!include org.activiti.engine.impl.cfg.puml
+hide @unlinked
+package org.activiti.engine.impl.interceptor {
+
+abstract class AbstractCommandInterceptor implements CommandInterceptor {
+    # next:CommandInterceptor
+    + getNext():CommandInterceptor
+    + setNext(CommandInterceptor):void
+}
+interface Command<T> {
+    + execute(CommandContext):T
+}
+class CommandConfig {
+    - contextReusePossible:boolean
+    - propagation:org.activiti.engine.impl.cfg.TransactionPropagation
+    + CommandConfig()
+    + CommandConfig(boolean contextReusePossible)
+    + CommandConfig(boolean contextReusePossible,TransactionPropagation propagation)
+    # CommandConfig(CommandConfig config)
+    + isContextReusePossible():boolean
+    + getTransactionPropagation():TransactionPropagation
+    + setContextReusePossible(boolean):void
+    + transactionRequired():CommandConfig
+    + transactionRequiresNew():CommandConfig
+    + transactionNotSupported():CommandConfig
+}
+class CommandContext {
+    # command:Command<?>
+    # transactionContext:org.activiti.engine.impl.cfg.TransactionContext
+    # sessionFactories:Map<Class<?>,SessionFactory>
+    # sessions:Map<Class<?>,Session>
+    # exception:Throwable
+    # nextOperations:LinkedList<org.activiti.engine.impl.pvm.runtime.AtomicOperation>
+    # processEngineConfiguration:org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl
+    # failedJobCommandFactory:org.activiti.engine.impl.jobexecutor.FailedJobCommandFactory
+    # closeListeners:List<CommandContextCloseListener>
+    # attributes:Map<String,Object>
+
+    + CommandContext(Command<?> command,org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl processEngineConfiguration):void
+    + performOperation(org.activiti.engine.impl.pvm.runtime.AtomicOperation executionOperation,org.activiti.engine.impl.pvm.runtime.InterpretableExecution execution):void
+    + close():void
+    + addCloseListener(CommandContextCloseListener):void
+    + getCloseListeners():List<CommandContextCloseListener>
+    # flushSessions():void
+    # closeSessions():void
+    + exception(Throwable):void
+    + addAttribute(String key,Object value):void
+    + getAttribute(String key):Object
+    + getSession(Class<T> sessionClass):T
+    + getDbSqlSession():org.activiti.engine.impl.db.DbSqlSession
+    + getDeploymentEntityManager():org.activiti.engine.impl.persistence.entity.DeploymentEntityManager
+    + getResourceEntityManager():org.activiti.engine.impl.persistence.entity.ResourceEntityManager
+    + getByteArrayEntityManager():org.activiti.engine.impl.persistence.entity.ByteArrayEntityManager
+    + getProcessDefinitionEntityManager():org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntityManager
+    + getModelEntityManager():org.activiti.engine.impl.persistence.entity.ModelEntityManager
+    + getProcessDefinitionInfoManager():org.activiti.engine.impl.persistence.entity.ProcessDefinitionInfoEntityManager
+    + getExecutionEntityManager():org.activiti.engine.impl.persistence.entity.ExecutionEntityManager
+    + getTaskEntityManager():org.activiti.engine.impl.persistence.entity.TaskEntityManager
+    + getIdentityLinkEntityManager():org.activiti.engine.impl.persistence.entity.IdentityLinkEntityManager
+    + getVariableInstanceEntityManager():org.activiti.engine.impl.persistence.entity.VariableInstanceEntityManager
+    + getHistoricProcessInstanceEntityManager():org.activiti.engine.impl.persistence.entity.HistoricProcessInstanceEntityManager
+    + getHistoricDetailEntityManager():org.activiti.engine.impl.persistence.entity.HistoricDetailEntityManager
+    + getHistoricVariableInstanceEntityManager():org.activiti.engine.impl.persistence.entity.HistoricVariableInstanceEntityManager
+    + getHistoricActivityInstanceEntityManager():org.activiti.engine.impl.persistence.entity.HistoricActivityInstanceEntityManager
+    + getHistoricTaskInstanceEntityManager():org.activiti.engine.impl.persistence.entity.HistoricTaskInstanceEntityManager
+    + getHistoricIdentityLinkEntityManager():org.activiti.engine.impl.persistence.entity.HistoricIdentityLinkEntityManager
+    + getEventLogEntryEntityManager():org.activiti.engine.impl.persistence.entity.EventLogEntryEntityManager
+    + getJobEntityManager():org.activiti.engine.impl.persistence.entity.JobEntityManager
+    + getUserIdentityManager():org.activiti.engine.impl.persistence.entity.UserIdentityManager
+    + getGroupIdentityManager():org.activiti.engine.impl.persistence.entity.GroupIdentityManager
+    + getIdentityInfoManager():org.activiti.engine.impl.persistence.entity.IdentityInfoManager
+    + getMembershipEntityManager():org.activiti.engine.impl.persistence.entity.MembershipEntityManager
+    + getAttachmentEntityManager():org.activiti.engine.impl.persistence.entity.AttachmentEntityManager
+    + getTableDataManager():org.activiti.engine.impl.persistence.entity.TableDataManager
+    + getCommentEntityManager():org.activiti.engine.impl.persistence.entity.CommentEntityManager
+    + getPropertyEntityManager():org.activiti.engine.impl.persistence.entity.PropertyEntityManager
+    + getEventSubscriptionEntityManager():org.activiti.engine.impl.persistence.entity.EventSubscriptionEntityManager
+    + getSessionFactories():Map<Class<?>,SessionFactory>
+    + getHistoryManager():org.activiti.engine.impl.history.HistoryManager
+    + getTransactionContext():org.activiti.engine.impl.cfg.TransactionContext
+    + getCommand():Command<?>
+    + getSessions():Map<Class<?>,Session>
+    + getException():Throwable
+    + getFailedJobCommandFactory():org.activiti.engine.impl.jobexecutor.FailedJobCommandFactory
+    + getProcessEngineConfiguration():org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl
+    + getEventDispatcher():org.activiti.engine.delegate.event.ActivitiEventDispatcher
+
+}
+CommandContext o--> org.activiti.engine.impl.cfg.TransactionContext
+CommandContext *--> CommandContextCloseListener
+CommandContext *--> Session
+CommandContext *--> SessionFactory
+
+interface CommandContextCloseListener {
+    + closing(CommandContext commandContext):void
+    + closed(CommandContext commandContext):void
+}
+class CommandContextFactory {
+    # processEngineConfiguration:org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl
+    + createCommandContext(Command<?> command):CommandContext
+    + getProcessEngineConfiguration():org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl
+    + setProcessEngineConfiguration(org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl processEngineConfiguration):void
+}
+CommandContext <.. CommandContextFactory
+class CommandContextInterceptor extends AbstractCommandInterceptor {
+    # commandContextFactory:CommandContextFactory
+    # processEngineConfiguration:org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl
+    + CommandContextInterceptor()
+    + CommandContextInterceptor(CommandContextFactory commandContextFactory,ProcessEngineConfigurationImpl processEngineConfiguration)
+    + execute(CommandConfig config,Command<T> command):T
+    + getCommandContextFactory():CommandContextFactory
+    + setCommandContextFactory(CommandContextFactory commandContextFactory):void
+    + getProcessEngineConfiguration():ProcessEngineConfigurationImpl
+    + setProcessEngineConfiguration(ProcessEngineConfigurationImpl processEngineConfiguration):void
+}
+CommandContextFactory <--* CommandContextInterceptor
+interface CommandExecutor {
+    + getDefaultConfig():CommandConfig
+    + execute(CommandConfig config,Command<T> command):T
+    + execute(Command<T> command):T
+}
+CommandExecutor ..> Command
+CommandExecutor ..> CommandConfig
+interface CommandInterceptor {
+    + execute(CommandConfig config,Command<T> command):T
+    + getNext():CommandInterceptor
+    + setNext(CommandInterceptor)
+}
+Command <.. CommandInterceptor
+CommandConfig <.. CommandInterceptor
+class CommandInvoker extends AbstractCommandInterceptor {
+    + execute(CommandConfig config,Command<T> command):T
+    + getNext():CommandInterceptor
+    + setNext(CommandInterceptor):void
+}
+
+interface DelegateInterceptor {
+    + handleInvocation(org.activiti.engine.impl.delegate.DelegateInvocation invocation):void
+}
+class JtaRetryInterceptor extends RetryInterceptor {
+    # transactionManager:javax.transaction.TransactionManager
+    + JtaRetryInterceptor(javax.transaction.TransactionManager)
+    + execute(CommandConfig config,Command<T> command):T
+
+}
+class JtaTransactionInterceptor extends AbstractCommandInterceptor {
+        - transactionManager:javax.transaction.TransactionManager
+        + JtaTransactionInterceptor(javax.transaction.TransactionManager)
+        + execute(CommandConfig config,Command<T> command):T
+}
+class LogInterceptor extends AbstractCommandInterceptor {
+    - log:Logger
+    + execute(CommandConfig config,Command<T> command):T
+
+}
+class RetryInterceptor extends AbstractCommandInterceptor {
+    # numOfRetries:int
+    # waitTimeInMs:int
+    # waitIncreaseFactor:int
+    + execute(CommandConfig config,Command<T> command):T
+    + setNumOfRetries(int):void
+    + setWaitIncreaseFactor(int):void
+    + setWaitTimeInMs(int):void
+    + getNumOfRetries():int
+    + getWaitIncreaseFactor():int
+    + getWaitTimeInMs():int
+
+}
+
+interface Session {
+    + flush()
+    + close()
+}
+
+interface SessionFactory {
+    + getSessionType():Class<?>
+    + openSession():Session
+}
+SessionFactory ..> Session
+
+}
+
+/‘ package finished '/
+@enduml
