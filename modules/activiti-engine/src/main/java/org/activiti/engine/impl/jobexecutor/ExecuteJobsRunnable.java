@@ -28,11 +28,11 @@ import org.slf4j.LoggerFactory;
  */
 public class ExecuteJobsRunnable implements Runnable {
 
-	private static Logger log = LoggerFactory.getLogger(ExecuteJobsRunnable.class);
+	private static final Logger log = LoggerFactory.getLogger(ExecuteJobsRunnable.class);
 
 	private JobEntity job;
 	private List<String> jobIds;
-	private JobExecutor jobExecutor;
+	private final JobExecutor jobExecutor;
 
 	public ExecuteJobsRunnable(JobExecutor jobExecutor, JobEntity job) {
 		this.jobExecutor = jobExecutor;

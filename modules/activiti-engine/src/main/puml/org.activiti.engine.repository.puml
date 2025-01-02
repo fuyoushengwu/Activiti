@@ -1,5 +1,160 @@
 @startuml
-'https://plantuml.com/class-diagram
+hide @unlinked
+package “org.activiti.engine.repository” {
+interface Deployment {
+    + getId():String
+    + getName():String
+    + getDeploymentTime():String
+    + getCategory():String
+    + getTenantId():String
+}
+interface DeploymentBuilder {
+    + addInputStream(String resourceName,InputStream in):DeploymentBuilder
+    + addClasspathResource(String resource):DeploymentBuilder
+    + addString(String resourceName,String text):DeploymentBuilder
+    + addZipInputStream(ZipInputStream in):DeploymentBuilder
+    + addBpmnModel(String resourceName,BpmnModel bpmnModel):DeploymentBuilder
+    + disableSchemaValidation():DeploymentBuilder
+    + disableBpmnValidation():DeploymentBuilder
+    + name(String name):DeploymentBuilder
+    + category(String category):DeploymentBuilder
+    + tenantId(String tenantId):DeploymentBuilder
+    + enableDuplicateFiltering():DeploymentBuilder
+    + activateProcessDefinitionsOn(Date date):DeploymentBuilder
+    + deploy():DeploymentBuilder
+}
+DeploymentBuilder ..> org.activiti.bpmn.model.BpmnModel
+
+interface DeploymentQuery extends org.activiti.engine.query.Query<DeploymentQuery,Deployment> {
+    + deploymentId(String deploymentId):DeploymentQuery
+    + deploymentName(String name):DeploymentQuery
+    + deploymentNameLike(String nameLike):DeploymentQuery
+    + deploymentCategory(String category):DeploymentQuery
+    + deploymentCategoryNotEquals(String categoryNotEquals):DeploymentQuery
+    + deploymentTenantId(String tenantId):DeploymentQuery
+    + deploymentTenantIdLike(String tenantIdLike):DeploymentQuery
+    + deploymentWithoutTenantId():DeploymentQuery
+    + processDefinitionKey(String key):DeploymentQuery
+    + processDefinitionKeyLike(String keyLike):DeploymentQuery
+    + orderByDeploymentId():DeploymentQuery
+    + orderByDeploymentName():DeploymentQuery
+    + orderByDeploymenTime():DeploymentQuery
+    + orderByTenantId():DeploymentQuery
+}
+
+class DiagramEdge extends DiagramElement {
+    - waypoints:List<DiagramEdgeWaypoint>
+    + DiagramEdge()
+    + DiagramEdge(String id,List<DiagramEdgeWaypoint> waypoints)
+    + isNode():boolean
+    + idEdge():boolean
+    + getWaypoints():List<DiagramEdgeWaypoint>
+    + setWaypoints(List<DiagramEdgeWaypoint> waypoints):void
+}
+
+class DiagramEdgeWaypoint {
+    - x:Double
+    - y:Double
+    + getX():Double
+    + getY():Double
+    + setX(Double x):void
+    + setY(Double y):void
+}
+
+abstract class DiagramElement {
+    # id:String
+    + DiagramElement()
+    + DiagramElement(String id)
+    + getId():String
+    + setId(String id):void
+    + {abstract} isNode():boolean
+    + {abstract} isEdge():boolean
+}
+
+class DiagramLayout {
+    - elements:Map<String,DiagramElement>
+    + DiagramLayout(Map<String, DiagramElement> elements)
+    + getNode(String id):DiagramNode
+    + getEdge(String id):DiagramEdge
+    + getElements():Map<String,DiagramElement>
+    + setElements(Map<String,DiagramElement> elements):void
+    + getNodes():List<DiagramNode>
+}
+
+class DiagramNode extends DiagramElement {
+    - x:Double
+    - y:Double
+    - width:Double
+    - height:Double
+    + DiagramNode()
+    + DiagramNode(String id)
+    + DiagramNode(String id, Double x, Double y, Double width, Double height)
+    + getX():Double
+    + getY():Double
+    + getHeight():Double
+    + getWidth():Double
+    + setX(Double x):void
+    + setY(Double y):void
+    + setHeight(Double height):void
+    + setWidth(Double width):void
+    + isEdge():boolean
+    + isNode():boolean
+}
+
+interface Model {
+    + getId():String
+    + getName():String
+    + setName(String name):void
+    + getKey():String
+    + setKey(String key):void
+    + getCategory():String
+    + setCategory(String category):void
+    + getCreateTime():Date
+    + getLastUpdateTime():Date
+    + getVersion():Integer
+    + setVersion(Integer version):void
+    + getMetaInfo():String
+    + setMetaInfo(String metaInfo):void
+    + getDeploymentId():String
+    + setDeploymentId(String deploymentId):void
+    + getTenantId():String
+    + setTenant(String tenantId):void
+    + hasEditorSource():boolean
+    + hasEditorSourceExtra():boolean
+}
+
+interface ModelQuery extends org.activiti.engine.query.Query<ModelQuery, Model> {
+    + modelId(String modelId):ModelQuery
+    + modelCategory(String category):ModelQuery
+    + modelCategoryLike(String modelCategoryLike):ModelQuery
+    + modelCategoryNotEquals(String categoryNotEquals):ModelQuery
+    + modelName(String modelName):ModelQuery
+    + modelNameLike(String modelNameLike):ModelQuery
+    + modelKey(String key):ModelQuery
+    + modelVersion(Integer modelVersion):ModelQuery
+    + latestVersion():ModelQuery
+    + deploymentId(String deploymentId):ModelQuery
+    + deployed():ModelQuery
+    + notDeployed():ModelQuery
+    + modelTenantId(String tenantId):ModelQuery
+    + modelTenantIdLike(String tenantIdLike):ModelQuery
+    + modelWithoutTenantId():ModelQuery
+    + orderByModelCategory():ModelQuery
+    + orderByModelId():ModelQuery
+    + orderByModelKey():ModelQuery
+    + orderByModelVersion():ModelQuery
+    + orderByModelName():ModelQuery
+    + orderByCreateTime():ModelQuery
+    + orderByLastUpdateTime():ModelQuery
+    + orderByTenantId():ModelQuery
+}
+
+interface NativeDeploymentQuery extends org.activiti.engine.query.NativeQuery<NativeDeploymentQuery, Deployment> {
+}
+interface NativeModelQuery extends org.activiti.engine.query.NativeQuery<NativeModelQuery, Model> {
+}
+interface NativeProcessDefinitionQuery extends org.activiti.engine.query.NativeQuery<NativeProcessDefinitionQuery, ProcessDefinition> {
+}
 
 interface ProcessDefinition {
     + getId():String
@@ -15,5 +170,45 @@ interface ProcessDefinition {
     + isSuspended():boolean
     + getTenantId():String
 }
+
+interface ProcessDefinitionQuery extends org.activiti.engine.query.Query<ProcessDefinitionQuery, ProcessDefinition> {
+     + processDefinitionId(String processDefinitionId):ProcessDefinitionQuery
+     + processDefinitionIds(Set<String> processDefinitionIds):ProcessDefinitionQuery
+     + processDefinitionCategory(String processDefinitionCategory):ProcessDefinitionQuery
+     + processDefinitionCategoryLike(String processDefinitionCategoryLike):ProcessDefinitionQuery
+     + processDefinitionCategoryNotEquals(String categoryNotEquals):ProcessDefinitionQuery
+     + processDefinitionName(String processDefinitionName):ProcessDefinitionQuery
+     + processDefinitionNameLike(String processDefinitionNameLike):ProcessDefinitionQuery
+     + deploymentId(String deploymentId):ProcessDefinitionQuery
+     + deploymentIds(Set<String> deploymentIds):ProcessDefinitionQuery
+     + processDefinitionKey(String processDefinitionKey):ProcessDefinitionQuery
+     + processDefinitionKeyLike(String processDefinitionKeyLike):ProcessDefinitionQuery
+     + processDefinitionVersion(Integer processDefinitionVersion):ProcessDefinitionQuery
+     + processDefinitionVersionGreaterThan(Integer processDefinitionVersion):ProcessDefinitionQuery
+     + processDefinitionVersionGreaterThanOrEquals(Integer processDefinitionVersion):ProcessDefinitionQuery
+     + processDefinitionVersionLowerThan(Integer processDefinitionVersion):ProcessDefinitionQuery
+     + processDefinitionVersionLowerThanOrEquals(Integer processDefinitionVersion):ProcessDefinitionQuery
+     + latestVersion():ProcessDefinitionQuery
+     + processDefinitionResourceName(String resourceName):ProcessDefinitionQuery
+     + processDefinitionResourceNameLike(String resourceNameLike):ProcessDefinitionQuery
+     + startableByUser(String userId):ProcessDefinitionQuery
+     + suspended():ProcessDefinitionQuery
+     + active():ProcessDefinitionQuery
+     + processDefinitionTenantId(String tenantId):ProcessDefinitionQuery
+     + processDefinitionTenantIdLike(String tenantIdLike):ProcessDefinitionQuery
+     + processDefinitionWithoutTenantId():ProcessDefinitionQuery
+     + messageEventSubscription(String messageName):ProcessDefinitionQuery
+     + messageEventSubscriptionName(String messageName):ProcessDefinitionQuery
+     + orderByProcessDefinitionCategory():ProcessDefinitionQuery
+     + orderByProcessDefinitionKey():ProcessDefinitionQuery
+     + orderByProcessDefinitionId():ProcessDefinitionQuery
+     + orderByProcessDefinitionVersion():ProcessDefinitionQuery
+     + orderByProcessDefinitionName():ProcessDefinitionQuery
+     + orderByDeploymentId():ProcessDefinitionQuery
+     + orderByTenantId():ProcessDefinitionQuery
+}
+}
+
+/'package finished'/
 
 @enduml

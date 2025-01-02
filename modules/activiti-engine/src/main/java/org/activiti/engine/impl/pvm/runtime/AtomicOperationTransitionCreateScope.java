@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
  */
 public class AtomicOperationTransitionCreateScope implements AtomicOperation {
   
-  private static Logger log = LoggerFactory.getLogger(AtomicOperationTransitionCreateScope.class);
+  private static final Logger log = LoggerFactory.getLogger(AtomicOperationTransitionCreateScope.class);
   
   public boolean isAsync(InterpretableExecution execution) {
     ActivityImpl activity = (ActivityImpl) execution.getActivity();

@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ManagedAsyncJobExecutor extends DefaultAsyncJobExecutor {
 
-  private static Logger log = LoggerFactory.getLogger(ManagedAsyncJobExecutor.class);
+  private static final Logger log = LoggerFactory.getLogger(ManagedAsyncJobExecutor.class);
 
   protected ManagedThreadFactory threadFactory;
 

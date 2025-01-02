@@ -1212,11 +1212,28 @@ JobEntity ..> org.activiti.engine.impl.interceptor.CommandContext
 class JobEntityManager extends org.activiti.engine.impl.persistence.AbstractManager {
     + send(MessageEntity message):void
     + schedule(TimerEntity timer):void
+    + retryAsyncJob(JobEntity job):void
     # hintAsyncExecutor(JobEntity job):void
     # hintJobExecutor(JobEntity job):void
-
-
+    + cancelTimers(ExecutionEntity execution):void
+    + findJobById(String jobId):JobEntity
+    + findNextJobsToExecute(Page page):List<JobEntity>
+    + findNextTimerJobsToExecute(Page page):List<JobEntity>
+    + findAsyncJobsDueToExecute(Page page):List<JobEntity>
+    + findJobsByLockerOwner(String lockOwner,int start,int maxNrOfJobs):List<JobEntity>
+    + findJobsByExecutionId(String executionId):List<JobEntity>
+    + findExclusiveJobsToExecute(String processInstanceId):List<JobEntity>
+    + findUnlockedTimersByDuedate(Date duedate,Page page):List<TimerEntity>
+    + findTimersByExecution(String executionId):List<TimerEntity>
+    + findJobsBYQueryCriteria(JobQueryImpl query,Page page):List<JobEntity>
+    + findJobsByTypeAndProcessDefinitionKeyAndTenantId(String jobHandlerTtype,String processDefinitionKey,String tenantId):List<JobEntity>
+    + findJobsByTypeAndProcessDefinitionId(String jobHandlerType,String processDefinitionId):List<JobEntity>
+    + unacquireJob(String jobId):void
+    + findJobCountByQueryCriteria(JobQueryImpl query):long
+    + updateJobTenantIdForDeployment(String deploymentId,String newTenantId):void
+    + updateJobLockForAllJobs(String lockOwner,Date expirationTime):int
 }
+
 class MembershipEntity implements org.activiti.engine.impl.db.PersistentObject {
     # userId:String
     # groupId:String
@@ -1248,11 +1265,65 @@ class MessageEventSubscriptionEntity extends EventSubscriptionEntity {
     + MessageEventSubscriptionEntity()
 }
 class ModelEntity implements org.activiti.engine.repository.Model,org.activiti.engine.impl.db.PersistentObject,org.activiti.engine.impl.db.HasRevision {
-
+    # id:String
+    # revision:int
+    # name:String
+    # key:String
+    # category:String
+    # createTime:Date
+    # lastUpdateTime:Date
+    # version:Integer
+    # metaInfo:String
+    # deploymentId:String
+    # editorSourceValueId:String
+    # editorSourceExtraValueId:String
+    # tenantId:String
+    + getPersistentState():Object
+    + getId():String
+    + getName():String
+    + setName(String name):void
+    + getKey():String
+    + setKey(String key):void
+    + getCategory():String
+    + setCategory(String category):void
+    + getCreateTime():Date
+    + setCreateTime(Date createTime):void
+    + getLastUpdateTime():Date
+    + setLastUpdateTime(Date lastUpdateTIme):void
+    + getVersion():Integer
+    + setVersion(Integer version):void
+    + getMetaInfo():String
+    + setMetaInfo(String metaInfo):void
+    + getDeploymentId():String
+    + setDeploymentId(String deploymentId):void
+    + getEditorSourceValueId():String
+    + setEditorSourceValueId(String editorSourceValueId):void
+    + getEditorSourceExtraValueId():String
+    + setEditorSourceExtraValueId(String editorSourceExtraValueId):void
+    + getTenantId():String
+    + setTenant(String tenantId):void
+    + hasEditorSource():boolean
+    + hasEditorSourceExtra():boolean
 }
 class ModelEntityManager extends org.activiti.engine.impl.persistence.AbstractManager {
-
+    + createNewModel():Model
+    + insertModel(Model model):void
+    + updateModel(ModelEntity updateModel):void
+    + deleteModel(String modelId):String
+    + insertEditorSourceForModel(String model,byte[] modelSource):void
+    + deleteEditorSource(ModelEntity model):void
+    + deleteEditorSourceExtra(ModelEntity model):void
+    + insertEditorSourceExtraForModel(String modelId,byte[] modelSource):void
+    + createNewModeQuery():ModelQuery
+    + findModelsByQueryCriteria(ModelQueryImpl query,Page page):List<Model>
+    + findModelCountByQueryCriteria(ModelQueryImpl query):long
+    + findModelById(String modelId):ModelEntity
+    + findEditorSourceByModelId(String modelId):byte[]
+    + findEditorSourceExtraByModelId(String modelId):byte[]
+    + findModelsByNativeQuery(Map<String, Object> parameterMap, int firstResult, int maxResults):List<Model>
+    + findModelCountByNativeQuery(Map<String, Object> parameterMap):long
 }
+ModelEntityManager ..> org.activiti.engine.repository.ModelQuery
 
 
 class ProcessDefinitionEntity extends org.activiti.engine.impl.pvm.process.ProcessDefinitionImpl implements ProcessDefinition,org.activiti.engine.impl.db.PersistentObject,org.activiti.engine.impl.db.HasRevision {
@@ -1278,18 +1349,66 @@ class ProcessDefinitionEntity extends org.activiti.engine.impl.pvm.process.Proce
     # eventSupport:ActivitiEventSupport
 }
 class ProcessDefinitionEntityManager extends org.activiti.engine.impl.persistence.AbstractManager {
+    + findLatestProcessDefinitionByKey(String processDefinitionKey):ProcessDefinitionEntity
+    + findLatestProcessDefinitionByKeyAndTenantId(String processDefinitionKey, String tenantId):ProcessDefinitionEntity
+    + deleteProcessDefinitionsByDeploymentId(String deploymentId):void
+    + findProcessDefinitionById(String processDefinitionId):ProcessDefinitionEntity
+    + findProcessDefinitionsByQueryCriteria(ProcessDefinitionQueryImpl processDefinitionQuery, Page page):List<ProcessDefinition>
+    + findProcessDefinitionCountByQueryCriteria(ProcessDefinitionQueryImpl processDefinitionQuery):long
+    + findProcessDefinitionByDeploymentAndKey(String deploymentId, String processDefinitionKey):ProcessDefinitionEntity
+    + findProcessDefinitionByDeploymentAndKeyAndTenantId(String deploymentId, String processDefinitionKey, String tenantId):ProcessDefinitionEntity
+    + findProcessDefinitionByKeyAndVersion(String processDefinitionKey, Integer processDefinitionVersion):ProcessDefinition
+    + findProcessDefinitionsStartableByUser(String user):List<ProcessDefinition>
+    + findProcessDefinitionsByNativeQuery(Map<String, Object> parameterMap, int firstResult, int maxResults):List<ProcessDefinition>
+    + findProcessDefinitionCountByNativeQuery(Map<String, Object> parameterMap):long
+    + updateProcessDefinitionTenantIdForDeployment(String deploymentId, String newTenantId):void
 
 }
 class ProcessDefinitionInfoEntity implements org.activiti.engine.impl.db.HasRevision,org.activiti.engine.impl.db.PersistentObject {
+    # id:String
+    # processDefinitionId:String
+    # revision:int
+    # infoJsonId:String
+    + getPersistentState():Object
+    + getId():String
+    + setId(String id):void
+    + getProcessDefinitionId():String
+    + setProcessDefinitionId(String processDefinitionId):void
+    + getRevision():int
+    + setRevision(int revision):void
+    + getRevisionNext():int
+    + getInfoJsonId():String
+    + setInfoJsonId(String infoJsonId):void
 }
 class ProcessDefinitionInfoEntityManager extends org.activiti.engine.impl.persistence.AbstractManager {
-
+    + insertProcessDefinitionInfo(ProcessDefinitionInfoEntity processDefinitionInfo):void
+    + updateProcessDefinitionInfo(ProcessDefinitionInfoEntity entity):void
+    + deleteProcessDefinitionInfo(String processDefinitionId):void
+    + updateInfoJson(String id,byte[] json):void
+    + deleteInfoJson(ProcessDefinitionInfoEntity processDefinitionInfoEntity):void
+    + findProcessDefinitionInfoById(String id):ProcessDefinitionInfoEntity
+    + findProcessDefinitionInfoByProcessDefinitionId(String processDefinitionId):ProcessDefinitionInfoEntity
+    + findInfoJsonById(String infoJsonId):byte[]
 }
 class PropertyEntity implements org.activiti.engine.impl.db.HasRevision,org.activiti.engine.impl.db.PersistentObject {
-
+    # name:String
+    # revision:int
+    # value:String
+    + PropertyEntity()
+    + PropertyEntity(String name,String value)
+    + getName():String
+    + setName(String name):void
+    + getRevision():int
+    + getRevisionNext():int
+    + setRevision(int revision):void
+    + getValue():String
+    + setValue(String value):void
+    + getId():void
+    + setId(String id)
+    + getPersistentState():Object
 }
 class PropertyEntityManager extends org.activiti.engine.impl.persistence.AbstractManager {
-
+    + findPropertyById(String propertyId):PropertyEntity
 }
 class ResourceEntity implements org.activiti.engine.impl.db.PersistentObject {
     # id:String
@@ -1334,7 +1453,7 @@ interface SuspensionState {
   + getStateCode(): int
 }
 
-class SuspensionStateImpl implements SuspensionState {
+class SuspensionState$SuspensionStateImpl implements SuspensionState {
   - stateCode: int
   - name: String
   + SuspensionStateImpl(int suspensionCode, String string)
@@ -1344,20 +1463,177 @@ class SuspensionStateImpl implements SuspensionState {
   + toString(): String
 }
 
-class SuspensionStateUtil {
+class SuspensionState$SuspensionStateUtil {
   + setSuspensionState(ProcessDefinitionEntity processDefinitionEntity, SuspensionState state): void
   + setSuspensionState(ExecutionEntity executionEntity, SuspensionState state): void
   + setSuspensionState(TaskEntity taskEntity, SuspensionState state): void
   - dispatchStateChangeEvent(Object entity, SuspensionState state): void
 }
 class TableDataManager extends org.activiti.engine.impl.persistence.AbstractManager {
-
+    + {static} apiTypeToTableNameMap:Map<Class<?>,String>
+    + {static} persistentObjectToTableNameMap:Map<Class<? extends PersistentObject>, String>
+    + getTableCount():Map<String,Long>
+    + getTablesPresentInDatabase():List<String>
+    # getTableCount(String tableName):long
+    + getTablePage(TablePageQueryImpl query,int firstResult, int maxResults):TablePage
+    + getTableName(Class<?> entityClass,boolean withPrefix):String
+    + getTableMetaData(String tableName):TableMetaData
 }
-class TaskEntity extends VariableScopeImpl implements Task, DelegateTask, PersistentObject, HasRevision, BulkDeleteable {
+class TaskEntity extends VariableScopeImpl implements org.activiti.engine.task.Task, org.activiti.engine.delegate.DelegateTask, org.activiti.engine.impl.db.PersistentObject, org.activiti.engine.impl.db.HasRevision, org.activiti.engine.impl.db.BulkDeleteable {
+    # revision:int
+    # owner:String
+    # assignee:String
+    # initialAssignee:String
+    # delegationState:DelegationState
+    # parentTaskId:String
+    # name:String
+    # localizedName:String
+    # description:String
+    # localizedDescription:String
+    # priority:int
+    # createTime:Date
+    # dueDate:Date
+    # suspensionState:int
+    # category:String
+    # isIdentityLinksInitialized:boolean
+    # taskIdentityLinkEntities:List<IdentityLinkEntity>
+    # executionId:String
+    # execution:ExecutionEntity
+    # processInstanceId:String
+    # processInstance:ExecutionEntity
+    # processDefinitionId:String
+    # taskDefinition:TaskDefinition
+    # taskDefinitionKey:String
+    # formKey:String
+    # isDeleted:boolean
+    # eventName:String
+    # tenantId:String
+    # queryVariables:List<VariableInstanceEntity>
+    # forcedUpdate:boolean
+    + TaskEntity()
+    + TaskEntity(String taskId)
+    + {static} createAndInsert(ActivityExecution execution):TaskEntity
+    + {static} create(Date createTime):TaskEntity
+    + insert(ExecutionEntity execution):void
+    + update():void
+    + complete(Map variablesMap,boolean localScope):void
+    + delegate(String userId):void
+    + resolve():void
+    + getPersistentState():Object
+    + getRevisionNext():int
+    + forceUpdate():void
+    # getParentVariableScope():VariableScopeImpl
+    # initializeVariableInstanceBackPointer(VariableInstanceEntity variableInstances):void
+    # loadVariableInstances():List<VariableInstanceEntity>
+    # createVariableInstance(String variableName,Object value,ExecutionEntity sourceActivityExecution):VariableInstanceEntity
+    # updateVariableInstance(VariableInstanceEntity variableInstance,Object value,ExecutionEntity sourceActivityExecution):void
+    + getExecution():ExecutionEntity
+    + setExecution(DelegateExecution execution):void
+    + addIdentityLink(String userId,String groupId,String type):IdentityLinkEntity
+    + deleteIdentityLink(String userId,String groupId,String type):void
+    + getCandidates():Set<IdentityLinkEntity>
+    + addCandidateUser(String userId):void
+    + addCandidateUsers((Collection<String> users):void
+    + addCandidateGroup(String groupId):void
+    + addCandidateGroups((Collection<String> groups):void
+    + addGroupIdentityLink(String groupId, String identityLinkType):void
+    + addUserIdentityLink(String userId, String identityLinkType):void
+    + deleteCandidateGroup(String groupId):void
+    + deleteCandidateUser(String userId):void
+    + deleteGroupIdentityLink(String groupId, String identityLinkType):void
+    + deleteUserIdentityLink(String userId, String identityLinkType):void
+    + getIdentityLinks():List<IdentityLinkEntity>
+    + getActivityInstanceVariables():Map<String,Object>
+    + setExecutionVariables(Map<String, Object> parameters):void
+    + setName(String taskName):void
+    + setNameWithoutCascade(String taskName):void
+    + setLocalizedName(String name):void
+    + setDescription(String description):void
+    + setDescriptionWithoutCascade(String description):void
+    + setLocalizedDescription(String description):void
+    + setAssignee(String assignee):void
+    + setAssignee(String assignee,boolean dispatchAssignmentEvent,boolean dispatchUpdateEvent):void
+    + setAssigneeWithoutCascade(String assignee):void
+    + setOwner(String owner):void
+    + setOwner(String owner,boolean dispatchUpdateEvent):void
+    + setOwnerWithoutCascade(String owner):void
+    + setDueDate(Date dueDate,boolean dispatchUpdateEvent):void
+    + setDueDateWithoutCascade(Date dueDate):void
+    + setPriority(int priority):void
+    + setPriority(int priority,boolean dispatchUpdateEvent):void
+    + setPriorityWithoutCascade(int priority):void
+    + setCategoryWithoutCascade(String category):void
+    + setCategory(String category):void
+    + setParentTaskIdWithoutCascade(String parentTaskId):void
+    + setTaskDefinitionKeyWithoutCascade(String taskDefinitionKey):void
+    + getFormKey():String
+    + setFormKey(String formKey):void
+    + setFormKeyWithoutCascade(String formKey):void
+    + fireEvent(String taskEventName):void
+    # isActivityIdUsedForDetails():boolean
+    # getSpecificVariable(String variableName):VariableInstanceEntity
+    # getSpecificVariables((Collection<String> variableNames):List<VariableInstanceEntity>
+    + setTaskDefinition(TaskDefinition taskDefinition):void
+    + getTaskDefinition():TaskDefinition
+    + getRevision():int
+    + setRevision(int revision):void
+    + getName():String
+    + getDescription():String
+    + getDueDate():Date
+    + getPriority():int
+    + getCreateTime():Date
+    + setCreateTime(Date createTime):void
+    + getExecutionId():String
+    + getProcessInstanceId():String
+    + getProcessDefinitionId():String
+    + setProcessDefinitionId(String processDefinitionId):void
+    + getAssignee():String
+    + getTaskDefinitionKey():String
+    + setTaskDefinitionKeY(String taskDefinitionKey):void
+    + getEventName():String
+    + setEventName(String eventName):void
+    + setExecutionId(String executionId):void
+    + getProcessInstance():ExecutionEntity
+    + setProcessInstance(ExecutionEntity processInstance):void
+    + setExecution(ExecutionEntity execution):void
+    + setProcessInstanceId(String processInstanceId):void
+    + getOwner():String
+    + getDelegationState():DelegationState
+    + setDelegationState(DelegationState delegationState):void
+    + getDelegationStateString():String
+    + setDelegationStateString(String delegationStateString):void
+    + isDeleted():Boolean
+    + setDeleted(boolean isDeleted):void
+    + getParentTaskId():String
+    + getVariableInstanceEntities():Map<String,VariableInstanceEntity>
+    + getSuspensionState():int
+    + setSuspensionState(int suspensionState):void
+    + getCategory():String
+    + isSuspended():boolean
+    + getTaskLocalVariables():Map<String,Object>
+    + getProcessVariables():Map<String,Object>
+    + getTenantId():String
+    + setTenantId(String tenantId):void
+    + getQueryVariables():List<VariableInstanceEntity>
+    + setQueryVariables(List<VariableInstanceEntity> list):void
 }
 class TaskEntityManager extends org.activiti.engine.impl.persistence.AbstractManager {
-
+    + deleteTasksByProcessInstanceId(String processInstanceId,String deleteReason,boolean cascade):void
+    + deleteTask（TaskEntity task,String reason,boolean cascade):void
+    + findTaskById(String id):TaskEntity
+    + findTasksByExecutionId(String executionId):List<TaskEntity>
+    + findTasksByProcessInstanceId(String processInstanceId):List<TaskEntity>
+    + findTasksByQueryCriteria(TaskQueryImpl taskQuery, Page page):List<TaskEntity>
+    + findTasksByQueryCriteria(TaskQueryImpl taskQuery):List<TaskEntity>
+    + findTasksAndVariablesByQueryCriteria(TaskQueryImpl taskQuery):List<TaskEntity>
+    + findTaskCountByQueryCriteria(TaskQueryImpl taskQuery):long
+    + findTasksByNativeQuery(Map<String, Object> parameterMap, int firstResult, int maxResults):List<TaskEntity>
+    + findTaskCountByNativeQuery(Map<String, Object> parameterMap):long
+    + findTasksByParentTaskId(String parentTaskId):List<TaskEntity>
+    + deleteTask(String taskId, String deleteReason, boolean cascade):void
+    + updateTaskTenantIdForDeployment(String deploymentId, String newTenantId):void
 }
+
  class TimerEntity extends JobEntity {
     # maxIterations:int
     # repeat:String
@@ -1365,11 +1641,75 @@ class TaskEntityManager extends org.activiti.engine.impl.persistence.AbstractMan
 
     + TimerEntity()
     + TimerEntity(TimerDeclarationImpl)
+    + execute(CommandContext commandContext):void
+    # restoreExtraData(CommandContext commandContext,String jobHandlerConfiguration):void
+    # checkStartEventDefinitions(ProcessDefinition def,String embedActivityId):int
+    # checkBoundaryEventsDefinitions(ProcessDefinition def, String embededActivityId):int
+    # checkBoundaryEventsDefinitions(List<ActivityImpl> activities,String embedActivityId):int
+    # calculateMaxIterationsValue(String originalExpression):int
+    # isValidTime(Date newTimer):boolean
+    # calculateRepeatValue():int
+    # setNewRepeat(int newRepeatValue):void
+    # calculateNextTimer():Date
+    # getBusinessCalendarName(String calendarName):String
+    + getRepeat():String
+    + setRepeat(String repeat):void
+    + getEndDate():Date
+    + setEndDate(Date endDate):void
  }
  class UserEntity implements org.activiti.engine.identity.User,org.activiti.engine.impl.db.PersistentObject,org.activiti.engine.impl.db.HasRevision {
+    # id:String
+    # revision:int
+    # firstName:String
+    # lastName:String
+    # email:String
+    # password:String
+    # pictureByteArrayRef:ByteArrayRef
+    + UserEntity()
+    + UserEntity(String id)
+    + delete():void
+    + getPersistentState():Object
+    + getRevisionNext():int
+    + getPicture():Picture
+    + setPicture(Picture picture):void
+    # savePicture(Picture picture):void
+    # deletePicture():void
+    + getId():String
+    + setId(String id):void
+    + getFirstName():String
+    + setFirstName(String firstName):void
+    + getLastName():String
+    + setLastName(String lastName):void
+    + getEmail():String
+    + setEmail(String email):void
+    + getPassword():String
+    + setPassword(String password):void
+    + getRevision():int
+    + setRevision(int revision):void
+    + isPictureSet():boolean
 
  }
+ UserEntity ..> org.activiti.engine.identity.Picture
+
  class UserEntityManager extends org.activiti.engine.impl.persistence.AbstractManager implements UserIdentityManager {
+    + createNewUser(String userId):void
+    + insertUser(User user):void
+    + updateUser(User updateUser):void
+    + findUserById(String userId):User
+    + deleteUser(String userId):void
+    + findUserByQueryCriteria(UserQueryImpl query,Page page):List<User>
+    + findUserCountByQueryCriteria(UserQueryImpl query):long
+    + findGroupsByUser(String userId):List<Group>
+    + createNewUserQuery():UserQuery
+    + findUserInfoByUserIdAndKey(String userId,String key):IdentityInfoEntity
+    + findUserInfoKeysByUserIdAndType(String userId,String type):List<String>
+    + checkPassword(String userId,String password):Boolean
+    + findPotentialStarterUsers(String procDefId): List<User>
+   + findUsersByNativeQuery(Map<String, Object> parameterMap, int firstResult, int maxResults): List<User>
+   + findUserCountByNativeQuery(Map<String, Object> parameterMap): long
+   + isNewUser(User user): boolean
+   + getUserPicture(String userId): Picture
+   + setUserPicture(String userId, Picture picture): void
 
  }
  interface UserIdentityManager {
@@ -1385,7 +1725,7 @@ class TaskEntityManager extends org.activiti.engine.impl.persistence.AbstractMan
    + findUserInfoByUserIdAndKey(String userId, String key): IdentityInfoEntity
    + findUserInfoKeysByUserIdAndType(String userId, String type): List<String>
    + checkPassword(String userId, String password): Boolean
-   + findPotentialStarterUsers(String proceDefId): List<User>
+   + findPotentialStarterUsers(String procDefId): List<User>
    + findUsersByNativeQuery(Map<String, Object> parameterMap, int firstResult, int maxResults): List<User>
    + findUserCountByNativeQuery(Map<String, Object> parameterMap): long
    + isNewUser(User user): boolean
@@ -1579,6 +1919,6 @@ abstract class VariableScopeImpl implements org.activiti.engine.delegate.Variabl
 
 }
 
-
+/' package finished '/
 
 @enduml

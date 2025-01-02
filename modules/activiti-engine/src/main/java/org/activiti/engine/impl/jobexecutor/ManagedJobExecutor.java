@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ManagedJobExecutor extends DefaultJobExecutor {
 
-  private static Logger log = LoggerFactory.getLogger(ManagedJobExecutor.class);
+  private static final Logger log = LoggerFactory.getLogger(ManagedJobExecutor.class);
 
   protected ManagedThreadFactory threadFactory;
 

@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
  */
 public class JobAddedNotification implements TransactionListener {
   
-  private static Logger log = LoggerFactory.getLogger(JobAddedNotification.class);
+  private static final Logger log = LoggerFactory.getLogger(JobAddedNotification.class);
   
   protected JobExecutor jobExecutor;
   

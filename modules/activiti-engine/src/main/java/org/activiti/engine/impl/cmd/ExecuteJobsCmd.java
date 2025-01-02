@@ -37,7 +37,7 @@ public class ExecuteJobsCmd implements Command<Object>, Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  private static Logger log = LoggerFactory.getLogger(ExecuteJobsCmd.class);
+  private static final Logger log = LoggerFactory.getLogger(ExecuteJobsCmd.class);
 
   protected String jobId;
   protected JobEntity job;
